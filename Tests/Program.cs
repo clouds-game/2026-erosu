@@ -3,6 +3,8 @@ using ChromaDrop.Localization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
+if (args.Contains("--analyze-challenge")) return ChallengeAnalysis.Run();
+
 var tests = new (string Name, Action Run)[]
 {
   ("Locale aliases and unsupported languages resolve consistently", () =>
@@ -31,10 +33,47 @@ var tests = new (string Name, Action Run)[]
       Check(text.Get("match", 3, 600, 2).Contains("600"));
     }
   }),
+  ("Challenge requires five pieces and supports a planned three-wave finish", () =>
+  {
+    var level = PuzzleLevels.All.Single(puzzle => !puzzle.IsTutorial);
+    var game = new GameSession(level);
+    Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
+    Check(game.Next.Count == 4 && game.Remaining == 5);
+    var moves = new[] { (0, 0), (1, 0), (5, 0), (2, 0), (0, 1) };
+    var colors = new List<int>();
+    game.Matched += wave => colors.Add(wave.Pieces[0].Color);
+    for (var i = 0; i < moves.Length; i++)
+    {
+      var (x, rotation) = moves[i];
+      for (var turn = 0; turn < rotation; turn++) Check(game.Rotate());
+      while (game.Active!.Cells.Min(cell => cell.X) != x)
+        Check(game.Move(Math.Sign(x - game.Active.Cells.Min(cell => cell.X)), 0));
+      game.HardDrop();
+      if (i < 4) Check(game.Cleared == 0 && game.Phase == GamePhase.Falling);
+      for (var tick = 0; tick < 500 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(0.05);
+    }
+    Check(game.Phase == GamePhase.Won && game.Locked == 5 && game.Board.Pieces.Count == 0);
+    Check(game.Cleared == 9 && game.BestChain == 3 && game.Score == 1800);
+    Check(colors.SequenceEqual(new[] { 1, 0, 2 }));
+  }),
+  ("Challenge color budget prevents a clear before setup or a win before piece five", () =>
+  {
+    var level = PuzzleLevels.All.Single(puzzle => !puzzle.IsTutorial);
+    var colors = level.InitialPieces.Concat(level.Sequence).Select(piece => piece.Color).Distinct();
+    foreach (var color in colors)
+    {
+      Check(level.InitialPieces.Concat(level.Sequence).Count(piece => piece.Color == color) == 3);
+      Check(level.InitialPieces.Concat(level.Sequence.Take(2)).Count(piece => piece.Color == color) < 3);
+    }
+    var finalColor = level.Sequence.Last().Color;
+    Check(level.InitialPieces.Concat(level.Sequence.SkipLast(1)).Count(piece => piece.Color == finalColor) == 2);
+    Check(PuzzleLevels.DefaultLevel == level.Number && PuzzleLevels.NextLevel(3) == level.Number);
+    Check(PuzzleLevels.NextLevel(level.Number) == level.Number && (PuzzleLevels.ProgressMask & 7) == 7);
+  }),
   ("Authored puzzles are stable, solvable through input, and replayable", () =>
   {
     var targets = new[] { 4, 0, 2 };
-    for (var index = 0; index < PuzzleLevels.All.Count; index++)
+    for (var index = 0; index < 3; index++)
     {
       var level = PuzzleLevels.All[index];
       var game = new GameSession(level);

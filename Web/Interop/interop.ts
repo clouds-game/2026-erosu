@@ -83,7 +83,7 @@ export async function initializeLanguage(): Promise<void> {
 }
 
 export function loadCompleted(): number {
-  try { return Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_completed')) || 0)) & 7; }
+  try { return Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_completed')) || 0)) & 0x7fffffff; }
   catch { return 0; }
 }
 export function saveCompleted(completed: number): void {

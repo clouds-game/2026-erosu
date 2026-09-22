@@ -31,9 +31,17 @@ public partial class GameHud : Control
   public override void _Ready()
   {
     _mode = new OptionButton { Position = Vector2.Zero, Size = new Vector2(228, 32) };
-    _mode.AddItem("");
-    foreach (var level in PuzzleLevels.All) _mode.AddItem("");
-    _mode.ItemSelected += index => LevelRequested?.Invoke((int)index);
+    _mode.AddItem("", 0);
+    _mode.AddSeparator("");
+    _mode.SetItemId(_mode.ItemCount - 1, 100);
+    foreach (var level in PuzzleLevels.All.Where(level => !level.IsTutorial)) _mode.AddItem("", level.Number);
+    _mode.AddSeparator("");
+    _mode.SetItemId(_mode.ItemCount - 1, 101);
+    foreach (var level in PuzzleLevels.All.Where(level => level.IsTutorial)) _mode.AddItem("", level.Number);
+    _mode.FitToLongestItem = false;
+    _mode.ClipText = true;
+    _mode.AddThemeFontSizeOverride("font_size", 14);
+    _mode.ItemSelected += index => LevelRequested?.Invoke(_mode.GetItemId((int)index));
     _mode.FocusMode = FocusModeEnum.None;
     AddChild(_mode);
     _goal = AddText("", 190, 15, PiecePainter.Text);
@@ -59,24 +67,30 @@ public partial class GameHud : Control
   public void Refresh(GameSession game, int best, bool soundEnabled, int selectedLevel, int completedLevels)
   {
     _mode.SetItemText(0, Texts.Get("free_play"));
+    _mode.SetItemText(_mode.GetItemIndex(100), Texts.Get("challenges"));
+    _mode.SetItemText(_mode.GetItemIndex(101), Texts.Get("learn"));
     foreach (var level in PuzzleLevels.All)
-      _mode.SetItemText(level.Number, $"{level.Number}. {Texts.Get(level.TitleKey)}" + ((completedLevels & (1 << (level.Number - 1))) != 0 ? " *" : ""));
-    _mode.Select(selectedLevel);
-    _mode.TooltipText = Texts.Get("mode");
-    _next.Visible = game.Puzzle is null;
+      _mode.SetItemText(_mode.GetItemIndex(level.Number), Texts.Get(level.IsTutorial ? "learn_label" : "challenge_label", PuzzleLevels.DisplayNumber(level), Texts.Get(level.TitleKey)) + ((completedLevels & (1 << (level.Number - 1))) != 0 ? " *" : ""));
+    _mode.Select(_mode.GetItemIndex(selectedLevel));
+    _mode.TooltipText = game.Puzzle is { } current ? Texts.Get(current.TitleKey) : Texts.Get("free_play");
+    _next.Visible = game.Puzzle is null || (!game.Puzzle.IsTutorial && game.Next.Count > 0);
+    _next.Horizontal = game.Puzzle is not null;
+    _next.Position = new Vector2(0, game.Puzzle is null ? 190 : 268);
+    _next.Size = new Vector2(228, game.Puzzle is null ? 135 : 62);
     _goal.Visible = game.Puzzle is not null;
-    _goal.Text = game.Puzzle is { } puzzle ? Texts.Get(puzzle.GoalKey, puzzle.Target) + "\n\n" + Texts.Get("remaining") + $"  {game.Remaining}" : "";
+    _goal.Text = game.Puzzle is { } puzzle ? Texts.Get(puzzle.GoalKey, puzzle.Target) + "\n" + Texts.Get("remaining") + $"  {game.Remaining}" : "";
     _scoreTitle.Text = Texts.Get("score");
-    _nextTitle.Text = game.Puzzle is null ? Texts.Get("next") : "";
+    _nextTitle.Text = game.Puzzle is null ? Texts.Get("next") : game.Puzzle.IsTutorial || game.Next.Count == 0 ? "" : Texts.Get("sequence");
+    _nextTitle.Position = new Vector2(0, game.Puzzle is null ? 158 : 240);
     _score.Text = UiText.Number(game.Score);
-    _best.Text = game.Puzzle is null ? Texts.Get("best", UiText.Number(best)) : Texts.Get("puzzle_intro");
+    _best.Text = game.Puzzle is null ? Texts.Get("best", UiText.Number(best)) : Texts.Get(game.Puzzle.IsTutorial ? "puzzle_intro" : "challenge_intro");
     _best.AutowrapMode = TextServer.AutowrapMode.WordSmart;
     _best.AddThemeFontSizeOverride("font_size", game.Puzzle is null ? 14 : 11);
     _stats.Text = $"{Texts.Get("level")}  {game.Level}\n{Texts.Get("cleared")}  {game.Cleared}\n{Texts.Get("chain")}  ×{game.BestChain}";
     if (game.Puzzle is not null) _stats.Text = $"{Texts.Get("cleared")}  {game.Cleared}";
     _keys.Text = $"← →  {Texts.Get("move")}\n↑  {Texts.Get("rotate")}\n↓  {Texts.Get("soft_drop")}\nSpace  {Texts.Get("drop")}";
     _pause.Text = Texts.Get(game.Paused ? "resume" : "pause") + "  [P]";
-    if (game.Phase == GamePhase.Won) _pause.Text = Texts.Get(selectedLevel == PuzzleLevels.All.Count ? "chapter_replay" : "next_level") + " [Enter]";
+    if (game.Phase == GamePhase.Won) _pause.Text = Texts.Get(PuzzleLevels.ContinueKey(game.Puzzle!)) + " [Enter]";
     else if (game.Phase == GamePhase.Over) _pause.Text = Texts.Get("play_again") + " [Enter]";
     _restart.Text = Texts.Get("restart") + "  [R]";
     _demo.Disabled = game.Puzzle is not null && game.IsFinished;

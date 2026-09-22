@@ -11,7 +11,7 @@ public partial class GameController : Control
   private GameHud _hud = null!;
   private GameAudio _audio = null!;
   private readonly UiText _texts = new();
-  private int _selectedLevel = 1;
+  private int _selectedLevel = PuzzleLevels.DefaultLevel;
   private int _completedLevels;
   private int _best;
   private double _noticeTimer;
@@ -33,7 +33,7 @@ public partial class GameController : Control
     if (save.Load(SavePath) == Error.Ok)
     {
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
-      _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & 7;
+      _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & PuzzleLevels.ProgressMask;
       _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
       _audio.Enabled = save.GetValue("settings", "sound_enabled", false).AsBool();
     }
@@ -139,7 +139,7 @@ public partial class GameController : Control
       _best = _game.Score;
       SaveProgress();
     };
-    ShowNotice(_game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro");
+    ShowNotice(_game.Puzzle is { IsTutorial: false } ? "challenge_intro" : _game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro");
   }
 
   private void Confirm()
@@ -148,7 +148,7 @@ public partial class GameController : Control
     {
       _completedLevels |= 1 << (_selectedLevel - 1);
       SaveProgress();
-      _selectedLevel = _selectedLevel % PuzzleLevels.All.Count + 1;
+      _selectedLevel = PuzzleLevels.NextLevel(_selectedLevel);
       Start();
     }
     else if (_game.Phase == GamePhase.Over) Start();

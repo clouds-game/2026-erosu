@@ -37,7 +37,7 @@ public partial class BoardView : Control
     if (game.Paused || game.IsFinished)
     {
       DrawRect(new Rect2(Vector2.Zero, Size), new Color(0.04f, 0.05f, 0.07f, 0.85f));
-      CenterText(Texts.Get(game.Paused ? "paused" : game.Phase == GamePhase.Won ? (game.Puzzle!.Number == PuzzleLevels.All.Count ? "chapter_done" : "puzzle_won") : game.Puzzle is not null ? "puzzle_failed" : "game_over"), Size.Y / 2 - 20, 30, PiecePainter.Text);
+      CenterText(Texts.Get(game.Paused ? "paused" : game.Phase == GamePhase.Won ? PuzzleLevels.CompletionKey(game.Puzzle!) : game.Puzzle is not null ? "puzzle_failed" : "game_over"), Size.Y / 2 - 20, 30, PiecePainter.Text);
       CenterText(game.Paused ? Texts.Get("resume_hint") : Texts.Get("score_value", UiText.Number(game.Score)), Size.Y / 2 + 20, 17, PiecePainter.Muted);
       if (!game.Paused) CenterText(Texts.Get(game.Phase == GamePhase.Won ? "continue_hint" : "restart_hint"), Size.Y / 2 + 55, 17, PiecePainter.Muted);
     }

@@ -13,7 +13,7 @@ public sealed class GameSession
 
   public Board Board { get; }
   public Piece? Active { get; private set; }
-  public IReadOnlyList<Piece> Next => _next.Take(3).ToArray();
+  public IReadOnlyList<Piece> Next => _next.Take(Puzzle is null ? 3 : _next.Count).ToArray();
   public PuzzleLevel? Puzzle { get; }
   public int Remaining => _next.Count + (Active is null ? 0 : 1);
   public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;

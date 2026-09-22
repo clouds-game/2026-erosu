@@ -57,7 +57,19 @@
     "hint_3": "Lay the horizontal I in the gap between the two red blocks.",
     "puzzle_intro": "Take your time. Space / Drop commits the piece.",
     "continue_hint": "Enter: continue · R: retry",
-    "completed": "Completed"
+    "completed": "Completed",
+    "learn": "Learn",
+    "challenges": "Challenges",
+    "challenge_1": "Delayed reaction",
+    "challenge_hint_1": "Think about the board after each color disappears. The last green block can start a chain.",
+    "challenge_done": "Challenge cleared!",
+    "replay_challenge": "Replay challenge",
+    "learn_done": "Lessons complete",
+    "start_challenge": "Start challenge",
+    "challenge_intro": "Five pieces. Clear every block. Plan the entire sequence.",
+    "sequence": "Remaining sequence",
+    "learn_label": "Learn {0}: {1}",
+    "challenge_label": "Challenge {0}: {1}"
   },
   "zh-CN": {
     "score": "得分",
@@ -117,7 +129,19 @@
     "hint_3": "把水平 I 放进两个红块之间的空隙。",
     "puzzle_intro": "慢慢想。空格 / 直接落下才会锁定方块。",
     "continue_hint": "Enter 继续 · R 重试",
-    "completed": "已完成"
+    "completed": "已完成",
+    "learn": "学习",
+    "challenges": "挑战",
+    "challenge_1": "蓄势连消",
+    "challenge_hint_1": "想想每种颜色消失后的棋盘。最后一个绿块可以引发连锁。",
+    "challenge_done": "挑战完成！",
+    "replay_challenge": "重玩挑战",
+    "learn_done": "学习完成",
+    "start_challenge": "开始挑战",
+    "challenge_intro": "五个方块，清空棋盘。先想好完整顺序。",
+    "sequence": "后续顺序",
+    "learn_label": "学习 {0}：{1}",
+    "challenge_label": "挑战 {0}：{1}"
   },
   "ja": {
     "score": "スコア",
@@ -177,6 +201,18 @@
     "hint_3": "横向きのI型を赤い2個の間に置こう。",
     "puzzle_intro": "時間制限なし。Space / ハードドロップで確定。",
     "continue_hint": "Enter で次へ · R でやり直し",
-    "completed": "クリア済み"
+    "completed": "クリア済み",
+    "learn": "練習",
+    "challenges": "チャレンジ",
+    "challenge_1": "遅れてつながる",
+    "challenge_hint_1": "各色が消えた後の盤面を考えよう。最後の緑が連鎖の始まり。",
+    "challenge_done": "チャレンジクリア！",
+    "replay_challenge": "もう一度挑戦",
+    "learn_done": "練習クリア",
+    "start_challenge": "チャレンジへ",
+    "challenge_intro": "5個で全消し。最後の一手まで考えよう。",
+    "sequence": "残りの順番",
+    "learn_label": "練習 {0}：{1}",
+    "challenge_label": "挑戦 {0}：{1}"
   }
 }

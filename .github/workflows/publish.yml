@@ -6,13 +6,15 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
+  schedule:
+    - cron: '23 18 * * *' # 02:23 Asia/Shanghai
 
 permissions:
   contents: read
 
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -25,6 +27,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet run --project Tests/ChromaDrop.Tests.csproj -c Release
+      - run: python3 -m unittest discover -s tools -p 'test_*.py'
 
   desktop:
     name: Desktop (${{ matrix.target }})
@@ -122,6 +125,29 @@ jobs:
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: python3 tools/check_web.py "$PAGE_URL"
+
+  nightly:
+    name: Publish rolling nightly
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: [desktop, web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    concurrency:
+      group: nightly-release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: desktop-*
+          path: packages
+          merge-multiple: true
+      - name: Update nightly release and moving tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 tools/publish_nightly.py packages
 
   release:
     name: Publish versioned bundles

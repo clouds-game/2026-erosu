@@ -7,6 +7,11 @@
     <RootNamespace>ChromaDrop.Web</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="../Assets/Fonts/*.otf;../Assets/Fonts/*.txt;../Assets/Fonts/*.md" Link="wwwroot/fonts/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="../Localization/strings.json" LogicalName="ChromaDrop.Localization.strings.json" />
+    <Compile Include="../Localization/**/*.cs" Link="Localization/%(Filename)%(Extension)" />
+    <Content Include="../Localization/strings.json" Link="wwwroot/locales.json" CopyToOutputDirectory="PreserveNewest" />
+
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.28" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.28" PrivateAssets="all" />
     <Compile Include="../Core/**/*.cs" Link="Core/%(Filename)%(Extension)" />

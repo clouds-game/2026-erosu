@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="../Localization/strings.json" LogicalName="ChromaDrop.Localization.strings.json" />
+    <Compile Include="../Localization/**/*.cs" Link="Localization/%(Filename)%(Extension)" />
+
     <Compile Include="../Core/**/*.cs" Link="Core/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

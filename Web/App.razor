@@ -1,61 +1,73 @@
+@using ChromaDrop.Localization
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
-<main class="game">
-  <section class="playfield" aria-label="Game board">
-    <svg viewBox="0 0 400 720" role="img" aria-label="Ten by eighteen falling-block board">
-      <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="#303946" /></pattern></defs>
-      <rect width="400" height="720" fill="#1b212c" />
-      <rect width="400" height="720" fill="url(#grid)" />
-      @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
-      @if (game.Phase == GamePhase.Falling)
+@if (ready)
+{
+  <main class="game">
+    <section class="playfield" aria-label="@T("board")">
+      <svg viewBox="0 0 400 720" role="img" aria-label="@T("board_description")">
+        <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="#303946" /></pattern></defs>
+        <rect width="400" height="720" fill="#1b212c" />
+        <rect width="400" height="720" fill="url(#grid)" />
+        @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
+        @if (game.Phase == GamePhase.Falling)
+        {
+          @if (game.Ghost() is { } ghost) { <PieceView Piece="ghost" Ghost="true" /> }
+          @if (game.Active is { } active) { <PieceView Piece="active" /> }
+        }
+        @if (game.Wave is { } wave)
+        {
+          <g opacity="@(1 - game.ClearProgress * 0.8)">
+            @foreach (var piece in wave.Pieces) { <PieceView Piece="piece" /> }
+          </g>
+        }
+      </svg>
+      @if (game.Paused || game.Phase == GamePhase.Over)
       {
-        @if (game.Ghost() is { } ghost) { <PieceView Piece="ghost" Ghost="true" /> }
-        @if (game.Active is { } active) { <PieceView Piece="active" /> }
+        <div class="overlay">
+          <strong>@T(game.Paused ? "paused" : "game_over")</strong>
+          <button @onclick="Confirm">@T(game.Paused ? "resume" : "play_again")</button>
+          <small>@(game.Paused ? T("resume_hint") : T("score_value", UiText.Number(game.Score)))</small>
+        </div>
       }
-      @if (game.Wave is { } wave)
-      {
-        <g opacity="@(1 - game.ClearProgress * 0.8)">
-          @foreach (var piece in wave.Pieces) { <PieceView Piece="piece" /> }
-        </g>
-      }
-    </svg>
-    @if (game.Paused || game.Phase == GamePhase.Over)
-    {
-      <div class="overlay">
-        <strong>@(game.Paused ? "PAUSED" : "GAME OVER")</strong>
-        <button @onclick="Confirm">@(game.Paused ? "Resume" : "Play again")</button>
-        <small>@(game.Paused ? "P / Enter" : $"Score {game.Score:N0}")</small>
+      else if (notice_key.Length > 0) { <div class="notice" role="status">@T(notice_key, notice_arguments)</div> }
+    </section>
+    <aside>
+      <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
+      <span class="muted">@T("best", UiText.Number(best))</span>
+      <span class="next-label muted">@T("next")</span>
+      <div class="previews">
+        @foreach (var piece in game.Next)
+        {
+          <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+        }
       </div>
-    }
-    else if (notice.Length > 0) { <div class="notice" role="status">@notice</div> }
-  </section>
-  <aside>
-    <span class="muted">SCORE</span><strong id="score">@game.Score.ToString("N0")</strong>
-    <span class="muted">Best @best.ToString("N0")</span>
-    <span class="next-label muted">NEXT</span>
-    <div class="previews">
-      @foreach (var piece in game.Next)
-      {
-        <svg viewBox="-20 -10 200 100" role="img" aria-label="@($"Next {piece.Shape}, color {piece.Color + 1}")"><PieceView Piece="piece" /></svg>
-      }
-    </div>
-    <dl><dt>Level</dt><dd>@game.Level</dd><dt>Blocks cleared</dt><dd id="cleared">@game.Cleared</dd><dt>Best chain</dt><dd>×@game.BestChain</dd></dl>
-    <p class="keys">← → Move<br />↑ Rotate · ↓ Soft drop<br />Space Drop · P Pause</p>
-    <button @onclick="TogglePause" disabled="@(game.Phase == GamePhase.Over)">@(game.Paused ? "Resume" : "Pause") [P]</button>
-    <button @onclick="() => Start()">Restart [R]</button>
-    <button @onclick="() => Start(true)">Match demo [F2]</button>
-    <button @onclick="ToggleSound">Sound @(sound_enabled ? "on" : "off") [M]</button>
-    <a class="downloads" href="https://github.com/clouds-game/2026-erosu/releases/tag/nightly">Desktop downloads</a>
-  </aside>
-  <nav class="touch" aria-label="Game controls">
-    <button aria-label="Move left" @onclick="() => game.Move(-1, 0)">←</button>
-    <button aria-label="Rotate" @onclick="() => game.Rotate()">↻</button>
-    <button aria-label="Move right" @onclick="() => game.Move(1, 0)">→</button>
-    <button aria-label="Move down" @onclick="() => game.Move(0, 1)">↓</button>
-    <button @onclick="game.HardDrop">Drop</button>
-  </nav>
-</main>
+      <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
+      <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
+      <button @onclick="TogglePause" disabled="@(game.Phase == GamePhase.Over)">@T(game.Paused ? "resume" : "pause") [P]</button>
+      <button @onclick="() => Start()">@T("restart") [R]</button>
+      <button @onclick="() => Start(true)">@T("demo") [F2]</button>
+      <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
+      <label class="language"><span>@T("language")</span>
+        <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
+          @for (var i = 0; i < UiText.Languages.Length; i++)
+          {
+            <option value="@UiText.Languages[i]">@UiText.LanguageNames[i]</option>
+          }
+        </select>
+      </label>
+      <a class="downloads" href="https://github.com/clouds-game/2026-erosu/releases/tag/nightly">@T("downloads")</a>
+    </aside>
+    <nav class="touch" aria-label="@T("controls")">
+      <button aria-label="@T("left")" @onclick="() => game.Move(-1, 0)">←</button>
+      <button aria-label="@T("rotate")" @onclick="() => game.Rotate()">↻</button>
+      <button aria-label="@T("right")" @onclick="() => game.Move(1, 0)">→</button>
+      <button aria-label="@T("down")" @onclick="() => game.Move(0, 1)">↓</button>
+      <button @onclick="game.HardDrop">@T("drop")</button>
+    </nav>
+  </main>
+}
 
 @code {
   private GameSession game = null!;
@@ -64,9 +76,13 @@
   private readonly CancellationTokenSource cancellation = new();
   private readonly HashSet<string> held = [];
   private Task? loop;
+  private bool ready;
   private int best;
   private bool sound_enabled;
-  private string notice = "";
+  private readonly UiText texts = new();
+  private string notice_key = "";
+  private object[] notice_arguments = [];
+  private string T(string key, params object[] arguments) => texts.Get(key, arguments);
   private double notice_time;
   private int held_direction;
   private double repeat_time;
@@ -78,10 +94,20 @@
   {
     if (!firstRender) return;
     interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js");
+    texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
+    await interop.InvokeVoidAsync("setLanguage", texts.Language);
     best = await interop.InvokeAsync<int>("loadBest");
     callback = DotNetObjectReference.Create(this);
     await interop.InvokeVoidAsync("connect", callback);
+    ready = true;
+    StateHasChanged();
     loop = RunLoop();
+  }
+
+  private async Task ChangeLanguage(ChangeEventArgs args)
+  {
+    texts.SetLanguage(args.Value?.ToString());
+    if (interop is not null) await interop.InvokeVoidAsync("setLanguage", texts.Language);
   }
 
   private async Task RunLoop()
@@ -119,7 +145,7 @@
         }
         held_direction = game.AcceptsInput ? direction : 0;
         game.Advance(delta, held.Contains("ArrowDown") || held.Contains("KeyS"));
-        if (!game.Paused && (notice_time -= delta) <= 0) notice = "";
+        if (!game.Paused && (notice_time -= delta) <= 0) notice_key = "";
         if (game.Score > best)
         {
           best = game.Score;
@@ -136,11 +162,13 @@
     game = demo ? GameSession.CreateDemo() : new GameSession();
     held.Clear();
     held_direction = 0;
-    notice = demo ? "Space / Drop: connect 3 whole blocks" : "Connect 3 same-color blocks, edge to edge";
+    notice_key = demo ? "demo_hint" : "intro";
+    notice_arguments = [];
     notice_time = 3;
     game.Matched += wave =>
     {
-      notice = $"{wave.Pieces.Count} blocks · +{wave.Points} · ×{wave.Chain}";
+      notice_key = "match";
+      notice_arguments = [wave.Pieces.Count, wave.Points, wave.Chain];
       notice_time = 1.8;
       PlayTone(360 + wave.Chain * 140, 0.25);
     };

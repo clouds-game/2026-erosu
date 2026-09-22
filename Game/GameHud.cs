@@ -1,10 +1,19 @@
 using ChromaDrop.Core;
+using ChromaDrop.Localization;
 using Godot;
 
 namespace ChromaDrop.Game;
 
 public partial class GameHud : Control
 {
+  public UiText Texts { get; set; } = new();
+  private Label _scoreTitle = null!;
+  private Label _nextTitle = null!;
+  private Label _keys = null!;
+  private Button _restart = null!;
+  private Button _demo = null!;
+  private Button _language = null!;
+  public event Action? LanguageRequested;
   private Label _score = null!;
   private Label _best = null!;
   private Label _stats = null!;
@@ -18,29 +27,38 @@ public partial class GameHud : Control
 
   public override void _Ready()
   {
-    AddText("SCORE", 0, 14, PiecePainter.Muted);
+    _scoreTitle = AddText("", 0, 14, PiecePainter.Muted);
     _score = AddText("0", 23, 36, PiecePainter.Text);
-    _best = AddText("Best  0", 72, 14, PiecePainter.Muted);
-    AddText("NEXT", 120, 14, PiecePainter.Muted);
-    _next = new NextView { Position = new Vector2(0, 153), Size = new Vector2(228, 220), MouseFilter = MouseFilterEnum.Ignore };
+    _best = AddText("", 72, 14, PiecePainter.Muted);
+    _nextTitle = AddText("", 108, 14, PiecePainter.Muted);
+    _next = new NextView { Position = new Vector2(0, 140), Size = new Vector2(228, 184), MouseFilter = MouseFilterEnum.Ignore };
     AddChild(_next);
-    _stats = AddText("", 383, 15, PiecePainter.Muted);
-    _stats.AddThemeConstantOverride("line_spacing", 7);
-    AddText("← →   Move\n↑        Rotate\n↓        Soft drop\nSpace  Drop", 473, 15, PiecePainter.Muted).AddThemeConstantOverride("line_spacing", 8);
-    _pause = AddButton("Pause  [P]", 590, () => PauseRequested?.Invoke());
-    AddButton("Restart  [R]", 631, () => RestartRequested?.Invoke());
-    AddButton("Match demo  [F2]", 672, () => DemoRequested?.Invoke());
-    _sound = AddButton("Sound off  [M]", 713, () => SoundRequested?.Invoke());
+    _stats = AddText("", 342, 14, PiecePainter.Muted);
+    _stats.AddThemeConstantOverride("line_spacing", 4);
+    _keys = AddText("", 430, 14, PiecePainter.Muted);
+    _keys.AddThemeConstantOverride("line_spacing", 4);
+    _pause = AddButton("", 558, () => PauseRequested?.Invoke());
+    _restart = AddButton("", 597, () => RestartRequested?.Invoke());
+    _demo = AddButton("", 636, () => DemoRequested?.Invoke());
+    _sound = AddButton("", 675, () => SoundRequested?.Invoke());
+    _language = AddButton("", 714, () => LanguageRequested?.Invoke());
   }
 
   public void Refresh(GameSession game, int best, bool soundEnabled)
   {
-    _score.Text = game.Score.ToString("N0");
-    _best.Text = $"Best  {best:N0}";
-    _stats.Text = $"Level                 {game.Level}\nBlocks cleared    {game.Cleared}\nBest chain          ×{game.BestChain}";
-    _pause.Text = game.Paused ? "Resume  [P]" : "Pause  [P]";
+    _scoreTitle.Text = Texts.Get("score");
+    _nextTitle.Text = Texts.Get("next");
+    _score.Text = UiText.Number(game.Score);
+    _best.Text = Texts.Get("best", UiText.Number(best));
+    _stats.Text = $"{Texts.Get("level")}  {game.Level}\n{Texts.Get("cleared")}  {game.Cleared}\n{Texts.Get("chain")}  ×{game.BestChain}";
+    _keys.Text = $"← →  {Texts.Get("move")}\n↑  {Texts.Get("rotate")}\n↓  {Texts.Get("soft_drop")}\nSpace  {Texts.Get("drop")}";
+    _pause.Text = Texts.Get(game.Paused ? "resume" : "pause") + "  [P]";
     _pause.Disabled = game.Phase == GamePhase.Over;
-    _sound.Text = soundEnabled ? "Sound on  [M]" : "Sound off  [M]";
+    _restart.Text = Texts.Get("restart") + "  [R]";
+    _demo.Text = Texts.Get("demo") + "  [F2]";
+    _sound.Text = Texts.Get(soundEnabled ? "sound_on" : "sound_off") + "  [M]";
+    _language.Text = UiText.LanguageNames[Array.IndexOf(UiText.Languages, Texts.Language)] + "  >";
+    _language.TooltipText = Texts.Get("language");
     _next.Pieces = game.Next;
     _next.QueueRedraw();
   }

@@ -7,6 +7,8 @@
     <RootNamespace>ChromaDrop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Localization/strings.json" LogicalName="ChromaDrop.Localization.strings.json" />
+
     <Compile Remove="Tests/**/*.cs;archive/**/*.cs;Web/**/*.cs" />
   </ItemGroup>
 </Project>

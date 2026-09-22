@@ -15,7 +15,7 @@ if html.count('<base href="/" />') != 1:
   raise ValueError("Expected exactly one base href in the published index.")
 index.write_text(html.replace('<base href="/" />', f'<base href="{args.base_path}" />'), encoding="utf-8")
 (args.directory / ".nojekyll").touch()
-for name in ["interop.js", "game.css", "_framework/blazor.webassembly.js"]:
+for name in ["interop.js", "game.css", "locales.json", "fonts/ChromaUI-SC.otf", "fonts/ChromaUI-JP.otf", "_framework/blazor.webassembly.js"]:
   if not (args.directory / name).is_file():
     raise FileNotFoundError(name)
 print(f"Pages prepared at {args.base_path}")

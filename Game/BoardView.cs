@@ -1,4 +1,5 @@
 using ChromaDrop.Core;
+using ChromaDrop.Localization;
 using Godot;
 
 namespace ChromaDrop.Game;
@@ -6,7 +7,10 @@ namespace ChromaDrop.Game;
 public partial class BoardView : Control
 {
   public GameSession? Session { get; set; }
-  public string Notice { get; set; } = "";
+  public UiText Texts { get; set; } = new();
+  public string NoticeKey { get; set; } = "";
+  public object[] NoticeArguments { get; set; } = [];
+  private string Notice => NoticeKey.Length == 0 ? "" : Texts.Get(NoticeKey, NoticeArguments);
   public const float CellSize = 42;
 
   public override void _Draw()
@@ -33,9 +37,9 @@ public partial class BoardView : Control
     if (game.Paused || game.Phase == GamePhase.Over)
     {
       DrawRect(new Rect2(Vector2.Zero, Size), new Color(0.04f, 0.05f, 0.07f, 0.85f));
-      CenterText(game.Paused ? "PAUSED" : "GAME OVER", Size.Y / 2 - 20, 30, PiecePainter.Text);
-      CenterText(game.Paused ? "P / Enter to resume" : $"Score  {game.Score:N0}", Size.Y / 2 + 20, 17, PiecePainter.Muted);
-      if (!game.Paused) CenterText("R / Enter to restart", Size.Y / 2 + 55, 17, PiecePainter.Muted);
+      CenterText(Texts.Get(game.Paused ? "paused" : "game_over"), Size.Y / 2 - 20, 30, PiecePainter.Text);
+      CenterText(game.Paused ? Texts.Get("resume_hint") : Texts.Get("score_value", UiText.Number(game.Score)), Size.Y / 2 + 20, 17, PiecePainter.Muted);
+      if (!game.Paused) CenterText(Texts.Get("restart_hint"), Size.Y / 2 + 55, 17, PiecePainter.Muted);
     }
     else if (Notice.Length > 0)
     {
@@ -46,8 +50,13 @@ public partial class BoardView : Control
 
   private void CenterText(string text, float y, int fontSize, Color color)
   {
-    var font = ThemeDB.FallbackFont;
+    var font = GetThemeDefaultFont();
     var width = font.GetStringSize(text, fontSize: fontSize).X;
+    if (width > Size.X - 32)
+    {
+      fontSize = Math.Max(10, (int)(fontSize * (Size.X - 32) / width));
+      width = font.GetStringSize(text, fontSize: fontSize).X;
+    }
     DrawString(font, new Vector2((Size.X - width) / 2, y), text, fontSize: fontSize, modulate: color);
   }
 }

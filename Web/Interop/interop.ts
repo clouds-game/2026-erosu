@@ -6,6 +6,7 @@ let audio: AudioContext | undefined;
 export function connect(callback: DotNetCallback): void {
   detach?.();
   const keydown = (event: KeyboardEvent) => {
+    if (event.target instanceof HTMLSelectElement || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
     if (!game_keys.has(event.code) || event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target instanceof HTMLButtonElement && ['Enter', 'Space'].includes(event.code)) return;
     event.preventDefault();
@@ -51,4 +52,32 @@ export function tone(frequency: number, duration: number): void {
   oscillator.connect(gain).connect(audio.destination);
   oscillator.start();
   oscillator.stop(audio.currentTime + duration);
+}
+
+export function loadLanguage(): string {
+  try { return localStorage.getItem('chroma_language') || navigator.language; }
+  catch { return navigator.language; }
+}
+export async function setLanguage(language: string): Promise<void> {
+  document.documentElement.lang = language;
+  try { localStorage.setItem('chroma_language', language); } catch { /* Saving is optional. */ }
+  try {
+    const catalog = await loadCatalog();
+    const strings = catalog[language] ?? catalog.en;
+    for (const element of document.querySelectorAll<HTMLElement>('[data-i18n]')) {
+      element.textContent = strings[element.dataset.i18n!];
+    }
+  } catch (error) { console.warn('Could not translate startup messages', error); }
+}
+type Catalog = Record<string, Record<string, string>>;
+let catalog: Promise<Catalog> | undefined;
+function loadCatalog(): Promise<Catalog> {
+  return catalog ??= fetch('locales.json').then(response => {
+    if (!response.ok) throw new Error('Translation catalog unavailable');
+    return response.json() as Promise<Catalog>;
+  });
+}
+export async function initializeLanguage(): Promise<void> {
+  const prefix = loadLanguage().replaceAll('_', '-').split('-')[0].toLowerCase();
+  await setLanguage(prefix === 'zh' || prefix === 'cn' ? 'zh-CN' : prefix === 'ja' ? 'ja' : 'en');
 }

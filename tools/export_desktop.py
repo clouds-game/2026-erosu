@@ -60,6 +60,9 @@ def main():
       for path in sorted(build.rglob("*")):
         if path.is_file():
           package.write(path, path.relative_to(build))
+  with zipfile.ZipFile(archive, "a", compression=zipfile.ZIP_DEFLATED) as package:
+    package.write(ROOT / "Assets/Fonts/OFL.txt", "FONT-LICENSE.txt")
+    package.write(ROOT / "Assets/Fonts/README.md", "FONT-SOURCES.md")
   digest = hashlib.sha256(archive.read_bytes()).hexdigest()
   archive.with_suffix(".zip.sha256").write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
   print(f"Package: {archive}")

@@ -1,7 +1,36 @@
 using ChromaDrop.Core;
+using ChromaDrop.Localization;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 var tests = new (string Name, Action Run)[]
 {
+  ("Locale aliases and unsupported languages resolve consistently", () =>
+  {
+    foreach (var (input, expected) in new[] { ("en-US", "en"), ("zh_TW", "zh-CN"), ("cn", "zh-CN"), ("ja-JP", "ja"), ("fr", "en"), ("", "en") })
+      Check(UiText.Normalize(input) == expected);
+    Check(UiText.Normalize(null) == "en");
+  }),
+  ("All UI translations have complete keys and matching placeholders", () =>
+  {
+    using var stream = typeof(UiText).Assembly.GetManifestResourceStream("ChromaDrop.Localization.strings.json")!;
+    var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(stream)!;
+    var english = catalog["en"];
+    foreach (var language in UiText.Languages)
+    {
+      Check(catalog[language].Keys.Order().SequenceEqual(english.Keys.Order()));
+      var text = new UiText();
+      text.SetLanguage(language);
+      foreach (var (key, value) in catalog[language])
+      {
+        Check(!string.IsNullOrWhiteSpace(value));
+        static string Slots(string template) => string.Join(",", Regex.Matches(template, @"\{\d+\}").Select(match => match.Value).Order());
+        Check(Slots(value) == Slots(english[key]));
+        Check(!text.Get(key, 3, 600, 2).Contains('{'));
+      }
+      Check(text.Get("match", 3, 600, 2).Contains("600"));
+    }
+  }),
   ("Whole blocks are counted, not their four cells", () =>
   {
     var board = BoardOf(Piece.Create(1, Shape.O, 0, 0, 16), Piece.Create(2, Shape.O, 0, 2, 16));

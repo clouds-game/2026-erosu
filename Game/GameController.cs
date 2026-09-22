@@ -1,4 +1,5 @@
 using ChromaDrop.Core;
+using ChromaDrop.Localization;
 using Godot;
 
 namespace ChromaDrop.Game;
@@ -9,6 +10,7 @@ public partial class GameController : Control
   private BoardView _board = null!;
   private GameHud _hud = null!;
   private GameAudio _audio = null!;
+  private readonly UiText _texts = new();
   private int _best;
   private double _noticeTimer;
   private int _heldDirection;
@@ -24,12 +26,24 @@ public partial class GameController : Control
     _hud = GetNode<GameHud>("Hud");
     _audio = new GameAudio();
     AddChild(_audio);
+    _texts.SetLanguage(OS.GetLocale());
     var save = new ConfigFile();
     if (save.Load(SavePath) == Error.Ok)
     {
+      _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
       _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
       _audio.Enabled = save.GetValue("settings", "sound_enabled", false).AsBool();
     }
+    ApplyLanguageFont();
+    _hud.Texts = _texts;
+    _board.Texts = _texts;
+    _hud.LanguageRequested += () =>
+    {
+      var index = Array.IndexOf(UiText.Languages, _texts.Language);
+      _texts.SetLanguage(UiText.Languages[(index + 1) % UiText.Languages.Length]);
+      ApplyLanguageFont();
+      SaveProgress();
+    };
     _hud.PauseRequested += TogglePause;
     _hud.RestartRequested += () => Start();
     _hud.DemoRequested += () => Start(true);
@@ -66,7 +80,7 @@ public partial class GameController : Control
     if (!_game.Paused)
     {
       _noticeTimer -= delta;
-      if (_noticeTimer <= 0) _board.Notice = "";
+      if (_noticeTimer <= 0) _board.NoticeKey = "";
     }
     _hud.Refresh(_game, _best, _audio.Enabled);
     _board.QueueRedraw();
@@ -110,13 +124,19 @@ public partial class GameController : Control
     _game.PieceLocked += () => _audio.Tone(160, 0.08f);
     _game.Matched += wave =>
     {
-      ShowNotice($"{wave.Pieces.Count} blocks   +{wave.Points}   ×{wave.Chain}");
+      ShowNotice("match", wave.Pieces.Count, wave.Points, wave.Chain);
       _audio.Tone(360 + wave.Chain * 140, 0.25f);
       if (_game.Score <= _best) return;
       _best = _game.Score;
       SaveProgress();
     };
-    ShowNotice(demo ? "Space: connect 3 whole blocks" : "Connect 3 same-color blocks, edge to edge");
+    ShowNotice(demo ? "demo_hint" : "intro");
+  }
+
+  private void ApplyLanguageFont()
+  {
+    var suffix = _texts.Language == "ja" ? "JP" : "SC";
+    Theme = new Theme { DefaultFont = GD.Load<FontFile>($"res://Assets/Fonts/ChromaUI-{suffix}.otf") };
   }
 
   private void TogglePause()
@@ -132,9 +152,10 @@ public partial class GameController : Control
     SaveProgress();
   }
 
-  private void ShowNotice(string message)
+  private void ShowNotice(string key, params object[] arguments)
   {
-    _board.Notice = message;
+    _board.NoticeKey = key;
+    _board.NoticeArguments = arguments;
     _noticeTimer = 2.5;
   }
 
@@ -148,6 +169,7 @@ public partial class GameController : Control
   private void SaveProgress()
   {
     var save = new ConfigFile();
+    save.SetValue("settings", "language", _texts.Language);
     save.SetValue("progress", "best_score", _best);
     save.SetValue("settings", "sound_enabled", _audio.Enabled);
     var result = save.Save(SavePath);

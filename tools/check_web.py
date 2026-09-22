@@ -17,6 +17,10 @@ for attempt in range(6):
   try:
     assert b"blazor.webassembly.js" in fetch("")
     assert b"KeyChanged" in fetch("interop.js")
+    catalog = json.loads(fetch("locales.json"))
+    assert set(catalog) == {"en", "zh-CN", "ja"}
+    for language in ("SC", "JP"):
+      assert fetch(f"fonts/ChromaUI-{language}.otf", 4) == b"OTTO"
     boot = json.loads(fetch("_framework/blazor.boot.json"))
     wasm_files = [name for group in boot["resources"].values() if isinstance(group, dict)
       for name in group if name.endswith(".wasm") and name.startswith("dotnet.native")]

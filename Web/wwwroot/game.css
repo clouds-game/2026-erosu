@@ -1,9 +1,13 @@
+@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf') format('opentype'); font-display: swap; }
+@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf') format('opentype'); font-display: swap; }
+html:lang(zh-CN) { font-family: ChromaSC, sans-serif; }
+html:lang(ja) { font-family: ChromaJP, sans-serif; }
 :root { color-scheme: dark; font-family: system-ui, sans-serif; color: #e6edf3; background: #101319; }
 * { box-sizing: border-box; }
 body { margin: 0; }
-button { font: inherit; color: inherit; background: #222a35; border: 1px solid #344052; border-radius: 4px; padding: 9px 12px; cursor: pointer; touch-action: manipulation; }
+button, select { font: inherit; color: inherit; background: #222a35; border: 1px solid #344052; border-radius: 4px; padding: 9px 12px; cursor: pointer; touch-action: manipulation; }
 button:hover { background: #303e4d; }
-button:focus-visible, a:focus-visible { outline: 2px solid #8ee2c4; outline-offset: 3px; }
+button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #8ee2c4; outline-offset: 3px; }
 button:disabled { opacity: .4; cursor: default; }
 .game { display: grid; grid-template-columns: minmax(0, 400px) 210px; gap: 16px 24px; max-width: 682px; margin: 20px auto; padding: 0 24px; }
 .playfield { position: relative; border: 1px solid #394452; align-self: start; }
@@ -44,3 +48,6 @@ aside button { font-size: 13px; }
   .notice { font-size: 11px; }
   .overlay strong { font-size: 19px; }
 }
+
+.language { display: flex; flex-direction: column; gap: 4px; color: #8391a5; font-size: 12px; }
+.language select { width: 100%; min-width: 0; color: #e6edf3; padding: 7px; }

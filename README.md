@@ -71,3 +71,5 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 [下载最新 Nightly](https://github.com/clouds-game/2026-erosu/releases/tag/nightly)：每次成功的主分支构建及每天北京时间 02:23 更新同一个滚动预发布，包含 Windows / macOS 包、校验文件和构建提交信息。
 
 详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线地址：[开始游戏](https://clouds-game.github.io/2026-erosu/)。
+
+界面支持 English / 简体中文 / 日本語，可在游戏侧栏切换并记住偏好。详见 [界面国际化](docs/界面国际化.md)。

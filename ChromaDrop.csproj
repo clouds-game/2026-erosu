@@ -7,6 +7,6 @@
     <RootNamespace>ChromaDrop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Tests/**/*.cs;archive/**/*.cs" />
+    <Compile Remove="Tests/**/*.cs;archive/**/*.cs;Web/**/*.cs" />
   </ItemGroup>
 </Project>

@@ -5,3 +5,6 @@ dist/
 **/bin/
 **/obj/
 .local/
+build/
+Web/wwwroot/interop.js
+__pycache__/

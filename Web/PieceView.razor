@@ -1,0 +1,35 @@
+<g opacity="@(Ghost ? "0.3" : "1")">
+  @foreach (var cell in Piece.Cells)
+  {
+    <rect x="@(cell.X * 40)" y="@(cell.Y * 40)" width="40" height="40" fill="@Color" />
+  }
+  @foreach (var cell in Piece.Cells)
+  {
+    var x = cell.X * 40;
+    var y = cell.Y * 40;
+    @if (!Has(cell.X, cell.Y - 1)) { <path d="@($"M{x} {y + 1}h40")" class="outline" /> }
+    @if (!Has(cell.X, cell.Y + 1)) { <path d="@($"M{x} {y + 39}h40")" class="outline" /> }
+    @if (!Has(cell.X - 1, cell.Y)) { <path d="@($"M{x + 1} {y}v40")" class="outline" /> }
+    @if (!Has(cell.X + 1, cell.Y)) { <path d="@($"M{x + 39} {y}v40")" class="outline" /> }
+    @if (!Ghost)
+    {
+      <g transform="@($"translate({x + 20} {y + 20})")" class="mark">
+        @switch (Piece.Color)
+        {
+          case 0: <circle r="2" fill="currentColor" /> break;
+          case 1: <rect x="-2.5" y="-2.5" width="5" height="5" /> break;
+          case 2: <path d="M-3 0h6M0 -3v6" /> break;
+          case 3: <path d="M-2 3l4 -6" /> break;
+        }
+      </g>
+    }
+  }
+</g>
+
+@code {
+  [Parameter, EditorRequired] public Piece Piece { get; set; } = null!;
+  [Parameter] public bool Ghost { get; set; }
+  private static readonly string[] Palette = ["#ff8278", "#8ee2c4", "#f6ce71", "#aaa2f7"];
+  private string Color => Palette[Piece.Color];
+  private bool Has(int x, int y) => Piece.Cells.Contains(new Cell(x, y));
+}

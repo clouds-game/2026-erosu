@@ -54,9 +54,18 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 - `Scenes/Game.tscn`：主场景，棋盘与 HUD 可以分别修改。
 - `Assets/`：项目资源；当前几何图形由 Godot 绘制。
 - `Tests/`：规则与状态机测试，失败时返回非零退出码。
+- `Web/`：共享 C# 规则的 .NET WebAssembly 网页版。
+- `.github/workflows/`：Windows / macOS 打包、Web 构建、GitHub Pages 和标签发布。
+- `tools/`：校验 Godot 下载、导出桌面包和准备 Pages 路径的脚本。
 - `docs/`：中文玩法、美术、开发与验证文档。
 - `archive/web-prototype/`：保留早期网页实验，仅供对照，不属于当前 Godot 构建。
 
 [玩法设计](docs/玩法设计.md) · [美术与资源](docs/美术与资源.md) · [开发与试玩](docs/开发与试玩.md) · [验证记录](docs/验证记录.md)
 
 讨论使用英文，项目文档使用中文。当前界面使用简短英文标签，仍处于玩法验证阶段。
+
+## 自动构建与网页发布
+
+主分支和 PR 自动运行测试并生成 Windows x64、macOS Universal 和 WASM 构建产物。`v*` 标签发布桌面 ZIP 到 GitHub Releases。网页使用同一份 C# 核心，界面维持棋盘与必要 HUD。
+
+详见 [持续集成与发布](docs/持续集成与发布.md)。Pages 部署需先满足仓库套餐条件，并设置仓库变量 `PAGES_ENABLED=true`；不改变源码仓库的可见性。

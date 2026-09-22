@@ -1,0 +1,192 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<main class="game">
+  <section class="playfield" aria-label="Game board">
+    <svg viewBox="0 0 400 720" role="img" aria-label="Ten by eighteen falling-block board">
+      <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="#303946" /></pattern></defs>
+      <rect width="400" height="720" fill="#1b212c" />
+      <rect width="400" height="720" fill="url(#grid)" />
+      @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
+      @if (game.Phase == GamePhase.Falling)
+      {
+        @if (game.Ghost() is { } ghost) { <PieceView Piece="ghost" Ghost="true" /> }
+        @if (game.Active is { } active) { <PieceView Piece="active" /> }
+      }
+      @if (game.Wave is { } wave)
+      {
+        <g opacity="@(1 - game.ClearProgress * 0.8)">
+          @foreach (var piece in wave.Pieces) { <PieceView Piece="piece" /> }
+        </g>
+      }
+    </svg>
+    @if (game.Paused || game.Phase == GamePhase.Over)
+    {
+      <div class="overlay">
+        <strong>@(game.Paused ? "PAUSED" : "GAME OVER")</strong>
+        <button @onclick="Confirm">@(game.Paused ? "Resume" : "Play again")</button>
+        <small>@(game.Paused ? "P / Enter" : $"Score {game.Score:N0}")</small>
+      </div>
+    }
+    else if (notice.Length > 0) { <div class="notice" role="status">@notice</div> }
+  </section>
+  <aside>
+    <span class="muted">SCORE</span><strong id="score">@game.Score.ToString("N0")</strong>
+    <span class="muted">Best @best.ToString("N0")</span>
+    <span class="next-label muted">NEXT</span>
+    <div class="previews">
+      @foreach (var piece in game.Next)
+      {
+        <svg viewBox="-20 -10 200 100" role="img" aria-label="@($"Next {piece.Shape}, color {piece.Color + 1}")"><PieceView Piece="piece" /></svg>
+      }
+    </div>
+    <dl><dt>Level</dt><dd>@game.Level</dd><dt>Blocks cleared</dt><dd id="cleared">@game.Cleared</dd><dt>Best chain</dt><dd>×@game.BestChain</dd></dl>
+    <p class="keys">← → Move<br />↑ Rotate · ↓ Soft drop<br />Space Drop · P Pause</p>
+    <button @onclick="TogglePause" disabled="@(game.Phase == GamePhase.Over)">@(game.Paused ? "Resume" : "Pause") [P]</button>
+    <button @onclick="() => Start()">Restart [R]</button>
+    <button @onclick="() => Start(true)">Match demo [F2]</button>
+    <button @onclick="ToggleSound">Sound @(sound_enabled ? "on" : "off") [M]</button>
+    <a class="downloads" href="https://github.com/clouds-game/2026-erosu/releases">Desktop downloads</a>
+  </aside>
+  <nav class="touch" aria-label="Game controls">
+    <button aria-label="Move left" @onclick="() => game.Move(-1, 0)">←</button>
+    <button aria-label="Rotate" @onclick="() => game.Rotate()">↻</button>
+    <button aria-label="Move right" @onclick="() => game.Move(1, 0)">→</button>
+    <button aria-label="Move down" @onclick="() => game.Move(0, 1)">↓</button>
+    <button @onclick="game.HardDrop">Drop</button>
+  </nav>
+</main>
+
+@code {
+  private GameSession game = null!;
+  private IJSObjectReference? interop;
+  private DotNetObjectReference<App>? callback;
+  private readonly CancellationTokenSource cancellation = new();
+  private readonly HashSet<string> held = [];
+  private Task? loop;
+  private int best;
+  private bool sound_enabled;
+  private string notice = "";
+  private double notice_time;
+  private int held_direction;
+  private double repeat_time;
+  private bool repeating;
+
+  protected override void OnInitialized() => Start();
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (!firstRender) return;
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js");
+    best = await interop.InvokeAsync<int>("loadBest");
+    callback = DotNetObjectReference.Create(this);
+    await interop.InvokeVoidAsync("connect", callback);
+    loop = RunLoop();
+  }
+
+  private async Task RunLoop()
+  {
+    using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(33));
+    var clock = System.Diagnostics.Stopwatch.StartNew();
+    var previous = clock.Elapsed.TotalSeconds;
+    try
+    {
+      while (await timer.WaitForNextTickAsync(cancellation.Token))
+      {
+        var now = clock.Elapsed.TotalSeconds;
+        var delta = Math.Min(0.05, now - previous);
+        previous = now;
+        var direction = (held.Contains("ArrowRight") || held.Contains("KeyD") ? 1 : 0) -
+          (held.Contains("ArrowLeft") || held.Contains("KeyA") ? 1 : 0);
+        if (game.AcceptsInput && direction != 0)
+        {
+          if (direction != held_direction)
+          {
+            game.Move(direction, 0);
+            repeat_time = 0;
+            repeating = false;
+          }
+          else
+          {
+            repeat_time += delta;
+            if (repeat_time >= (repeating ? 0.075 : 0.18))
+            {
+              game.Move(direction, 0);
+              repeat_time = 0;
+              repeating = true;
+            }
+          }
+        }
+        held_direction = game.AcceptsInput ? direction : 0;
+        game.Advance(delta, held.Contains("ArrowDown") || held.Contains("KeyS"));
+        if (!game.Paused && (notice_time -= delta) <= 0) notice = "";
+        if (game.Score > best)
+        {
+          best = game.Score;
+          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best);
+        }
+        await InvokeAsync(StateHasChanged);
+      }
+    }
+    catch (OperationCanceledException) { }
+  }
+
+  private void Start(bool demo = false)
+  {
+    game = demo ? GameSession.CreateDemo() : new GameSession();
+    held.Clear();
+    held_direction = 0;
+    notice = demo ? "Space / Drop: connect 3 whole blocks" : "Connect 3 same-color blocks, edge to edge";
+    notice_time = 3;
+    game.Matched += wave =>
+    {
+      notice = $"{wave.Pieces.Count} blocks · +{wave.Points} · ×{wave.Chain}";
+      notice_time = 1.8;
+      PlayTone(360 + wave.Chain * 140, 0.25);
+    };
+    game.PieceLocked += () => PlayTone(160, 0.08);
+  }
+
+  [JSInvokable]
+  public void KeyChanged(string key, bool pressed)
+  {
+    if (!pressed) { held.Remove(key); return; }
+    held.Add(key);
+    switch (key)
+    {
+      case "ArrowUp": case "KeyW": game.Rotate(); break;
+      case "Space": game.HardDrop(); break;
+      case "KeyP": case "Escape": TogglePause(); break;
+      case "KeyR": Start(); break;
+      case "F2": Start(true); break;
+      case "KeyM": ToggleSound(); break;
+      case "Enter": Confirm(); break;
+    }
+  }
+
+  [JSInvokable]
+  public void PauseForFocus() { game.SetPaused(true); held.Clear(); }
+  private void TogglePause() { game.SetPaused(!game.Paused); held.Clear(); }
+  private void Confirm()
+  {
+    if (game.Phase == GamePhase.Over) Start();
+    else if (game.Paused) TogglePause();
+  }
+  private void ToggleSound() { sound_enabled = !sound_enabled; PlayTone(500, 0.1); }
+  private void PlayTone(int frequency, double duration)
+  {
+    if (sound_enabled && interop is not null) _ = interop.InvokeVoidAsync("tone", frequency, duration);
+  }
+  public async ValueTask DisposeAsync()
+  {
+    cancellation.Cancel();
+    if (loop is not null) await loop;
+    if (interop is not null)
+    {
+      await interop.InvokeVoidAsync("disconnect");
+      await interop.DisposeAsync();
+    }
+    callback?.Dispose();
+    cancellation.Dispose();
+  }
+}

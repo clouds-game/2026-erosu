@@ -25,6 +25,7 @@ public static class PuzzleLevels
   public static int DisplayNumber(PuzzleLevel puzzle) => All.Where(level => level.IsTutorial == puzzle.IsTutorial)
     .TakeWhile(level => level.Number != puzzle.Number).Count() + 1;
   public static bool IsLastTutorial(PuzzleLevel puzzle) => puzzle.IsTutorial && puzzle.Number == All.Last(level => level.IsTutorial).Number;
+  public static bool IsLastChallenge(PuzzleLevel puzzle) => !puzzle.IsTutorial && puzzle.Number == All.Last(level => !level.IsTutorial).Number;
   public static int NextLevel(int number)
   {
     var current = All.Single(level => level.Number == number);
@@ -32,9 +33,11 @@ public static class PuzzleLevels
       .SkipWhile(level => level.Number != number).Skip(1).FirstOrDefault()?.Number ?? DefaultLevel;
   }
   public static string CompletionKey(PuzzleLevel puzzle) => puzzle.IsTutorial
-    ? (IsLastTutorial(puzzle) ? "learn_done" : "puzzle_won") : "challenge_done";
+    ? (IsLastTutorial(puzzle) ? "learn_done" : "puzzle_won")
+    : (IsLastChallenge(puzzle) ? "challenges_done" : "challenge_done");
   public static string ContinueKey(PuzzleLevel puzzle) => puzzle.IsTutorial
-    ? (IsLastTutorial(puzzle) ? "start_challenge" : "next_level") : "replay_challenge";
+    ? (IsLastTutorial(puzzle) ? "start_challenge" : "next_level")
+    : (IsLastChallenge(puzzle) ? "replay_challenges" : "next_challenge");
 
   public static IReadOnlyList<PuzzleLevel> All { get; } = Array.AsReadOnly(new[]
   {
@@ -57,6 +60,27 @@ public static class PuzzleLevels
       new[] {
         Piece.Create(1, Shape.S, 0), Piece.Create(2, Shape.L, 1), Piece.Create(3, Shape.O, 2),
         Piece.Create(4, Shape.J, 0), Piece.Create(5, Shape.J, 1)
+      }),
+    new PuzzleLevel(5, "challenge_2", "challenge_hint_2", PuzzleGoal.ClearBoard, 0,
+      new[] {
+        new Piece(-1, Shape.S, 1, new Cell[] { new(0, 15), new(0, 16), new(1, 16), new(1, 17) }),
+        new Piece(-2, Shape.S, 2, new Cell[] { new(7, 17), new(8, 16), new(8, 17), new(9, 16) }),
+        new Piece(-3, Shape.T, 0, new Cell[] { new(3, 16), new(4, 15), new(4, 16), new(4, 17) }),
+        new Piece(-4, Shape.S, 0, new Cell[] { new(4, 14), new(5, 13), new(5, 14), new(6, 13) })
+      },
+      new[] {
+        Piece.Create(1, Shape.Z, 2), Piece.Create(2, Shape.J, 1), Piece.Create(3, Shape.T, 1),
+        Piece.Create(4, Shape.O, 0), Piece.Create(5, Shape.T, 2)
+      }),
+    new PuzzleLevel(6, "challenge_3", "challenge_hint_3", PuzzleGoal.ClearBoard, 0,
+      new[] {
+        Piece.Create(-1, Shape.I, 1, 4, 17),
+        new Piece(-2, Shape.S, 2, new Cell[] { new(3, 16), new(4, 15), new(4, 16), new(5, 15) }),
+        new Piece(-3, Shape.Z, 0, new Cell[] { new(8, 16), new(8, 17), new(9, 15), new(9, 16) })
+      },
+      new[] {
+        Piece.Create(1, Shape.I, 2), Piece.Create(2, Shape.T, 1), Piece.Create(3, Shape.Z, 0),
+        Piece.Create(4, Shape.S, 0), Piece.Create(5, Shape.O, 1), Piece.Create(6, Shape.J, 2)
       })
   });
 }

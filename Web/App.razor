@@ -130,7 +130,7 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=challenge-1");
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=challenge-3");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
     best = await interop.InvokeAsync<int>("loadBest");

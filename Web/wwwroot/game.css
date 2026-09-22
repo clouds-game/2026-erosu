@@ -1,5 +1,5 @@
-@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=challenge-1') format('opentype'); font-display: swap; }
-@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=challenge-1') format('opentype'); font-display: swap; }
+@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=challenge-3') format('opentype'); font-display: swap; }
+@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=challenge-3') format('opentype'); font-display: swap; }
 html:lang(zh-CN) { font-family: ChromaSC, sans-serif; }
 html:lang(ja) { font-family: ChromaJP, sans-serif; }
 :root { color-scheme: dark; font-family: system-ui, sans-serif; color: #e6edf3; background: #101319; }

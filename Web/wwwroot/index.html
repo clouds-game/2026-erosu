@@ -6,14 +6,14 @@
     <meta name="theme-color" content="#101319" />
     <title>Chroma Drop</title>
     <base href="/" />
-    <link rel="stylesheet" href="game.css?v=challenge-1" />
+    <link rel="stylesheet" href="game.css?v=challenge-3" />
   </head>
   <body>
     <div id="app"><p class="loading" data-i18n="loading">Loading game…</p></div>
     <div id="blazor-error-ui" role="alert"><span data-i18n="error">The game stopped unexpectedly.</span> <a href="." data-i18n="reload">Reload</a></div>
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script type="module">
-      import { initializeLanguage } from './interop.js?v=challenge-1';
+      import { initializeLanguage } from './interop.js?v=challenge-3';
       try { await initializeLanguage(); } catch (error) { console.warn(error); }
       Blazor.start().catch(() => { document.getElementById('blazor-error-ui').style.display = 'block'; });
     </script>

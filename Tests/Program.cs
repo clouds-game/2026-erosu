@@ -3,7 +3,11 @@ using ChromaDrop.Localization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-if (args.Contains("--analyze-challenge")) return ChallengeAnalysis.Run();
+if (args.Contains("--analyze-challenge"))
+{
+  var argument = Array.IndexOf(args, "--analyze-challenge");
+  return ChallengeAnalysis.Run(argument + 1 < args.Length && int.TryParse(args[argument + 1], out var number) ? number : null);
+}
 
 var tests = new (string Name, Action Run)[]
 {
@@ -33,42 +37,42 @@ var tests = new (string Name, Action Run)[]
       Check(text.Get("match", 3, 600, 2).Contains("600"));
     }
   }),
-  ("Challenge requires five pieces and supports a planned three-wave finish", () =>
+  ("Every challenge has a verified solution with its intended clear rhythm", () =>
   {
-    var level = PuzzleLevels.All.Single(puzzle => !puzzle.IsTutorial);
-    var game = new GameSession(level);
-    Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
-    Check(game.Next.Count == 4 && game.Remaining == 5);
-    var moves = new[] { (0, 0), (1, 0), (5, 0), (2, 0), (0, 1) };
-    var colors = new List<int>();
-    game.Matched += wave => colors.Add(wave.Pieces[0].Color);
-    for (var i = 0; i < moves.Length; i++)
+    var solutions = new[]
     {
-      var (x, rotation) = moves[i];
-      for (var turn = 0; turn < rotation; turn++) Check(game.Rotate());
-      while (game.Active!.Cells.Min(cell => cell.X) != x)
-        Check(game.Move(Math.Sign(x - game.Active.Cells.Min(cell => cell.X)), 0));
-      game.HardDrop();
-      if (i < 4) Check(game.Cleared == 0 && game.Phase == GamePhase.Falling);
-      for (var tick = 0; tick < 500 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(0.05);
+      new ChallengeSolution(4, new[] { (0, 0), (1, 0), (5, 0), (2, 0), (0, 1) }, 1800, 3, new[] { "1", "0", "2" }),
+      new ChallengeSolution(5, new[] { (8, 1), (4, 3), (2, 0), (7, 0), (8, 1) }, 1200, 2, new[] { "0", "1", "2" }),
+      new ChallengeSolution(6, new[] { (5, 0), (2, 3), (4, 0), (6, 1), (1, 0), (8, 3) }, 1500, 2, new[] { "2", "01" })
+    };
+    foreach (var solution in solutions)
+    {
+      var level = PuzzleLevels.All.Single(puzzle => puzzle.Number == solution.Level);
+      var game = Play(level, solution.Moves, out var waves);
+      Check(game.Phase == GamePhase.Won && game.Locked == solution.Moves.Length && game.Board.Pieces.Count == 0);
+      Check(game.Cleared == 9 && game.BestChain == solution.Chain && game.Score == solution.Score);
+      Check(waves.SequenceEqual(solution.Waves));
     }
-    Check(game.Phase == GamePhase.Won && game.Locked == 5 && game.Board.Pieces.Count == 0);
-    Check(game.Cleared == 9 && game.BestChain == 3 && game.Score == 1800);
-    Check(colors.SequenceEqual(new[] { 1, 0, 2 }));
   }),
-  ("Challenge color budget prevents a clear before setup or a win before piece five", () =>
+  ("Challenge color budgets require setup and every supplied piece", () =>
   {
-    var level = PuzzleLevels.All.Single(puzzle => !puzzle.IsTutorial);
-    var colors = level.InitialPieces.Concat(level.Sequence).Select(piece => piece.Color).Distinct();
-    foreach (var color in colors)
+    var challenges = PuzzleLevels.All.Where(puzzle => !puzzle.IsTutorial).ToArray();
+    foreach (var level in challenges)
     {
-      Check(level.InitialPieces.Concat(level.Sequence).Count(piece => piece.Color == color) == 3);
-      Check(level.InitialPieces.Concat(level.Sequence.Take(2)).Count(piece => piece.Color == color) < 3);
+      var colors = level.InitialPieces.Concat(level.Sequence).Select(piece => piece.Color).Distinct();
+      foreach (var color in colors)
+      {
+        Check(level.InitialPieces.Concat(level.Sequence).Count(piece => piece.Color == color) == 3);
+        Check(level.InitialPieces.Concat(level.Sequence.Take(level.Number == 6 ? 3 : 2)).Count(piece => piece.Color == color) < 3);
+      }
+      var finalColor = level.Sequence.Last().Color;
+      Check(level.InitialPieces.Concat(level.Sequence.SkipLast(1)).Count(piece => piece.Color == finalColor) == 2);
     }
-    var finalColor = level.Sequence.Last().Color;
-    Check(level.InitialPieces.Concat(level.Sequence.SkipLast(1)).Count(piece => piece.Color == finalColor) == 2);
-    Check(PuzzleLevels.DefaultLevel == level.Number && PuzzleLevels.NextLevel(3) == level.Number);
-    Check(PuzzleLevels.NextLevel(level.Number) == level.Number && (PuzzleLevels.ProgressMask & 7) == 7);
+    Check(PuzzleLevels.DefaultLevel == 4 && PuzzleLevels.NextLevel(3) == 4);
+    Check(PuzzleLevels.NextLevel(4) == 5 && PuzzleLevels.NextLevel(5) == 6 && PuzzleLevels.NextLevel(6) == 4);
+    Check(PuzzleLevels.ContinueKey(challenges[0]) == "next_challenge");
+    Check(PuzzleLevels.CompletionKey(challenges[^1]) == "challenges_done");
+    Check(PuzzleLevels.ContinueKey(challenges[^1]) == "replay_challenges" && PuzzleLevels.ProgressMask == 63);
   }),
   ("Authored puzzles are stable, solvable through input, and replayable", () =>
   {
@@ -348,3 +352,24 @@ static void Settle(Board board)
   var steps = 0;
   while (board.StepGravity()) Check(++steps <= Board.Height);
 }
+
+static GameSession Play(PuzzleLevel level, IReadOnlyList<(int X, int Rotations)> moves, out IReadOnlyList<string> waves)
+{
+  var game = new GameSession(level);
+  Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
+  Check(game.Remaining == moves.Count && game.Next.Count == moves.Count - 1);
+  var observed = new List<string>();
+  game.Matched += wave => observed.Add(string.Concat(wave.Pieces.Select(piece => piece.Color).Distinct().Order()));
+  foreach (var (x, rotations) in moves)
+  {
+    for (var turn = 0; turn < rotations; turn++) Check(game.Rotate());
+    while (game.Active!.Cells.Min(cell => cell.X) != x)
+      Check(game.Move(Math.Sign(x - game.Active.Cells.Min(cell => cell.X)), 0));
+    game.HardDrop();
+    for (var tick = 0; tick < 500 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(0.05);
+  }
+  waves = observed;
+  return game;
+}
+
+sealed record ChallengeSolution(int Level, (int X, int Rotations)[] Moves, int Score, int Chain, string[] Waves);

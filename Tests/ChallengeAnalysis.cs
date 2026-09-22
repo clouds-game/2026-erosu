@@ -5,9 +5,13 @@ using ChromaDrop.Core;
 // of uniqueness over every possible input sequence.
 static class ChallengeAnalysis
 {
-  public static int Run()
+  public static int Run(int? displayNumber)
   {
-    var level = PuzzleLevels.All.Single(puzzle => !puzzle.IsTutorial);
+    var challenges = PuzzleLevels.All.Where(puzzle => !puzzle.IsTutorial).ToArray();
+    var level = displayNumber is null
+      ? challenges[0]
+      : challenges.ElementAtOrDefault(displayNumber.Value - 1) ?? throw new ArgumentOutOfRangeException(nameof(displayNumber));
+    Console.WriteLine($"Analyzing challenge {PuzzleLevels.DisplayNumber(level)} (level ID {level.Number})");
     var cache = new Dictionary<string, long>();
     var nodes = 0;
     var earlyClears = 0;
@@ -15,6 +19,8 @@ static class ChallengeAnalysis
     long Search(IReadOnlyList<Piece> board, int step)
     {
       if (step == level.Sequence.Count) return board.Count == 0 ? 1 : 0;
+      var availableColors = board.Concat(level.Sequence.Skip(step)).GroupBy(piece => piece.Color);
+      if (availableColors.Any(group => group.Count() is > 0 and < 3)) return 0;
       var key = step + ":" + string.Join(";", board.OrderBy(piece => piece.Id).Select(piece =>
         $"{piece.Id},{piece.Color}:" + string.Join(",", piece.Cells.OrderBy(cell => cell.Y).ThenBy(cell => cell.X).Select(cell => $"{cell.X}/{cell.Y}"))));
       if (cache.TryGetValue(key, out var known)) return known;
@@ -41,7 +47,7 @@ static class ChallengeAnalysis
           for (var tick = 0; tick < 500 && !game.IsFinished; tick++) game.Advance(0.05);
           if (!game.IsFinished) throw new Exception("Resolution exceeded limit");
           var descendants = Search(game.Board.Pieces, step + 1);
-          if (step < 4 && game.Cleared > 0)
+          if (step < level.Sequence.Count - 1 && game.Cleared > 0)
           {
             earlyClears++;
             if (descendants == 0) losingClears++;

@@ -35,22 +35,24 @@ var tests = new (string Name, Action Run)[]
         Check(!text.Get(key, 3, 600, 2).Contains('{'));
       }
       Check(text.Get("match", 3, 600, 2).Contains("600"));
+      Check(text.Get("match", 3, UiText.Number(2100), 2).Contains("2,100"));
     }
   }),
   ("Every challenge has a verified solution with its intended clear rhythm", () =>
   {
     var solutions = new[]
     {
-      new ChallengeSolution(4, new[] { (0, 0), (1, 0), (5, 0), (2, 0), (0, 1) }, 1800, 3, new[] { "1", "0", "2" }),
-      new ChallengeSolution(5, new[] { (8, 1), (4, 3), (2, 0), (7, 0), (8, 1) }, 1200, 2, new[] { "0", "1", "2" }),
-      new ChallengeSolution(6, new[] { (5, 0), (2, 3), (4, 0), (6, 1), (1, 0), (8, 3) }, 1500, 2, new[] { "2", "01" })
+      new ChallengeSolution(4, new[] { (0, 0), (1, 0), (5, 0), (2, 0), (0, 1) }, 20900, 3, new[] { "1", "0", "2" }),
+      new ChallengeSolution(5, new[] { (8, 1), (4, 3), (2, 0), (7, 0), (8, 1) }, 10700, 2, new[] { "0", "1", "2" }),
+      new ChallengeSolution(6, new[] { (5, 0), (2, 3), (4, 0), (6, 1), (1, 0), (8, 3) }, 16200, 2, new[] { "2", "01" })
     };
     foreach (var solution in solutions)
     {
       var level = PuzzleLevels.All.Single(puzzle => puzzle.Number == solution.Level);
       var game = Play(level, solution.Moves, out var waves);
       Check(game.Phase == GamePhase.Won && game.Locked == solution.Moves.Length && game.Board.Pieces.Count == 0);
-      Check(game.Cleared == 9 && game.BestChain == solution.Chain && game.Score == solution.Score);
+      Check(game.Cleared == 9 && game.BestChain == solution.Chain && game.Score == solution.Score,
+        $"Challenge {solution.Level - 3} scored {game.Score}, expected {solution.Score}.");
       Check(waves.SequenceEqual(solution.Waves));
     }
   }),
@@ -130,10 +132,10 @@ var tests = new (string Name, Action Run)[]
     game.HardDrop();
     game.SetPaused(true);
     game.Advance(10);
-    Check(game.Phase == GamePhase.Clearing && game.Score == 300);
+    Check(game.Phase == GamePhase.Clearing && game.Score == 2100);
     game.SetPaused(false);
     for (var step = 0; step < 500 && !game.IsFinished; step++) game.Advance(0.05);
-    Check(game.Phase == GamePhase.Won && game.Score == 900 && game.BestChain == 2);
+    Check(game.Phase == GamePhase.Won && game.Score == 9200 && game.BestChain == 2);
   }),
   ("A blocked puzzle spawn fails and finite previews preserve sequence order", () =>
   {
@@ -204,13 +206,27 @@ var tests = new (string Name, Action Run)[]
       Piece.Create(4, Shape.O, 1, 0, 10), Piece.Create(5, Shape.O, 1, 2, 10), Piece.Create(6, Shape.O, 1, 4, 10));
     Check(board.FindMatches().Count == 6);
   }),
-  ("Demo scores 300 and passes through clear, gravity, and next turn", () =>
+  ("Scoring rewards altitude, compactness, larger clears, and later combo steps", () =>
+  {
+    var floor = new[] { Piece.Create(1, Shape.O, 0, 0, 16), Piece.Create(2, Shape.O, 0, 2, 16), Piece.Create(3, Shape.O, 0, 4, 16) };
+    var basic = ScoreRules.Calculate(floor, 1);
+    Check(basic == new ScoreAward(1000, 0, 1100, 0, 0) && basic.Total == 2100);
+    var high = ScoreRules.Calculate(floor.Select(piece => piece.Offset(0, -6)).ToArray(), 1);
+    Check(high.Altitude == 600 && high.Total == basic.Total + 600);
+    var wide = ScoreRules.Calculate(new[] { floor[0], floor[1].Offset(2, 0), floor[2].Offset(4, 0) }, 1);
+    Check(wide.Compactness == 800 && wide.Total < basic.Total);
+    var six = ScoreRules.Calculate(floor.Concat(floor.Select((piece, index) => piece with { Id = 4 + index }).Select(piece => piece.Offset(0, -2))).ToArray(), 1);
+    Check(six.MultiClear == 7000 && six.Total == 9800);
+    Check(ScoreRules.Calculate(floor, 2).Combo == 5000);
+    Check(ScoreRules.Calculate(floor, 3).Combo == 10000);
+  }),
+  ("Demo scores through the new economy and advances to the next turn", () =>
   {
     var game = GameSession.CreateDemo();
     var observed = 0;
     game.Matched += wave => observed += wave.Pieces.Count;
     game.HardDrop();
-    Check(game.Score == 300 && game.Cleared == 3 && game.BestChain == 1 && observed == 3);
+    Check(game.Score == 2100 && game.Cleared == 3 && game.BestChain == 1 && observed == 3);
     Check(game.Phase == GamePhase.Clearing && game.Active is null);
     game.Advance(0.3);
     Check(game.Phase == GamePhase.Settling);
@@ -236,7 +252,7 @@ var tests = new (string Name, Action Run)[]
     game.Advance(0.3);
     Check(game.Phase == GamePhase.Settling);
   }),
-  ("Session scores a second wave with the chain multiplier", () =>
+  ("Session adds five thousand points for the second combo step", () =>
   {
     var board = BoardOf(
       Piece.Create(-1, Shape.O, 0, 0, 16), Piece.Create(-2, Shape.O, 0, 2, 16), Piece.Create(-3, Shape.O, 0, 4, 16),
@@ -248,7 +264,7 @@ var tests = new (string Name, Action Run)[]
     game.HardDrop();
     for (var i = 0; i < 500 && game.Phase is GamePhase.Clearing or GamePhase.Settling; i++) game.Advance(0.05);
     Check(game.Phase == GamePhase.Falling);
-    Check(game.Score == 900 && game.BestChain == 2 && game.Cleared == 6);
+    Check(game.Score == 9200 && game.BestChain == 2 && game.Cleared == 6);
   }),
   ("Soft drop moves the active piece and grounded pieces lock after the delay", () =>
   {
@@ -259,7 +275,7 @@ var tests = new (string Name, Action Run)[]
     game.Advance(0.2);
     Check(game.Locked == 0);
     game.Advance(0.19);
-    Check(game.Locked == 1 && game.Score == 300);
+    Check(game.Locked == 1 && game.Score == 2100);
   }),
   ("Match resolution rejects new movement and hard drops", () =>
   {
@@ -267,7 +283,7 @@ var tests = new (string Name, Action Run)[]
     game.HardDrop();
     Check(!game.Move(1, 0) && !game.Rotate());
     game.HardDrop();
-    Check(game.Locked == 1 && game.Score == 300);
+    Check(game.Locked == 1 && game.Score == 2100);
   }),
   ("Ghost and movement respect the floor and walls", () =>
   {
@@ -335,9 +351,9 @@ foreach (var test in tests)
 Console.WriteLine($"\n{tests.Length - failures}/{tests.Length} tests passed.");
 return failures == 0 ? 0 : 1;
 
-static void Check(bool condition)
+static void Check(bool condition, string? message = null)
 {
-  if (!condition) throw new InvalidOperationException("Assertion failed.");
+  if (!condition) throw new InvalidOperationException(message ?? "Assertion failed.");
 }
 
 static Board BoardOf(params Piece[] pieces)

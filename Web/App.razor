@@ -212,7 +212,7 @@
     game.Matched += wave =>
     {
       notice_key = "match";
-      notice_arguments = [wave.Pieces.Count, wave.Points, wave.Chain];
+      notice_arguments = [wave.Pieces.Count, UiText.Number(wave.Points), wave.Chain];
       notice_time = 1.8;
       PlayTone(360 + wave.Chain * 140, 0.25);
     };

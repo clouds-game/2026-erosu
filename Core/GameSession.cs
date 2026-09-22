@@ -1,7 +1,10 @@
 namespace ChromaDrop.Core;
 
 public enum GamePhase { Falling, Clearing, Settling, Over, Won }
-public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, int Points);
+public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, ScoreAward Award)
+{
+  public int Points => Award.Total;
+}
 
 public sealed class GameSession
 {
@@ -197,12 +200,12 @@ public sealed class GameSession
       return;
     }
     _chain++;
-    var points = matches.Count * 100 * _chain;
+    var award = ScoreRules.Calculate(matches, _chain);
     Board.Remove(matches);
-    Score += points;
+    Score += award.Total;
     Cleared += matches.Count;
     BestChain = Math.Max(BestChain, _chain);
-    Wave = new ClearWave(matches, _chain, points);
+    Wave = new ClearWave(matches, _chain, award);
     Phase = GamePhase.Clearing;
     _timer = 0;
     Matched?.Invoke(Wave);

@@ -133,7 +133,7 @@ public partial class GameController : Control
     _game.PieceLocked += () => _audio.Tone(160, 0.08f);
     _game.Matched += wave =>
     {
-      ShowNotice("match", wave.Pieces.Count, wave.Points, wave.Chain);
+      ShowNotice("match", wave.Pieces.Count, UiText.Number(wave.Points), wave.Chain);
       _audio.Tone(360 + wave.Chain * 140, 0.25f);
       if (_game.Puzzle is not null || _game.Score <= _best) return;
       _best = _game.Score;

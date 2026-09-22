@@ -68,4 +68,4 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 
 主分支和 PR 自动运行测试并生成 Windows x64、macOS Universal 和 WASM 构建产物。`v*` 标签发布桌面 ZIP 到 GitHub Releases。网页使用同一份 C# 核心，界面维持棋盘与必要 HUD。
 
-详见 [持续集成与发布](docs/持续集成与发布.md)。Pages 部署需先满足仓库套餐条件，并设置仓库变量 `PAGES_ENABLED=true`；不改变源码仓库的可见性。
+详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线地址：[开始游戏](https://clouds-game.github.io/2026-erosu/)。

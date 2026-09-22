@@ -63,8 +63,8 @@ aside button { font-size: 13px; padding: 7px 4px; }
   dl { gap: 3px; margin-top: 2px; }
   aside button { padding: 4px; }
 }
-@media (max-height: 540px) and (min-width: 581px) {
-  .game { --sidebar: 330px; --gap: 16px; }
+@media (max-height: 540px) and (min-width: 480px) {
+  .game { --sidebar: clamp(260px, 39vw, 330px); --gap: 16px; }
   aside { display: grid; grid-template-columns: 1fr 1fr; align-content: center; align-items: start; gap: 12px; }
   .muted, dl, aside button { font-size: 12px; }
 }

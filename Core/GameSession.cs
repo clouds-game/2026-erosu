@@ -1,11 +1,11 @@
 namespace ChromaDrop.Core;
 
-public enum GamePhase { Falling, Clearing, Settling, Over }
+public enum GamePhase { Falling, Clearing, Settling, Over, Won }
 public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, int Points);
 
 public sealed class GameSession
 {
-  private readonly PieceBag _bag;
+  private readonly PieceBag? _bag;
   private readonly Queue<Piece> _next = new();
   private double _timer;
   private double _lockTimer;
@@ -13,7 +13,10 @@ public sealed class GameSession
 
   public Board Board { get; }
   public Piece? Active { get; private set; }
-  public IReadOnlyList<Piece> Next => _next.ToArray();
+  public IReadOnlyList<Piece> Next => _next.Take(3).ToArray();
+  public PuzzleLevel? Puzzle { get; }
+  public int Remaining => _next.Count + (Active is null ? 0 : 1);
+  public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;
   public GamePhase Phase { get; private set; } = GamePhase.Falling;
   public bool Paused { get; private set; }
   public ClearWave? Wave { get; private set; }
@@ -35,6 +38,15 @@ public sealed class GameSession
     Spawn();
   }
 
+  public GameSession(PuzzleLevel puzzle)
+  {
+    Puzzle = puzzle;
+    Board = new Board();
+    foreach (var piece in puzzle.InitialPieces) Board.Add(piece);
+    foreach (var piece in puzzle.Sequence) _next.Enqueue(piece);
+    Spawn();
+  }
+
   public static GameSession CreateDemo()
   {
     var game = new GameSession();
@@ -46,7 +58,7 @@ public sealed class GameSession
 
   public void SetPaused(bool paused)
   {
-    if (Phase != GamePhase.Over) Paused = paused;
+    if (!IsFinished) Paused = paused;
   }
 
   public bool Move(int dx, int dy)
@@ -97,11 +109,19 @@ public sealed class GameSession
 
   public void Advance(double delta, bool softDrop = false)
   {
-    if (Paused || Phase == GamePhase.Over || delta <= 0) return;
+    if (Paused || IsFinished || delta <= 0) return;
     _timer += delta;
     switch (Phase)
     {
       case GamePhase.Falling:
+        // Puzzles advance only through player input; touching the floor never
+        // consumes a piece until the player commits it with hard drop.
+        if (Puzzle is not null)
+        {
+          if (softDrop && _timer >= 0.045) { Move(0, 1); _timer = 0; }
+          if (!softDrop) _timer = 0;
+          break;
+        }
         var interval = softDrop ? 0.045 : Math.Max(0.18, 0.85 - (Locked / 15) * 0.07);
         if (_timer >= interval)
         {
@@ -135,8 +155,14 @@ public sealed class GameSession
 
   private void Spawn()
   {
+    if (_next.Count == 0)
+    {
+      Active = null;
+      Phase = GamePhase.Over;
+      return;
+    }
     var piece = _next.Dequeue();
-    _next.Enqueue(_bag.Take());
+    if (_bag is not null) _next.Enqueue(_bag.Take());
     var width = piece.Cells.Max(cell => cell.X) + 1;
     Active = piece.Offset((Board.Width - width) / 2, 0);
     Phase = GamePhase.Falling;
@@ -164,7 +190,10 @@ public sealed class GameSession
     var matches = Board.FindMatches();
     if (matches.Count == 0)
     {
-      Spawn();
+      // Judge only after all waves and gravity have settled, including the
+      // final supplied piece. An exhausted queue must not hide a victory.
+      if (Puzzle?.IsComplete(this) == true) Phase = GamePhase.Won;
+      else Spawn();
       return;
     }
     _chain++;

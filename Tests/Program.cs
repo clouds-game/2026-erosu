@@ -31,6 +31,75 @@ var tests = new (string Name, Action Run)[]
       Check(text.Get("match", 3, 600, 2).Contains("600"));
     }
   }),
+  ("Authored puzzles are stable, solvable through input, and replayable", () =>
+  {
+    var targets = new[] { 4, 0, 2 };
+    for (var index = 0; index < PuzzleLevels.All.Count; index++)
+    {
+      var level = PuzzleLevels.All[index];
+      var game = new GameSession(level);
+      Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
+      Check(game.Remaining == 1 && game.Next.Count == 0);
+      var target = targets[index];
+      while (game.Active!.Cells.Min(cell => cell.X) != target)
+        Check(game.Move(Math.Sign(target - game.Active.Cells.Min(cell => cell.X)), 0));
+      game.HardDrop();
+      Check(game.Phase == GamePhase.Clearing && !game.IsFinished && game.Remaining == 0);
+      for (var step = 0; step < 500 && !game.IsFinished; step++) game.Advance(0.05);
+      Check(game.Phase == GamePhase.Won && game.Cleared == 3 && game.Active is null);
+      Check(game.Board.Pieces.Count == (index == 1 ? 1 : 0));
+      Check(!game.Move(1, 0) && !game.Rotate());
+      game.HardDrop();
+      game.SetPaused(true);
+      Check(game.Locked == 1 && !game.Paused);
+      var retry = new GameSession(level);
+      Check(retry.Cleared == 0 && retry.Remaining == 1 && retry.Board.Pieces.Count == level.InitialPieces.Count);
+    }
+  }),
+  ("Puzzle thinking time and floor contact never consume a piece", () =>
+  {
+    var game = new GameSession(PuzzleLevels.All[0]);
+    var original = game.Active;
+    game.Advance(100);
+    Check(game.Active == original && game.Locked == 0);
+    game.Advance(0.05, true);
+    Check(game.Active!.Cells.Min(cell => cell.Y) == 1);
+    while (game.Move(0, 1)) { }
+    game.Advance(100, true);
+    Check(game.Locked == 0 && game.Phase == GamePhase.Falling);
+  }),
+  ("Exhausted puzzle sequences fail without injecting random pieces", () =>
+  {
+    var game = new GameSession(PuzzleLevels.All[0]);
+    while (game.Move(1, 0)) { }
+    game.HardDrop();
+    Check(game.Phase == GamePhase.Over && game.Remaining == 0 && game.Next.Count == 0 && game.Active is null);
+  }),
+  ("Final puzzle piece resolves every chain before declaring success", () =>
+  {
+    var level = new PuzzleLevel(99, "", "", PuzzleGoal.ClearBlocks, 6,
+      new[] {
+        Piece.Create(-1, Shape.O, 0, 0, 16), Piece.Create(-2, Shape.O, 0, 2, 16), Piece.Create(-3, Shape.O, 0, 4, 16),
+        Piece.Create(-4, Shape.O, 1, 0, 14), Piece.Create(-5, Shape.O, 1, 2, 12), Piece.Create(-6, Shape.O, 1, 4, 10)
+      }, new[] { Piece.Create(1, Shape.O, 2) });
+    var game = new GameSession(level);
+    while (game.Move(1, 0)) { }
+    game.HardDrop();
+    game.SetPaused(true);
+    game.Advance(10);
+    Check(game.Phase == GamePhase.Clearing && game.Score == 300);
+    game.SetPaused(false);
+    for (var step = 0; step < 500 && !game.IsFinished; step++) game.Advance(0.05);
+    Check(game.Phase == GamePhase.Won && game.Score == 900 && game.BestChain == 2);
+  }),
+  ("A blocked puzzle spawn fails and finite previews preserve sequence order", () =>
+  {
+    var level = new PuzzleLevel(99, "", "", PuzzleGoal.ClearBlocks, 3,
+      new[] { Piece.Create(-1, Shape.O, 1, 4, 0) },
+      new[] { Piece.Create(1, Shape.O, 0), Piece.Create(2, Shape.T, 1), Piece.Create(3, Shape.I, 2) });
+    var game = new GameSession(level);
+    Check(game.Phase == GamePhase.Over && game.Next.Select(piece => piece.Shape).SequenceEqual(new[] { Shape.T, Shape.I }));
+  }),
   ("Whole blocks are counted, not their four cells", () =>
   {
     var board = BoardOf(Piece.Create(1, Shape.O, 0, 0, 16), Piece.Create(2, Shape.O, 0, 2, 16));

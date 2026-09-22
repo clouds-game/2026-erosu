@@ -81,3 +81,11 @@ export async function initializeLanguage(): Promise<void> {
   const prefix = loadLanguage().replaceAll('_', '-').split('-')[0].toLowerCase();
   await setLanguage(prefix === 'zh' || prefix === 'cn' ? 'zh-CN' : prefix === 'ja' ? 'ja' : 'en');
 }
+
+export function loadCompleted(): number {
+  try { return Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_completed')) || 0)) & 7; }
+  catch { return 0; }
+}
+export function saveCompleted(completed: number): void {
+  try { localStorage.setItem('chroma_completed', String(completed)); } catch { /* Saving is optional. */ }
+}

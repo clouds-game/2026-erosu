@@ -11,6 +11,8 @@ public partial class GameController : Control
   private GameHud _hud = null!;
   private GameAudio _audio = null!;
   private readonly UiText _texts = new();
+  private int _selectedLevel = 1;
+  private int _completedLevels;
   private int _best;
   private double _noticeTimer;
   private int _heldDirection;
@@ -31,6 +33,7 @@ public partial class GameController : Control
     if (save.Load(SavePath) == Error.Ok)
     {
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
+      _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & 7;
       _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
       _audio.Enabled = save.GetValue("settings", "sound_enabled", false).AsBool();
     }
@@ -44,9 +47,10 @@ public partial class GameController : Control
       ApplyLanguageFont();
       SaveProgress();
     };
-    _hud.PauseRequested += TogglePause;
+    _hud.LevelRequested += number => { _selectedLevel = number; Start(); };
+    _hud.PauseRequested += () => { if (_game.IsFinished) Confirm(); else TogglePause(); };
     _hud.RestartRequested += () => Start();
-    _hud.DemoRequested += () => Start(true);
+    _hud.DemoRequested += ShowHintOrDemo;
     _hud.SoundRequested += ToggleSound;
     Start(OS.GetCmdlineUserArgs().Contains("--demo"));
   }
@@ -82,7 +86,12 @@ public partial class GameController : Control
       _noticeTimer -= delta;
       if (_noticeTimer <= 0) _board.NoticeKey = "";
     }
-    _hud.Refresh(_game, _best, _audio.Enabled);
+    if (_game.Phase == GamePhase.Won && (_completedLevels & (1 << (_selectedLevel - 1))) == 0)
+    {
+      _completedLevels |= 1 << (_selectedLevel - 1);
+      SaveProgress();
+    }
+    _hud.Refresh(_game, _best, _audio.Enabled, _selectedLevel, _completedLevels);
     _board.QueueRedraw();
   }
 
@@ -91,12 +100,11 @@ public partial class GameController : Control
     if (input is not InputEventKey { Pressed: true, Echo: false }) return;
     if (input.IsActionPressed("pause")) TogglePause();
     else if (input.IsActionPressed("restart")) Start();
-    else if (input.IsActionPressed("demo")) Start(true);
+    else if (input.IsActionPressed("demo")) ShowHintOrDemo();
     else if (input.IsActionPressed("sound")) ToggleSound();
     else if (input.IsActionPressed("confirm"))
     {
-      if (_game.Phase == GamePhase.Over) Start();
-      else if (_game.Paused) TogglePause();
+      Confirm();
     }
     else if (input.IsActionPressed("rotate"))
     {
@@ -118,7 +126,8 @@ public partial class GameController : Control
 
   private void Start(bool demo = false)
   {
-    _game = demo ? GameSession.CreateDemo() : new GameSession();
+    if (demo) _selectedLevel = 0;
+    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
     _board.Session = _game;
     ResetRepeat();
     _game.PieceLocked += () => _audio.Tone(160, 0.08f);
@@ -126,11 +135,33 @@ public partial class GameController : Control
     {
       ShowNotice("match", wave.Pieces.Count, wave.Points, wave.Chain);
       _audio.Tone(360 + wave.Chain * 140, 0.25f);
-      if (_game.Score <= _best) return;
+      if (_game.Puzzle is not null || _game.Score <= _best) return;
       _best = _game.Score;
       SaveProgress();
     };
-    ShowNotice(demo ? "demo_hint" : "intro");
+    ShowNotice(_game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro");
+  }
+
+  private void Confirm()
+  {
+    if (_game.Phase == GamePhase.Won)
+    {
+      _completedLevels |= 1 << (_selectedLevel - 1);
+      SaveProgress();
+      _selectedLevel = _selectedLevel % PuzzleLevels.All.Count + 1;
+      Start();
+    }
+    else if (_game.Phase == GamePhase.Over) Start();
+    else if (_game.Paused) TogglePause();
+  }
+
+  private void ShowHintOrDemo()
+  {
+    if (_game.Puzzle is null) { Start(true); return; }
+    _game.SetPaused(false);
+    ResetRepeat();
+    ShowNotice(_game.Puzzle.HintKey);
+    _noticeTimer = 12;
   }
 
   private void ApplyLanguageFont()
@@ -171,6 +202,7 @@ public partial class GameController : Control
     var save = new ConfigFile();
     save.SetValue("settings", "language", _texts.Language);
     save.SetValue("progress", "best_score", _best);
+    save.SetValue("progress", "completed_levels", _completedLevels);
     save.SetValue("settings", "sound_enabled", _audio.Enabled);
     var result = save.Save(SavePath);
     if (result != Error.Ok) GD.PushWarning($"Could not save local progress: {result}");

@@ -23,11 +23,11 @@
           </g>
         }
       </svg>
-      @if (game.Paused || game.Phase == GamePhase.Over)
+      @if (game.Paused || game.IsFinished)
       {
         <div class="overlay">
-          <strong>@T(game.Paused ? "paused" : "game_over")</strong>
-          <button @onclick="Confirm">@T(game.Paused ? "resume" : "play_again")</button>
+          <strong>@T(game.Paused ? "paused" : game.Phase == GamePhase.Won ? (selected_level == PuzzleLevels.All.Count ? "chapter_done" : "puzzle_won") : game.Puzzle is not null ? "puzzle_failed" : "game_over")</strong>
+          <button @onclick="Confirm">@T(game.Paused ? "resume" : game.Phase == GamePhase.Won ? (selected_level == PuzzleLevels.All.Count ? "chapter_replay" : "next_level") : "play_again")</button>
           <small>@(game.Paused ? T("resume_hint") : T("score_value", UiText.Number(game.Score)))</small>
         </div>
       }
@@ -35,22 +35,38 @@
     </section>
     <aside>
       <div class="overview">
-        <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
-        <span class="muted">@T("best", UiText.Number(best))</span>
-        <span class="next-label muted">@T("next")</span>
-        <div class="previews">
-          @foreach (var piece in game.Next)
+        <select class="mode" aria-label="@T("mode")" value="@selected_level" @onchange="SelectLevel" @onfocus="PauseForFocus">
+          <option value="0">@T("free_play")</option>
+          @foreach (var level in PuzzleLevels.All)
           {
-            <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+            <option value="@level.Number">@T("puzzle_label", level.Number, T(level.TitleKey))@(IsCompleted(level.Number) ? " *" : "")</option>
           }
-        </div>
-        <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
+        </select>
+        <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
+        @if (game.Puzzle is { } puzzle)
+        {
+          <p class="puzzle-goal">@T(puzzle.GoalKey, puzzle.Target)</p>
+          <dl><dt>@T("remaining")</dt><dd>@game.Remaining</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd></dl>
+          @if (IsCompleted(puzzle.Number)) { <span class="muted">@T("completed")</span> }
+        }
+        else
+        {
+          <span class="muted">@T("best", UiText.Number(best))</span>
+          <span class="next-label muted">@T("next")</span>
+          <div class="previews">
+            @foreach (var piece in game.Next)
+            {
+              <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+            }
+          </div>
+          <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
+        }
       </div>
       <div class="actions">
         <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
-        <button @onclick="TogglePause" disabled="@(game.Phase == GamePhase.Over)">@T(game.Paused ? "resume" : "pause") [P]</button>
+        <button @onclick="TogglePause" disabled="@game.IsFinished">@T(game.Paused ? "resume" : "pause") [P]</button>
         <button @onclick="() => Start()">@T("restart") [R]</button>
-        <button @onclick="() => Start(true)">@T("demo") [F2]</button>
+        <button @onclick="ShowHintOrDemo" disabled="@(game.Puzzle is not null && game.IsFinished)">@T(game.Puzzle is null ? "demo" : "hint") [F2]</button>
         <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
         <label class="language"><span>@T("language")</span>
           <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
@@ -80,6 +96,8 @@
   private readonly CancellationTokenSource cancellation = new();
   private readonly HashSet<string> held = [];
   private Task? loop;
+  private int selected_level = 1;
+  private int completed_levels;
   private bool ready;
   private int best;
   private bool sound_enabled;
@@ -97,10 +115,11 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js");
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=puzzles-2");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
     best = await interop.InvokeAsync<int>("loadBest");
+    completed_levels = await interop.InvokeAsync<int>("loadCompleted");
     callback = DotNetObjectReference.Create(this);
     await interop.InvokeVoidAsync("connect", callback);
     ready = true;
@@ -150,7 +169,12 @@
         held_direction = game.AcceptsInput ? direction : 0;
         game.Advance(delta, held.Contains("ArrowDown") || held.Contains("KeyS"));
         if (!game.Paused && (notice_time -= delta) <= 0) notice_key = "";
-        if (game.Score > best)
+        if (game.Phase == GamePhase.Won && !IsCompleted(selected_level))
+        {
+          completed_levels |= 1 << (selected_level - 1);
+          if (interop is not null) await interop.InvokeVoidAsync("saveCompleted", completed_levels);
+        }
+        if (game.Puzzle is null && game.Score > best)
         {
           best = game.Score;
           if (interop is not null) await interop.InvokeVoidAsync("saveBest", best);
@@ -163,10 +187,11 @@
 
   private void Start(bool demo = false)
   {
-    game = demo ? GameSession.CreateDemo() : new GameSession();
+    if (demo) selected_level = 0;
+    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[selected_level - 1]);
     held.Clear();
     held_direction = 0;
-    notice_key = demo ? "demo_hint" : "intro";
+    notice_key = game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";
     notice_arguments = [];
     notice_time = 3;
     game.Matched += wave =>
@@ -190,7 +215,7 @@
       case "Space": game.HardDrop(); break;
       case "KeyP": case "Escape": TogglePause(); break;
       case "KeyR": Start(); break;
-      case "F2": Start(true); break;
+      case "F2": ShowHintOrDemo(); break;
       case "KeyM": ToggleSound(); break;
       case "Enter": Confirm(); break;
     }
@@ -201,8 +226,31 @@
   private void TogglePause() { game.SetPaused(!game.Paused); held.Clear(); }
   private void Confirm()
   {
-    if (game.Phase == GamePhase.Over) Start();
+    if (game.Phase == GamePhase.Won)
+    {
+      completed_levels |= 1 << (selected_level - 1);
+      if (interop is not null) _ = interop.InvokeVoidAsync("saveCompleted", completed_levels);
+      selected_level = selected_level % PuzzleLevels.All.Count + 1;
+      Start();
+    }
+    else if (game.Phase == GamePhase.Over) Start();
     else if (game.Paused) TogglePause();
+  }
+  private bool IsCompleted(int number) => number > 0 && (completed_levels & (1 << (number - 1))) != 0;
+  private void SelectLevel(ChangeEventArgs args)
+  {
+    if (!int.TryParse(args.Value?.ToString(), out var number) || number < 0 || number > PuzzleLevels.All.Count) return;
+    selected_level = number;
+    Start();
+  }
+  private void ShowHintOrDemo()
+  {
+    if (game.Puzzle is null) { Start(true); return; }
+    game.SetPaused(false);
+    held.Clear();
+    notice_key = game.Puzzle.HintKey;
+    notice_arguments = [];
+    notice_time = 12;
   }
   private void ToggleSound() { sound_enabled = !sound_enabled; PlayTone(500, 0.1); }
   private void PlayTone(int frequency, double duration)

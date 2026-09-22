@@ -14,7 +14,9 @@ public partial class NextView : Control
       var piece = Pieces[i];
       var width = piece.Cells.Max(cell => cell.X) + 1;
       var height = piece.Cells.Max(cell => cell.Y) + 1;
-      PiecePainter.Draw(this, piece, new Vector2((Size.X - width * 28) / 2, i * 64 + (2 - height) * 14), 28);
+      var rowHeight = Size.Y / 3;
+      var cellSize = Math.Min(28, (rowHeight - 6) / 2);
+      PiecePainter.Draw(this, piece, new Vector2((Size.X - width * cellSize) / 2, i * rowHeight + (2 - height) * cellSize / 2), cellSize);
     }
   }
 }

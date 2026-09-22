@@ -34,17 +34,20 @@ public partial class BoardView : Control
       foreach (var piece in game.Wave.Pieces) PiecePainter.Draw(this, piece, Vector2.Zero, CellSize, flash: flash);
     }
     DrawRect(new Rect2(Vector2.Zero, Size), new Color("394452"), false, 1);
-    if (game.Paused || game.Phase == GamePhase.Over)
+    if (game.Paused || game.IsFinished)
     {
       DrawRect(new Rect2(Vector2.Zero, Size), new Color(0.04f, 0.05f, 0.07f, 0.85f));
-      CenterText(Texts.Get(game.Paused ? "paused" : "game_over"), Size.Y / 2 - 20, 30, PiecePainter.Text);
+      CenterText(Texts.Get(game.Paused ? "paused" : game.Phase == GamePhase.Won ? (game.Puzzle!.Number == PuzzleLevels.All.Count ? "chapter_done" : "puzzle_won") : game.Puzzle is not null ? "puzzle_failed" : "game_over"), Size.Y / 2 - 20, 30, PiecePainter.Text);
       CenterText(game.Paused ? Texts.Get("resume_hint") : Texts.Get("score_value", UiText.Number(game.Score)), Size.Y / 2 + 20, 17, PiecePainter.Muted);
-      if (!game.Paused) CenterText(Texts.Get("restart_hint"), Size.Y / 2 + 55, 17, PiecePainter.Muted);
+      if (!game.Paused) CenterText(Texts.Get(game.Phase == GamePhase.Won ? "continue_hint" : "restart_hint"), Size.Y / 2 + 55, 17, PiecePainter.Muted);
     }
     else if (Notice.Length > 0)
     {
-      DrawRect(new Rect2(12, 120, Size.X - 24, 44), new Color(0.06f, 0.08f, 0.1f, 0.93f));
-      CenterText(Notice, 148, 16, PiecePainter.Text);
+      var font = GetThemeDefaultFont();
+      var textHeight = font.GetMultilineStringSize(Notice, width: Size.X - 48, fontSize: 16).Y;
+      DrawRect(new Rect2(12, 120, Size.X - 24, textHeight + 20), new Color(0.06f, 0.08f, 0.1f, 0.93f));
+      DrawMultilineString(font, new Vector2(24, 130), Notice, alignment: HorizontalAlignment.Center,
+        width: Size.X - 48, fontSize: 16, modulate: PiecePainter.Text);
     }
   }
 

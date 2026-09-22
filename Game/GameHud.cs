@@ -7,6 +7,9 @@ namespace ChromaDrop.Game;
 public partial class GameHud : Control
 {
   public UiText Texts { get; set; } = new();
+  private OptionButton _mode = null!;
+  private Label _goal = null!;
+  public event Action<int>? LevelRequested;
   private Label _scoreTitle = null!;
   private Label _nextTitle = null!;
   private Label _keys = null!;
@@ -27,11 +30,20 @@ public partial class GameHud : Control
 
   public override void _Ready()
   {
-    _scoreTitle = AddText("", 0, 14, PiecePainter.Muted);
-    _score = AddText("0", 23, 36, PiecePainter.Text);
-    _best = AddText("", 72, 14, PiecePainter.Muted);
-    _nextTitle = AddText("", 108, 14, PiecePainter.Muted);
-    _next = new NextView { Position = new Vector2(0, 140), Size = new Vector2(228, 184), MouseFilter = MouseFilterEnum.Ignore };
+    _mode = new OptionButton { Position = Vector2.Zero, Size = new Vector2(228, 32) };
+    _mode.AddItem("");
+    foreach (var level in PuzzleLevels.All) _mode.AddItem("");
+    _mode.ItemSelected += index => LevelRequested?.Invoke((int)index);
+    _mode.FocusMode = FocusModeEnum.None;
+    AddChild(_mode);
+    _goal = AddText("", 190, 15, PiecePainter.Text);
+    _goal.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+    _goal.Size = new Vector2(228, 130);
+    _scoreTitle = AddText("", 44, 14, PiecePainter.Muted);
+    _score = AddText("0", 67, 36, PiecePainter.Text);
+    _best = AddText("", 116, 14, PiecePainter.Muted);
+    _nextTitle = AddText("", 158, 14, PiecePainter.Muted);
+    _next = new NextView { Position = new Vector2(0, 190), Size = new Vector2(228, 135), MouseFilter = MouseFilterEnum.Ignore };
     AddChild(_next);
     _stats = AddText("", 342, 14, PiecePainter.Muted);
     _stats.AddThemeConstantOverride("line_spacing", 4);
@@ -44,18 +56,31 @@ public partial class GameHud : Control
     _language = AddButton("", 714, () => LanguageRequested?.Invoke());
   }
 
-  public void Refresh(GameSession game, int best, bool soundEnabled)
+  public void Refresh(GameSession game, int best, bool soundEnabled, int selectedLevel, int completedLevels)
   {
+    _mode.SetItemText(0, Texts.Get("free_play"));
+    foreach (var level in PuzzleLevels.All)
+      _mode.SetItemText(level.Number, $"{level.Number}. {Texts.Get(level.TitleKey)}" + ((completedLevels & (1 << (level.Number - 1))) != 0 ? " *" : ""));
+    _mode.Select(selectedLevel);
+    _mode.TooltipText = Texts.Get("mode");
+    _next.Visible = game.Puzzle is null;
+    _goal.Visible = game.Puzzle is not null;
+    _goal.Text = game.Puzzle is { } puzzle ? Texts.Get(puzzle.GoalKey, puzzle.Target) + "\n\n" + Texts.Get("remaining") + $"  {game.Remaining}" : "";
     _scoreTitle.Text = Texts.Get("score");
-    _nextTitle.Text = Texts.Get("next");
+    _nextTitle.Text = game.Puzzle is null ? Texts.Get("next") : "";
     _score.Text = UiText.Number(game.Score);
-    _best.Text = Texts.Get("best", UiText.Number(best));
+    _best.Text = game.Puzzle is null ? Texts.Get("best", UiText.Number(best)) : Texts.Get("puzzle_intro");
+    _best.AutowrapMode = TextServer.AutowrapMode.WordSmart;
+    _best.AddThemeFontSizeOverride("font_size", game.Puzzle is null ? 14 : 11);
     _stats.Text = $"{Texts.Get("level")}  {game.Level}\n{Texts.Get("cleared")}  {game.Cleared}\n{Texts.Get("chain")}  ×{game.BestChain}";
+    if (game.Puzzle is not null) _stats.Text = $"{Texts.Get("cleared")}  {game.Cleared}";
     _keys.Text = $"← →  {Texts.Get("move")}\n↑  {Texts.Get("rotate")}\n↓  {Texts.Get("soft_drop")}\nSpace  {Texts.Get("drop")}";
     _pause.Text = Texts.Get(game.Paused ? "resume" : "pause") + "  [P]";
-    _pause.Disabled = game.Phase == GamePhase.Over;
+    if (game.Phase == GamePhase.Won) _pause.Text = Texts.Get(selectedLevel == PuzzleLevels.All.Count ? "chapter_replay" : "next_level") + " [Enter]";
+    else if (game.Phase == GamePhase.Over) _pause.Text = Texts.Get("play_again") + " [Enter]";
     _restart.Text = Texts.Get("restart") + "  [R]";
-    _demo.Text = Texts.Get("demo") + "  [F2]";
+    _demo.Disabled = game.Puzzle is not null && game.IsFinished;
+    _demo.Text = Texts.Get(game.Puzzle is null ? "demo" : "hint") + "  [F2]";
     _sound.Text = Texts.Get(soundEnabled ? "sound_on" : "sound_off") + "  [M]";
     _language.Text = UiText.LanguageNames[Array.IndexOf(UiText.Languages, Texts.Language)] + "  >";
     _language.TooltipText = Texts.Get("language");

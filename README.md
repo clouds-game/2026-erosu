@@ -1,0 +1,62 @@
+# 色块连落（暂定名）
+
+Godot + C# 原生下落益智游戏。进入游戏后直接显示棋盘，不设网页式标题、品牌栏、宣传文案或装饰面板。
+
+**一个方块就是一个完整的四连方形状。每块只有一种颜色；三个及以上同色方块通过边接触连成一组时，整组消除。消除后其他形状保持完整地下落，并可能触发连锁。**
+
+## 环境与启动
+
+当前使用 **Godot .NET 4.7.2 + .NET SDK 8**。必须使用支持 C# 的 Godot .NET 版本，普通 Godot 版本无法运行此项目。
+
+1. 在 Godot .NET 中导入根目录的 `project.godot`。
+2. 构建 C# 项目，按 F5 运行主场景。
+3. 进入游戏即开始；F2 可切换到固定匹配示例。
+
+本机命令：
+
+```sh
+dotnet build ChromaDrop.csproj
+/Applications/Godot_mono.app/Contents/MacOS/Godot --path .
+```
+
+直接载入示例：
+
+```sh
+/Applications/Godot_mono.app/Contents/MacOS/Godot --path . -- --demo
+```
+
+独立运行规则测试，不需要启动 Godot，也没有第三方测试包依赖：
+
+```sh
+dotnet run --project Tests/ChromaDrop.Tests.csproj
+```
+
+## 操作
+
+| 按键 | 功能 |
+| --- | --- |
+| ← / → 或 A / D | 左右移动；支持长按连续移动 |
+| ↑ 或 W | 顺时针旋转 |
+| ↓ 或 S | 加速下落 |
+| Space | 直接落地 |
+| P / Esc | 暂停或恢复 |
+| R | 重新开始 |
+| F2 | 匹配示例；再按 Space 消除三块，获得 300 分 |
+| M | 开关音效 |
+| Enter | 暂停时恢复，结束时重开 |
+
+失去窗口焦点时自动暂停。最高分和声音设置保存在 Godot 的 `user://progress.cfg`。
+
+## 结构
+
+- `Core/`：纯 C# 规则、方块生成、结算状态机，与 Godot 解耦。
+- `Game/`：Godot 输入、棋盘绘制、必要 HUD、音效和本地保存。
+- `Scenes/Game.tscn`：主场景，棋盘与 HUD 可以分别修改。
+- `Assets/`：项目资源；当前几何图形由 Godot 绘制。
+- `Tests/`：规则与状态机测试，失败时返回非零退出码。
+- `docs/`：中文玩法、美术、开发与验证文档。
+- `archive/web-prototype/`：保留早期网页实验，仅供对照，不属于当前 Godot 构建。
+
+[玩法设计](docs/玩法设计.md) · [美术与资源](docs/美术与资源.md) · [开发与试玩](docs/开发与试玩.md) · [验证记录](docs/验证记录.md)
+
+讨论使用英文，项目文档使用中文。当前界面使用简短英文标签，仍处于玩法验证阶段。

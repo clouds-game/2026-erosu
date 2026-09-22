@@ -34,30 +34,34 @@
       else if (notice_key.Length > 0) { <div class="notice" role="status">@T(notice_key, notice_arguments)</div> }
     </section>
     <aside>
-      <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
-      <span class="muted">@T("best", UiText.Number(best))</span>
-      <span class="next-label muted">@T("next")</span>
-      <div class="previews">
-        @foreach (var piece in game.Next)
-        {
-          <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
-        }
-      </div>
-      <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
-      <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
-      <button @onclick="TogglePause" disabled="@(game.Phase == GamePhase.Over)">@T(game.Paused ? "resume" : "pause") [P]</button>
-      <button @onclick="() => Start()">@T("restart") [R]</button>
-      <button @onclick="() => Start(true)">@T("demo") [F2]</button>
-      <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
-      <label class="language"><span>@T("language")</span>
-        <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
-          @for (var i = 0; i < UiText.Languages.Length; i++)
+      <div class="overview">
+        <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
+        <span class="muted">@T("best", UiText.Number(best))</span>
+        <span class="next-label muted">@T("next")</span>
+        <div class="previews">
+          @foreach (var piece in game.Next)
           {
-            <option value="@UiText.Languages[i]">@UiText.LanguageNames[i]</option>
+            <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
           }
-        </select>
-      </label>
-      <a class="downloads" href="https://github.com/clouds-game/2026-erosu/releases/tag/nightly">@T("downloads")</a>
+        </div>
+        <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
+      </div>
+      <div class="actions">
+        <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
+        <button @onclick="TogglePause" disabled="@(game.Phase == GamePhase.Over)">@T(game.Paused ? "resume" : "pause") [P]</button>
+        <button @onclick="() => Start()">@T("restart") [R]</button>
+        <button @onclick="() => Start(true)">@T("demo") [F2]</button>
+        <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
+        <label class="language"><span>@T("language")</span>
+          <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
+            @for (var i = 0; i < UiText.Languages.Length; i++)
+            {
+              <option value="@UiText.Languages[i]">@UiText.LanguageNames[i]</option>
+            }
+          </select>
+        </label>
+        <a class="downloads" href="https://github.com/clouds-game/2026-erosu/releases/tag/nightly">@T("downloads")</a>
+      </div>
     </aside>
     <nav class="touch" aria-label="@T("controls")">
       <button aria-label="@T("left")" @onclick="() => game.Move(-1, 0)">←</button>

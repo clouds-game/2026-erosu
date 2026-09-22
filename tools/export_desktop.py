@@ -5,6 +5,7 @@ import hashlib
 import os
 from pathlib import Path
 import platform
+import plistlib
 import shutil
 import subprocess
 import zipfile
@@ -38,9 +39,16 @@ def main():
     raise RuntimeError("The export is missing its executable or C# assembly.")
   if args.target == "macos":
     run("codesign", "--verify", "--deep", "--strict", str(output))
-    run(str(output / "Contents/MacOS/ChromaDrop"), "--headless", "--quit-after", "120")
+    with (output / "Contents/Info.plist").open("rb") as source:
+      executable = output / "Contents/MacOS" / plistlib.load(source)["CFBundleExecutable"]
   else:
-    run(str(output), "--headless", "--quit-after", "120")
+    executable = output
+  smoke = subprocess.run([str(executable), "--headless", "--quit-after", "120"], cwd=ROOT,
+    check=True, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=90)
+  log = smoke.stdout + smoke.stderr
+  print(log)
+  if "ERROR:" in log or "SCRIPT ERROR:" in log:
+    raise RuntimeError("The exported game reported runtime errors during its startup check.")
 
   packages = ROOT / "build" / "packages"
   packages.mkdir(parents=True, exist_ok=True)

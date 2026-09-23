@@ -18,6 +18,7 @@ public partial class GameHud : HBoxContainer
   private Label _feedback = null!;
   private Label _speed = null!;
   private Button _levels = null!;
+  private PanelContainer _instructionPanel = null!;
   private VBoxContainer _progress = null!;
   private readonly TextureRect[] _progressTiles = new TextureRect[6];
   private PanelContainer _nextPanel = null!;
@@ -27,7 +28,7 @@ public partial class GameHud : HBoxContainer
   public override void _Ready()
   {
     GetNode<PanelContainer>("BoardFrame").AddThemeStyleboxOverride("panel",
-      PixelUi.Style("res://Assets/PixelUI/Ancient/brown.png", 8, 12));
+      PixelUi.Style("res://Assets/PixelUI/Ancient/tan.png", 8, 12));
     var left = GetNode<VBoxContainer>("Left");
     var right = GetNode<VBoxContainer>("Right");
     left.AddThemeConstantOverride("separation", 12);
@@ -43,7 +44,7 @@ public partial class GameHud : HBoxContainer
     {
       var center = new CenterContainer { MouseFilter = MouseFilterEnum.Ignore };
       _progress.AddChild(center);
-      _progressTiles[i] = PixelUi.Tile(PiecePainter.Colors[0], new Vector2(44, 44));
+      _progressTiles[i] = PixelUi.Tile(0, new Vector2(44, 44));
       center.AddChild(_progressTiles[i]);
     }
     Spacer(left);
@@ -60,16 +61,23 @@ public partial class GameHud : HBoxContainer
     pause.AddThemeFontSizeOverride("font_size", 28);
     pause.Pressed += () => PauseRequested?.Invoke();
     Spacer(right);
-    _instruction = AddLabel(right, "", 25, PixelUi.Cream, true);
+    _instructionPanel = new PanelContainer { SelfModulate = PixelUi.PanelBlue };
+    _instructionPanel.AddThemeStyleboxOverride("panel",
+      PixelUi.Style("res://Assets/PixelUI/Ancient/white.png", 12, 12));
+    right.AddChild(_instructionPanel);
+    var instructionBody = new VBoxContainer();
+    instructionBody.AddThemeConstantOverride("separation", 10);
+    _instructionPanel.AddChild(instructionBody);
+    _instruction = AddLabel(instructionBody, "", 25, PixelUi.Cream, true);
     _instruction.HorizontalAlignment = HorizontalAlignment.Center;
-    _key = AddLabel(right, "SPACE", 20, PixelUi.Gold);
+    _key = AddLabel(instructionBody, "SPACE", 20, PixelUi.Gold);
     _key.HorizontalAlignment = HorizontalAlignment.Center;
     _feedback = AddLabel(right, "", 27, PixelUi.Gold, true);
     _feedback.HorizontalAlignment = HorizontalAlignment.Center;
     Spacer(right);
-    _nextPanel = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter };
+    _nextPanel = new PanelContainer { SizeFlagsHorizontal = SizeFlags.ShrinkCenter, SelfModulate = PixelUi.PanelBlue };
     _nextPanel.AddThemeStyleboxOverride("panel",
-      PixelUi.Style("res://Assets/PixelUI/Ancient/brown.png", 8, 12));
+      PixelUi.Style("res://Assets/PixelUI/Ancient/white.png", 8, 12));
     right.AddChild(_nextPanel);
     _next = new NextView { CustomMinimumSize = new Vector2(104, 270), MouseFilter = MouseFilterEnum.Ignore };
     _nextPanel.AddChild(_next);
@@ -97,11 +105,11 @@ public partial class GameHud : HBoxContainer
       {
         var icon = _progressTiles[i];
         icon.GetParent<Control>().Visible = i < total;
-        icon.Modulate = tutorial ? new Color(PiecePainter.Colors[0], i < remaining ? 1 : 0.25f)
-          : new Color(PixelUi.Gold, i < remaining ? 1 : 0.24f);
+        icon.Modulate = new Color(1, 1, 1, i < remaining ? 1 : 0.25f);
       }
     }
     _instruction.Visible = tutorial && !game.IsFinished && _feedbackText.Length == 0;
+    _instructionPanel.Visible = _instruction.Visible;
     _key.Visible = _instruction.Visible;
     _instruction.Text = _instruction.Visible ? Texts.Get(puzzle!.Number switch
     {

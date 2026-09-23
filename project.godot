@@ -35,4 +35,4 @@ renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
-environment/defaults/default_clear_color=Color(0.063, 0.075, 0.098, 1)
+environment/defaults/default_clear_color=Color(0.30588236, 0.48235294, 0.69803923, 1)

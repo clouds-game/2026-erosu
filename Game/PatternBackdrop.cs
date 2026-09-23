@@ -8,12 +8,12 @@ public partial class PatternBackdrop : Control
 
   public override void _Draw()
   {
-    DrawRect(new Rect2(Vector2.Zero, Size), new Color("121711"));
+    DrawRect(new Rect2(Vector2.Zero, Size), PixelUi.Blue);
     const float tileSize = 64;
     for (var y = 0f; y < Size.Y; y += tileSize)
       for (var x = 0f; x < Size.X; x += tileSize)
         DrawTextureRect(_pattern, new Rect2(x, y, tileSize, tileSize), false,
-          new Color(0.20f, 0.26f, 0.19f, 0.10f));
+          new Color(0.18f, 0.34f, 0.59f, 0.05f));
   }
 
   public override void _Notification(int what)

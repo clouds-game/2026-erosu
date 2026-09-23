@@ -20,7 +20,7 @@ public partial class GameOverlay : Control
 
   public override void _Ready()
   {
-    var shade = new ColorRect { Color = new Color(0.03f, 0.05f, 0.035f, 0.84f), MouseFilter = MouseFilterEnum.Stop };
+    var shade = new ColorRect { Color = new Color(0.04f, 0.10f, 0.20f, 0.78f), MouseFilter = MouseFilterEnum.Stop };
     shade.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
     AddChild(shade);
     var center = new CenterContainer { MouseFilter = MouseFilterEnum.Stop };
@@ -30,7 +30,8 @@ public partial class GameOverlay : Control
     {
       CustomMinimumSize = new Vector2(Kind == 0 ? 740 : 500, 0),
       SizeFlagsHorizontal = SizeFlags.ShrinkCenter,
-      SizeFlagsVertical = SizeFlags.ShrinkCenter
+      SizeFlagsVertical = SizeFlags.ShrinkCenter,
+      SelfModulate = PixelUi.PanelBlue
     };
     center.AddChild(panel);
     _body = new VBoxContainer();
@@ -151,7 +152,11 @@ public partial class GameOverlay : Control
       FocusMode = FocusModeEnum.All,
       Alignment = HorizontalAlignment.Center
     };
-    if (primary) button.ThemeTypeVariation = "PrimaryButton";
+    if (primary)
+    {
+      button.ThemeTypeVariation = "PrimaryButton";
+      button.SelfModulate = PixelUi.ActiveBlue;
+    }
     parent.AddChild(button);
     return button;
   }

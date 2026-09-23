@@ -2,8 +2,8 @@
 extends ProgrammaticTheme
 
 const UPDATE_ON_SAVE = true
-const INK = Color("2b211d")
-const CREAM = Color("fff0cb")
+const INK = Color("253044")
+const CREAM = Color("f6f1e4")
 
 func setup() -> void:
 	set_save_path("res://Themes/pixel_theme.tres")
@@ -26,7 +26,7 @@ func define_theme() -> void:
 		"disabled": tan, "focus": focus,
 		"font_color": INK, "font_hover_color": INK,
 		"font_pressed_color": INK, "font_focus_color": INK,
-		"font_disabled_color": Color("796b60")
+		"font_disabled_color": Color("6d7480")
 	})
 	define_variant_style("PrimaryButton", "Button", {
 		"normal": white, "hover": tan, "pressed": pressed,
@@ -35,7 +35,7 @@ func define_theme() -> void:
 	})
 	define_style("PanelContainer", {
 		"panel": stylebox_texture({
-			"texture": load("res://Assets/PixelUI/Ancient/brown.png"),
+			"texture": load("res://Assets/PixelUI/Ancient/white.png"),
 			"texture_margin_left": 14, "texture_margin_top": 14,
 			"texture_margin_right": 14, "texture_margin_bottom": 14,
 			"content_margin_left": 22, "content_margin_top": 22,

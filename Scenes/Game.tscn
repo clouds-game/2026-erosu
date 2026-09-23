@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://Game/GameController.cs" id="1"]
 [ext_resource type="Script" path="res://Game/BoardView.cs" id="2"]
 [ext_resource type="Script" path="res://Game/GameHud.cs" id="3"]
+[ext_resource type="PackedScene" path="res://Scenes/ModeSelect.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://Scenes/PauseMenu.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://Scenes/Result.tscn" id="6"]
+[ext_resource type="Script" path="res://Game/PatternBackdrop.cs" id="7"]
 
 [node name="Game" type="Control"]
 layout_mode = 3
@@ -13,19 +17,60 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1")
 
-[node name="Board" type="Control" parent="."]
-layout_mode = 0
-offset_left = 24.0
-offset_top = 24.0
-offset_right = 444.0
-offset_bottom = 780.0
+[node name="Background" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7")
+
+[node name="Shell" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Hud" type="HBoxContainer" parent="Shell"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+script = ExtResource("3")
+
+[node name="Left" type="VBoxContainer" parent="Shell/Hud"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BoardFrame" type="PanelContainer" parent="Shell/Hud"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Board" type="Control" parent="Shell/Hud/BoardFrame"]
+custom_minimum_size = Vector2(320, 576)
+layout_mode = 2
 mouse_filter = 2
 script = ExtResource("2")
 
-[node name="Hud" type="Control" parent="."]
-layout_mode = 0
-offset_left = 468.0
-offset_top = 24.0
-offset_right = 696.0
-offset_bottom = 780.0
-script = ExtResource("3")
+[node name="Right" type="VBoxContainer" parent="Shell/Hud"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ModeSelect" parent="." instance=ExtResource("4")]
+visible = false
+
+[node name="PauseMenu" parent="." instance=ExtResource("5")]
+visible = false
+
+[node name="Result" parent="." instance=ExtResource("6")]
+visible = false

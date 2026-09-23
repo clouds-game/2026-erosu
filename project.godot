@@ -1,29 +1,38 @@
-; 项目入口：使用 Godot .NET 版本打开。
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
+
 config/name="Chroma Drop"
 run/main_scene="res://Scenes/Game.tscn"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 config/icon="res://Assets/icon.svg"
 
 [display]
-window/size/viewport_width=720
-window/size/viewport_height=804
-window/size/window_width_override=720
-window/size/window_height_override=804
-window/size/min_width=540
-window/size/min_height=603
+
+window/size/viewport_width=1040
+window/size/viewport_height=800
+window/size/window_width_override=1040
+window/size/window_height_override=800
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
+window/size/min_width=780
+window/size/min_height=600
 
 [dotnet]
+
 project/assembly_name="ChromaDrop"
 
 [rendering]
+
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0.063, 0.075, 0.098, 1)
-textures/default_filters/use_nearest_mipmap_filter=false
 textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
+environment/defaults/default_clear_color=Color(0.063, 0.075, 0.098, 1)

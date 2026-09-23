@@ -28,7 +28,7 @@ public sealed class GameSession
   public int BestChain { get; private set; }
   public int Locked { get; private set; }
   public int Level => Math.Min(11, 1 + Locked / 15);
-  public double ClearProgress => Math.Clamp(_timer / 0.28, 0, 1);
+  public double ClearProgress => Math.Clamp(_timer / 0.42, 0, 1);
   public bool AcceptsInput => !Paused && Phase == GamePhase.Falling;
   public event Action<ClearWave>? Matched;
   public event Action? PieceLocked;
@@ -139,7 +139,7 @@ public sealed class GameSession
         else _lockTimer = 0;
         break;
       case GamePhase.Clearing:
-        if (_timer >= 0.28)
+        if (_timer >= 0.42)
         {
           Phase = GamePhase.Settling;
           _timer = 0;
@@ -147,7 +147,7 @@ public sealed class GameSession
         }
         break;
       case GamePhase.Settling:
-        if (_timer >= 0.04)
+        if (_timer >= 0.06)
         {
           _timer = 0;
           if (!Board.StepGravity()) CheckMatches();

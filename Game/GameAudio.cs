@@ -2,24 +2,41 @@ using Godot;
 
 namespace ChromaDrop.Game;
 
-public partial class GameAudio : AudioStreamPlayer
+public partial class GameAudio : Node
 {
-  public bool Enabled { get; set; }
+  private AudioStreamPlayer _lock = null!;
+  private AudioStreamPlayer _match = null!;
+  private AudioStreamPlayer _select = null!;
+  public bool Enabled { get; set; } = true;
 
-  public void Tone(float frequency, float duration = 0.1f)
+  public override void _Ready()
+  {
+    _lock = AddPlayer("res://Assets/Kenney/Audio/lock.ogg", -6);
+    _match = AddPlayer("res://Assets/Kenney/Audio/match.ogg", -2);
+    _select = AddPlayer("res://Assets/Kenney/Audio/select.ogg", -10);
+  }
+
+  public void Lock()
+  {
+    if (Enabled) _lock.Play();
+  }
+
+  public void Match(int chain)
   {
     if (!Enabled) return;
-    const int rate = 22050;
-    var count = (int)(rate * duration);
-    var data = new byte[count * 2];
-    for (var i = 0; i < count; i++)
-    {
-      var envelope = Math.Min(1, i / 110.0) * Math.Pow(1 - (double)i / count, 2);
-      var sample = (short)(Math.Sin(Math.Tau * frequency * i / rate) * envelope * 5000);
-      data[i * 2] = (byte)(sample & 0xff);
-      data[i * 2 + 1] = (byte)((sample >> 8) & 0xff);
-    }
-    Stream = new AudioStreamWav { Format = AudioStreamWav.FormatEnum.Format16Bits, MixRate = rate, Data = data };
-    Play();
+    _match.PitchScale = Math.Min(1.45f, 1 + (chain - 1) * 0.12f);
+    _match.Play();
+  }
+
+  public void Select()
+  {
+    if (Enabled) _select.Play();
+  }
+
+  private AudioStreamPlayer AddPlayer(string path, float volumeDb)
+  {
+    var player = new AudioStreamPlayer { Stream = GD.Load<AudioStream>(path), VolumeDb = volumeDb };
+    AddChild(player);
+    return player;
   }
 }

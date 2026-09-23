@@ -1,5 +1,9 @@
 {
   "en": {
+    "menu": "Options",
+    "current_piece": "YOUR PIECE",
+    "tutorial_rule": "Each shape counts as one block. Connect three by their edges.",
+    "challenge_rule": "Plan the full sequence. Cleared blocks can trigger a chain.",
     "score": "SCORE",
     "best": "Best {0}",
     "next": "NEXT",
@@ -75,9 +79,25 @@
     "challenge_intro": "Use the full sequence to clear every block. Plan before you drop.",
     "sequence": "Remaining sequence",
     "learn_label": "Learn {0}: {1}",
-    "challenge_label": "Challenge {0}: {1}"
+    "challenge_label": "Challenge {0}: {1}",
+    "objective": "OBJECTIVE",
+    "first_instruction": "Place the third beside its pair",
+    "lesson_instruction_2": "Connect by an edge",
+    "lesson_instruction_3": "Bridge the gap",
+    "choose_mode": "Choose mode",
+    "mode_intro": "Pick a level and start playing.",
+    "learn_mode_description": "One move at a time. No falling timer.",
+    "challenge_mode_description": "Plan the whole sequence.",
+    "free_mode_description": "Endless falling blocks",
+    "settings": "SETTINGS",
+    "controls_line_1": "← → / A D  Move     ↑ / W  Rotate",
+    "controls_line_2": "↓ / S  Faster     Space  Drop     Esc  Pause"
   },
   "zh-CN": {
+    "menu": "选项",
+    "current_piece": "当前方块",
+    "tutorial_rule": "每个完整形状算一块，三块同色边相连才会消除。",
+    "challenge_rule": "规划完整序列；消除后整块下落，可能触发连锁。",
     "score": "得分",
     "best": "最高 {0}",
     "next": "下一个",
@@ -153,9 +173,25 @@
     "challenge_intro": "用完整序列清空棋盘。落下前先规划。",
     "sequence": "后续顺序",
     "learn_label": "学习 {0}：{1}",
-    "challenge_label": "挑战 {0}：{1}"
+    "challenge_label": "挑战 {0}：{1}",
+    "objective": "目标",
+    "first_instruction": "第三块接到同色伙伴旁",
+    "lesson_instruction_2": "沿边连接同色块",
+    "lesson_instruction_3": "横块搭成一座桥",
+    "choose_mode": "选择模式",
+    "mode_intro": "选择关卡，开始游戏。",
+    "learn_mode_description": "逐步练习，没有下落计时。",
+    "challenge_mode_description": "规划完整序列。",
+    "free_mode_description": "持续下落的无尽模式",
+    "settings": "设置",
+    "controls_line_1": "← → / A D  移动     ↑ / W  旋转",
+    "controls_line_2": "↓ / S  加速     空格  落下     Esc  暂停"
   },
   "ja": {
+    "menu": "オプション",
+    "current_piece": "現在のブロック",
+    "tutorial_rule": "形１つを１ブロックと数え、同色の３つを辺でつなげます。",
+    "challenge_rule": "全ピースを計画。消去後の落下で連鎖が起こります。",
     "score": "スコア",
     "best": "ベスト {0}",
     "next": "次のブロック",
@@ -231,6 +267,18 @@
     "challenge_intro": "すべての手を使って全消し。落とす前に考えよう。",
     "sequence": "残りの順番",
     "learn_label": "練習 {0}：{1}",
-    "challenge_label": "挑戦 {0}：{1}"
+    "challenge_label": "挑戦 {0}：{1}",
+    "objective": "目標",
+    "first_instruction": "3個目を同色の仲間の隣へ",
+    "lesson_instruction_2": "辺を合わせてつなぐ",
+    "lesson_instruction_3": "横のブロックで橋を作る",
+    "choose_mode": "モードを選ぶ",
+    "mode_intro": "ステージを選んで始めよう。",
+    "learn_mode_description": "時間制限なしで一手ずつ。",
+    "challenge_mode_description": "すべての手を計画しよう。",
+    "free_mode_description": "落ち続けるエンドレスモード",
+    "settings": "設定",
+    "controls_line_1": "← → / A D  移動     ↑ / W  回転",
+    "controls_line_2": "↓ / S  加速     Space  落下     Esc  一時停止"
   }
 }

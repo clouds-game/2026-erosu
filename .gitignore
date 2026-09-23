@@ -8,4 +8,3 @@ dist/
 build/
 Web/wwwroot/interop.js
 __pycache__/
-AGENTS.md

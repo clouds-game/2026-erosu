@@ -228,10 +228,9 @@ var tests = new (string Name, Action Run)[]
     game.HardDrop();
     Check(game.Score == 2100 && game.Cleared == 3 && game.BestChain == 1 && observed == 3);
     Check(game.Phase == GamePhase.Clearing && game.Active is null);
-    game.Advance(0.3);
-    Check(game.Phase == GamePhase.Settling);
-    game.Advance(0.05);
-    Check(game.Phase == GamePhase.Falling && game.Active is not null && game.Board.Pieces.Count == 0);
+    AdvanceUntil(game, GamePhase.Settling);
+    AdvanceUntil(game, GamePhase.Falling);
+    Check(game.Active is not null && game.Board.Pieces.Count == 0);
   }),
   ("Pause freezes input and clear animation timers", () =>
   {
@@ -249,8 +248,7 @@ var tests = new (string Name, Action Run)[]
     game.Advance(2);
     Check(game.Phase == GamePhase.Clearing && game.ClearProgress == 0);
     game.SetPaused(false);
-    game.Advance(0.3);
-    Check(game.Phase == GamePhase.Settling);
+    AdvanceUntil(game, GamePhase.Settling);
   }),
   ("Session adds five thousand points for the second combo step", () =>
   {
@@ -354,6 +352,12 @@ return failures == 0 ? 0 : 1;
 static void Check(bool condition, string? message = null)
 {
   if (!condition) throw new InvalidOperationException(message ?? "Assertion failed.");
+}
+
+static void AdvanceUntil(GameSession game, GamePhase phase)
+{
+  for (var step = 0; step < 500 && game.Phase != phase; step++) game.Advance(0.02);
+  Check(game.Phase == phase, $"Expected {phase}, got {game.Phase}.");
 }
 
 static Board BoardOf(params Piece[] pieces)

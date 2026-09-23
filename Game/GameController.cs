@@ -9,9 +9,12 @@ public partial class GameController : Control
   private GameSession _game = null!;
   private BoardView _board = null!;
   private GameHud _hud = null!;
+  private GameOverlay _modes = null!;
+  private GameOverlay _pauseMenu = null!;
+  private GameOverlay _result = null!;
   private GameAudio _audio = null!;
   private readonly UiText _texts = new();
-  private int _selectedLevel = PuzzleLevels.DefaultLevel;
+  private int _selectedLevel = 1;
   private int _completedLevels;
   private int _best;
   private double _noticeTimer;
@@ -24,8 +27,12 @@ public partial class GameController : Control
   {
     ConfigureWindow();
     RegisterInput();
-    _board = GetNode<BoardView>("Board");
-    _hud = GetNode<GameHud>("Hud");
+    TextureFilter = CanvasItem.TextureFilterEnum.Nearest;
+    _board = GetNode<BoardView>("Shell/Hud/BoardFrame/Board");
+    _hud = GetNode<GameHud>("Shell/Hud");
+    _modes = GetNode<GameOverlay>("ModeSelect");
+    _pauseMenu = GetNode<GameOverlay>("PauseMenu");
+    _result = GetNode<GameOverlay>("Result");
     _audio = new GameAudio();
     AddChild(_audio);
     _texts.SetLanguage(OS.GetLocale());
@@ -35,24 +42,56 @@ public partial class GameController : Control
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
       _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & PuzzleLevels.ProgressMask;
       _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
-      _audio.Enabled = save.GetValue("settings", "sound_enabled", false).AsBool();
+      _audio.Enabled = save.GetValue("settings", "sound_enabled", true).AsBool();
     }
+    var captureLanguage = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture-lang="));
+    if (captureLanguage is not null) _texts.SetLanguage(captureLanguage["--capture-lang=".Length..]);
+    _selectedLevel = PuzzleLevels.All.Where(level => level.IsTutorial)
+      .FirstOrDefault(level => (_completedLevels & (1 << (level.Number - 1))) == 0)?.Number
+      ?? PuzzleLevels.DefaultLevel;
     ApplyLanguageFont();
     _hud.Texts = _texts;
-    _board.Texts = _texts;
-    _hud.LanguageRequested += () =>
+    foreach (var overlay in new[] { _modes, _pauseMenu, _result })
     {
-      var index = Array.IndexOf(UiText.Languages, _texts.Language);
-      _texts.SetLanguage(UiText.Languages[(index + 1) % UiText.Languages.Length]);
-      ApplyLanguageFont();
-      SaveProgress();
-    };
-    _hud.LevelRequested += number => { _selectedLevel = number; Start(); };
-    _hud.PauseRequested += () => { if (_game.IsFinished) Confirm(); else TogglePause(); };
-    _hud.RestartRequested += () => Start();
-    _hud.DemoRequested += ShowHintOrDemo;
-    _hud.SoundRequested += ToggleSound;
-    Start(OS.GetCmdlineUserArgs().Contains("--demo"));
+      overlay.Texts = _texts;
+      overlay.LevelRequested += number =>
+      {
+        if (number < 0) OpenModes();
+        else { _selectedLevel = number; Start(); }
+      };
+      overlay.CloseRequested += CloseOverlay;
+      overlay.RestartRequested += () => Start();
+      overlay.ContinueRequested += Confirm;
+      overlay.SoundRequested += ToggleSound;
+      overlay.LanguageRequested += ChangeLanguage;
+      overlay.HintRequested += ShowHintOrDemo;
+    }
+    _hud.LevelsRequested += OpenModes;
+    _hud.PauseRequested += TogglePause;
+    var args = OS.GetCmdlineUserArgs();
+    var levelArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-level="));
+    if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
+      && captureLevel >= 0 && captureLevel <= PuzzleLevels.All.Count) _selectedLevel = captureLevel;
+    Start(args.Contains("--demo"));
+    if (args.Contains("--capture-modes")) OpenModes();
+    if (args.Contains("--capture-pause")) OpenPause();
+    if (args.Contains("--capture-result"))
+    {
+      _game.HardDrop();
+      for (var i = 0; i < 120 && !_game.IsFinished; i++) _game.Advance(0.05);
+      if (_game.IsFinished) OpenResult();
+    }
+    var captureArg = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture="));
+    if (captureArg is not null) CaptureAfterDraw(captureArg["--capture=".Length..]);
+  }
+
+  private async void CaptureAfterDraw(string path)
+  {
+    await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+    await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+    var result = GetViewport().GetTexture().GetImage().SavePng(path);
+    if (result != Error.Ok) GD.PushError($"Could not save screenshot: {result}");
+    GetTree().Quit(result == Error.Ok ? 0 : 1);
   }
 
   public override void _Process(double delta)
@@ -84,20 +123,34 @@ public partial class GameController : Control
     if (!_game.Paused)
     {
       _noticeTimer -= delta;
-      if (_noticeTimer <= 0) _board.NoticeKey = "";
+      if (_noticeTimer <= 0) _hud.ClearFeedback();
     }
     if (_game.Phase == GamePhase.Won && (_completedLevels & (1 << (_selectedLevel - 1))) == 0)
     {
       _completedLevels |= 1 << (_selectedLevel - 1);
       SaveProgress();
     }
-    _hud.Refresh(_game, _best, _audio.Enabled, _selectedLevel, _completedLevels);
+    if (_game.IsFinished && !_result.Visible && !_modes.Visible) OpenResult();
+    _hud.Refresh(_game, _best, _selectedLevel);
     _board.QueueRedraw();
   }
 
   public override void _UnhandledInput(InputEvent input)
   {
     if (input is not InputEventKey { Pressed: true, Echo: false }) return;
+    if (_modes.Visible || _pauseMenu.Visible)
+    {
+      if (input.IsActionPressed("pause") || input.IsActionPressed("confirm")) CloseOverlay();
+      GetViewport().SetInputAsHandled();
+      return;
+    }
+    if (_result.Visible)
+    {
+      if (input.IsActionPressed("confirm")) Confirm();
+      else if (input.IsActionPressed("restart")) Start();
+      GetViewport().SetInputAsHandled();
+      return;
+    }
     if (input.IsActionPressed("pause")) TogglePause();
     else if (input.IsActionPressed("restart")) Start();
     else if (input.IsActionPressed("demo")) ShowHintOrDemo();
@@ -108,7 +161,7 @@ public partial class GameController : Control
     }
     else if (input.IsActionPressed("rotate"))
     {
-      if (_game.Rotate()) _audio.Tone(240, 0.04f);
+      if (_game.Rotate()) _audio.Select();
     }
     else if (input.IsActionPressed("hard_drop")) _game.HardDrop();
     else return;
@@ -117,9 +170,9 @@ public partial class GameController : Control
 
   public override void _Notification(int what)
   {
-    if (what == NotificationApplicationFocusOut && _game is not null)
+    if (what == NotificationApplicationFocusOut && _game is not null && !OS.GetCmdlineUserArgs().Any(arg => arg.StartsWith("--capture")))
     {
-      _game.SetPaused(true);
+      if (!_game.IsFinished) OpenPause();
       ResetRepeat();
     }
   }
@@ -129,17 +182,20 @@ public partial class GameController : Control
     if (demo) _selectedLevel = 0;
     _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
     _board.Session = _game;
+    _hud.ClearFeedback();
+    _modes.Visible = _pauseMenu.Visible = _result.Visible = false;
     ResetRepeat();
-    _game.PieceLocked += () => _audio.Tone(160, 0.08f);
+    _game.PieceLocked += _audio.Lock;
     _game.Matched += wave =>
     {
-      ShowNotice("match", wave.Pieces.Count, UiText.Number(wave.Points), wave.Chain);
-      _audio.Tone(360 + wave.Chain * 140, 0.25f);
+      _hud.ShowFeedback("+" + UiText.Number(wave.Points) + "  ×" + wave.Chain);
+      _noticeTimer = 2.5;
+      _audio.Match(wave.Chain);
       if (_game.Puzzle is not null || _game.Score <= _best) return;
       _best = _game.Score;
       SaveProgress();
     };
-    ShowNotice(_game.Puzzle is { IsTutorial: false } ? "challenge_intro" : _game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro");
+
   }
 
   private void Confirm()
@@ -158,35 +214,88 @@ public partial class GameController : Control
   private void ShowHintOrDemo()
   {
     if (_game.Puzzle is null) { Start(true); return; }
-    _game.SetPaused(false);
-    ResetRepeat();
+    CloseOverlay();
     ShowNotice(_game.Puzzle.HintKey);
     _noticeTimer = 12;
   }
 
   private void ApplyLanguageFont()
   {
-    var suffix = _texts.Language == "ja" ? "JP" : "SC";
-    Theme = new Theme { DefaultFont = GD.Load<FontFile>($"res://Assets/Fonts/ChromaUI-{suffix}.otf") };
+    var theme = (Theme)GD.Load<Theme>("res://Themes/pixel_theme.tres").Duplicate();
+    theme.DefaultFont = GD.Load<FontFile>(_texts.Language == "ja"
+      ? "res://Assets/Fonts/Fusion/ja.ttf"
+      : "res://Assets/Fonts/Fusion/zh_hans.ttf");
+    Theme = theme;
+  }
+
+  private void OpenModes()
+  {
+    _game.SetPaused(true);
+    _pauseMenu.Visible = _result.Visible = false;
+    _modes.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _modes.Visible = true;
+    ResetRepeat();
+  }
+
+  private void OpenPause()
+  {
+    if (_game.IsFinished) return;
+    _game.SetPaused(true);
+    _modes.Visible = _result.Visible = false;
+    _pauseMenu.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _pauseMenu.Visible = true;
+    ResetRepeat();
+  }
+
+  private void OpenResult()
+  {
+    _modes.Visible = _pauseMenu.Visible = false;
+    _result.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _result.Visible = true;
+    ResetRepeat();
+  }
+
+  private void CloseOverlay()
+  {
+    _modes.Visible = _pauseMenu.Visible = false;
+    if (_game.IsFinished) OpenResult();
+    else _game.SetPaused(false);
+    ResetRepeat();
+  }
+
+  private void RefreshOverlay()
+  {
+    if (_modes.Visible) _modes.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    if (_pauseMenu.Visible) _pauseMenu.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    if (_result.Visible) _result.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+  }
+
+  private void ChangeLanguage()
+  {
+    var index = Array.IndexOf(UiText.Languages, _texts.Language);
+    _texts.SetLanguage(UiText.Languages[(index + 1) % UiText.Languages.Length]);
+    ApplyLanguageFont();
+    RefreshOverlay();
+    SaveProgress();
   }
 
   private void TogglePause()
   {
-    _game.SetPaused(!_game.Paused);
-    ResetRepeat();
+    if (_pauseMenu.Visible) CloseOverlay();
+    else OpenPause();
   }
 
   private void ToggleSound()
   {
     _audio.Enabled = !_audio.Enabled;
-    _audio.Tone(500);
+    _audio.Select();
     SaveProgress();
+    RefreshOverlay();
   }
 
   private void ShowNotice(string key, params object[] arguments)
   {
-    _board.NoticeKey = key;
-    _board.NoticeArguments = arguments;
+    _hud.ShowFeedback(_texts.Get(key, arguments));
     _noticeTimer = 2.5;
   }
 
@@ -233,10 +342,11 @@ public partial class GameController : Control
     if (DisplayServer.GetName() == "headless") return;
     var usable = DisplayServer.ScreenGetUsableRect();
     var density = DisplayServer.ScreenGetScale();
-    var scale = Math.Min(density, Math.Min(usable.Size.X * 0.9f / 720, usable.Size.Y * 0.9f / 804));
+    var scale = Math.Min(density, Math.Min(usable.Size.X * 0.9f / 1040, usable.Size.Y * 0.9f / 800));
     var window = GetWindow();
-    window.MinSize = (Vector2I)(new Vector2(540, 603) * scale);
-    window.Size = (Vector2I)(new Vector2(720, 804) * scale);
+    window.MinSize = (Vector2I)(new Vector2(780, 600) * scale);
+    window.Size = (Vector2I)(new Vector2(1040, 800) * scale);
+    if (OS.GetCmdlineUserArgs().Contains("--capture-min")) window.Size = window.MinSize;
     window.Position = usable.Position + (usable.Size - window.Size) / 2;
   }
 }

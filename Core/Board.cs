@@ -1,5 +1,7 @@
 namespace ChromaDrop.Core;
 
+public enum RaiseResult { Success, Overflow }
+
 public sealed class Board
 {
   public const int Width = 10;
@@ -58,26 +60,19 @@ public sealed class Board
     _pieces.RemoveAll(piece => ids.Contains(piece.Id));
   }
 
-  public bool TryRaiseAndAdd(int rows, IReadOnlyList<Piece> incoming)
+  public RaiseResult TryRaiseAndAdd(int rows, IReadOnlyList<Piece> incoming)
   {
     if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows));
     var raised = _pieces.Select(piece => piece.Offset(0, -rows)).ToArray();
-    if (raised.SelectMany(piece => piece.Cells).Any(cell => cell.Y < 0)) return false;
+    if (raised.SelectMany(piece => piece.Cells).Any(cell => cell.Y < 0)) return RaiseResult.Overflow;
 
     var candidate = new Board();
-    try
-    {
-      foreach (var piece in raised) candidate.Add(piece);
-      foreach (var piece in incoming) candidate.Add(piece);
-    }
-    catch (InvalidOperationException)
-    {
-      return false;
-    }
+    foreach (var piece in raised) candidate.Add(piece);
+    foreach (var piece in incoming) candidate.Add(piece);
 
     _pieces.Clear();
     _pieces.AddRange(candidate._pieces);
-    return true;
+    return RaiseResult.Success;
   }
 
   public bool StepGravity()

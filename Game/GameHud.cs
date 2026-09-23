@@ -89,7 +89,7 @@ public partial class GameHud : HBoxContainer
   public void ShowFeedback(string text) => _feedbackText = text;
   public void ClearFeedback() => _feedbackText = "";
 
-  public void Refresh(GameSession game, int best, int selectedLevel)
+  public void Refresh(GameSession game)
   {
     var puzzle = game.Puzzle;
     var tutorial = puzzle is { IsTutorial: true };

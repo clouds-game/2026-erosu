@@ -44,6 +44,14 @@ var tests = new (string Name, Action Run)[]
       new[] { 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6 }));
     Check(ContaminationRules.RiseInterval(100) == 6);
   }),
+  ("Game selections are valid and create the requested session type", () =>
+  {
+    Check(GameSession.Create(GameSelection.FreePlay, new Random(1)).Mode == GameMode.FreePlay);
+    Check(GameSession.Create(GameSelection.Contamination, new Random(1)).Mode == GameMode.Contamination);
+    Check(GameSession.Create(GameSelection.Puzzle(1)).Puzzle?.Number == 1);
+    CheckThrows<ArgumentOutOfRangeException>(() => GameSelection.Puzzle(0));
+    CheckThrows<ArgumentOutOfRangeException>(() => GameSelection.Puzzle(PuzzleLevels.All.Count + 1));
+  }),
   ("Every contamination band is stable, distinct-colored, and match-free", () =>
   {
     var templates = ContaminationGenerator.AllTemplates();
@@ -63,14 +71,40 @@ var tests = new (string Name, Action Run)[]
   {
     var board = BoardOf(Piece.Create(1, Shape.O, 0, 0, 16));
     var incoming = new[] { Piece.Create(-1, Shape.O, 1, 4, 16) };
-    Check(board.TryRaiseAndAdd(3, incoming));
+    Check(board.TryRaiseAndAdd(3, incoming) == RaiseResult.Success);
     Check(board.Pieces.Single(piece => piece.Id == 1).Cells.Min(cell => cell.Y) == 13);
     Check(board.Pieces.Single(piece => piece.Id == -1).Cells.Min(cell => cell.Y) == 16);
 
     var blocked = BoardOf(Piece.Create(2, Shape.O, 0, 0, 0));
     var before = blocked.Pieces.SelectMany(piece => piece.Cells).ToArray();
-    Check(!blocked.TryRaiseAndAdd(3, incoming));
+    Check(blocked.TryRaiseAndAdd(3, incoming) == RaiseResult.Overflow);
     Check(blocked.Pieces.Count == 1 && blocked.Pieces[0].Cells.SequenceEqual(before));
+
+    var invalid = BoardOf(Piece.Create(3, Shape.O, 0, 0, 16));
+    var invalidBefore = invalid.Pieces.Single();
+    var overlapping = new[] { Piece.Create(-2, Shape.O, 1, 0, 13) };
+    CheckThrows<InvalidOperationException>(() => invalid.TryRaiseAndAdd(3, overlapping));
+    Check(invalid.Pieces.Count == 1 && invalid.Pieces[0] == invalidBefore);
+  }),
+  ("Contamination piece and mode random streams are independent", () =>
+  {
+    var first = SessionRandomStreams.Split(new Random(73));
+    var second = SessionRandomStreams.Split(new Random(73));
+    var firstBag = new PieceBag(first.Pieces, balancedColors: true);
+    var secondBag = new PieceBag(second.Pieces, balancedColors: true);
+    var generator = new ContaminationGenerator(second.Mode);
+    for (var wave = 1; wave <= 20; wave++) generator.CreateBand(wave);
+    Check(Enumerable.Range(0, 24).Select(_ => PieceSignature(firstBag.Take()))
+      .SequenceEqual(Enumerable.Range(0, 24).Select(_ => PieceSignature(secondBag.Take()))));
+
+    var third = SessionRandomStreams.Split(new Random(91));
+    var fourth = SessionRandomStreams.Split(new Random(91));
+    var noisyBag = new PieceBag(fourth.Pieces, balancedColors: true);
+    for (var i = 0; i < 40; i++) noisyBag.Take();
+    var thirdGenerator = new ContaminationGenerator(third.Mode);
+    var fourthGenerator = new ContaminationGenerator(fourth.Mode);
+    Check(Enumerable.Range(1, 12).Select(wave => BandSignature(thirdGenerator.CreateBand(wave)))
+      .SequenceEqual(Enumerable.Range(1, 12).Select(wave => BandSignature(fourthGenerator.CreateBand(wave)))));
   }),
   ("Contamination sessions start deterministically with marked whole blocks", () =>
   {
@@ -102,25 +136,28 @@ var tests = new (string Name, Action Run)[]
   }),
   ("Ordinary matches purify marked whole blocks during seeded play", () =>
   {
-    GameSession? observed = null;
-    for (var seed = 0; seed < 24 && observed is null; seed++)
+    var game = GameSession.CreateContamination(new Random(0));
+    (int Rotations, int Direction)[] moves =
     {
-      var controls = new Random(seed * 31 + 7);
-      var game = GameSession.CreateContamination(new Random(seed));
-      for (var turn = 0; turn < 80 && !game.IsFinished && game.PollutionCleared == 0; turn++)
+      (1, 4), (2, -5), (1, 2), (0, 5), (3, 4), (1, 5), (1, -4), (3, -1), (3, -2)
+    };
+    for (var turn = 0; turn < moves.Length; turn++)
+    {
+      var move = moves[turn];
+      for (var rotation = 0; rotation < move.Rotations; rotation++) game.Rotate();
+      for (var step = 0; step < Math.Abs(move.Direction); step++)
+        game.Move(Math.Sign(move.Direction), 0);
+      game.HardDrop();
+      var ticks = 0;
+      while (game.Phase is GamePhase.Clearing or GamePhase.Settling)
       {
-        for (var rotation = controls.Next(4); rotation > 0; rotation--) game.Rotate();
-        var direction = controls.Next(-5, 6);
-        for (var step = 0; step < Math.Abs(direction); step++) game.Move(Math.Sign(direction), 0);
-        game.HardDrop();
-        for (var tick = 0; tick < 1000 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(0.05);
+        game.Advance(0.05);
+        Check(++ticks < 1000, $"Turn {turn + 1} did not settle.");
       }
-      if (game.PollutionCleared > 0) observed = game;
+      Check(!game.IsFinished, $"Game ended unexpectedly on turn {turn + 1}.");
     }
-    Check(observed is not null);
-    var result = observed!;
-    Check(result.PollutionCleared > 0 && result.Cleared >= result.PollutionCleared);
-    Check(result.Board.Pieces.Where(piece => result.IsPolluted(piece.Id)).Count() == result.PollutionRemaining);
+    Check(game.PollutionCleared > 0 && game.Cleared >= game.PollutionCleared);
+    Check(game.Board.Pieces.Where(piece => game.IsPolluted(piece.Id)).Count() == game.PollutionRemaining);
   }),
   ("Every challenge has a verified solution with its intended clear rhythm", () =>
   {
@@ -440,6 +477,19 @@ static void Check(bool condition, string? message = null)
 {
   if (!condition) throw new InvalidOperationException(message ?? "Assertion failed.");
 }
+
+static void CheckThrows<TException>(Action action) where TException : Exception
+{
+  try { action(); }
+  catch (TException) { return; }
+  throw new InvalidOperationException($"Expected {typeof(TException).Name}.");
+}
+
+static string PieceSignature(Piece piece) => $"{piece.Id}:{piece.Shape}:{piece.Color}:" +
+  string.Join(';', piece.Cells.Select(cell => $"{cell.X},{cell.Y}"));
+
+static string BandSignature(IReadOnlyList<Piece> pieces) =>
+  string.Join('|', pieces.Select(PieceSignature));
 
 static void AdvanceUntil(GameSession game, GamePhase phase)
 {

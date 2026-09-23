@@ -14,8 +14,7 @@ public partial class GameController : Control
   private GameOverlay _result = null!;
   private GameAudio _audio = null!;
   private readonly UiText _texts = new();
-  private GameMode _selectedMode = GameMode.Puzzle;
-  private int _selectedLevel = 1;
+  private GameSelection _selection = GameSelection.Puzzle(1);
   private int _completedLevels;
   private int _best;
   private int _pollutionBestCleared;
@@ -51,19 +50,17 @@ public partial class GameController : Control
     }
     var captureLanguage = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture-lang="));
     if (captureLanguage is not null) _texts.SetLanguage(captureLanguage["--capture-lang=".Length..]);
-    _selectedLevel = PuzzleLevels.All.Where(level => level.IsTutorial)
+    var selectedLevel = PuzzleLevels.All.Where(level => level.IsTutorial)
       .FirstOrDefault(level => (_completedLevels & (1 << (level.Number - 1))) == 0)?.Number
       ?? PuzzleLevels.DefaultLevel;
+    _selection = GameSelection.Puzzle(selectedLevel);
     ApplyLanguageFont();
     _hud.Texts = _texts;
     foreach (var overlay in new[] { _modes, _pauseMenu, _result })
     {
       overlay.Texts = _texts;
-      overlay.ModeRequested += (mode, number) =>
-      {
-        if (number < 0) OpenModes();
-        else { _selectedMode = mode; _selectedLevel = number; Start(); }
-      };
+      overlay.ModeRequested += selection => { _selection = selection; Start(); };
+      overlay.ModesRequested += OpenModes;
       overlay.CloseRequested += CloseOverlay;
       overlay.RestartRequested += () => Start();
       overlay.ContinueRequested += Confirm;
@@ -78,10 +75,9 @@ public partial class GameController : Control
     if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
       && captureLevel >= 0 && captureLevel <= PuzzleLevels.All.Count)
     {
-      _selectedMode = captureLevel == 0 ? GameMode.FreePlay : GameMode.Puzzle;
-      _selectedLevel = captureLevel;
+      _selection = captureLevel == 0 ? GameSelection.FreePlay : GameSelection.Puzzle(captureLevel);
     }
-    if (args.Contains("--capture-contamination")) _selectedMode = GameMode.Contamination;
+    if (args.Contains("--capture-contamination")) _selection = GameSelection.Contamination;
     Start(args.Contains("--demo"));
     if (args.Contains("--capture-modes")) OpenModes();
     if (args.Contains("--capture-pause")) OpenPause();
@@ -135,13 +131,14 @@ public partial class GameController : Control
       _noticeTimer -= delta;
       if (_noticeTimer <= 0) _hud.ClearFeedback();
     }
-    if (_game.Mode == GameMode.Puzzle && _game.Phase == GamePhase.Won && (_completedLevels & (1 << (_selectedLevel - 1))) == 0)
+    if (_game.Mode == GameMode.Puzzle && _game.Phase == GamePhase.Won &&
+      (_completedLevels & (1 << (_selection.PuzzleNumber!.Value - 1))) == 0)
     {
-      _completedLevels |= 1 << (_selectedLevel - 1);
+      _completedLevels |= 1 << (_selection.PuzzleNumber.Value - 1);
       SaveProgress();
     }
     if (_game.IsFinished && !_result.Visible && !_modes.Visible) OpenResult();
-    _hud.Refresh(_game, _best, _selectedLevel);
+    _hud.Refresh(_game);
     _board.QueueRedraw();
   }
 
@@ -189,13 +186,8 @@ public partial class GameController : Control
 
   private void Start(bool demo = false)
   {
-    if (demo) { _selectedMode = GameMode.FreePlay; _selectedLevel = 0; }
-    _game = demo ? GameSession.CreateDemo() : _selectedMode switch
-    {
-      GameMode.FreePlay => new GameSession(),
-      GameMode.Contamination => GameSession.CreateContamination(),
-      _ => new GameSession(PuzzleLevels.All[_selectedLevel - 1])
-    };
+    if (demo) _selection = GameSelection.FreePlay;
+    _game = demo ? GameSession.CreateDemo() : GameSession.Create(_selection);
     _board.Session = _game;
     _hud.ClearFeedback();
     _modes.Visible = _pauseMenu.Visible = _result.Visible = false;
@@ -230,9 +222,10 @@ public partial class GameController : Control
   {
     if (_game.Phase == GamePhase.Won)
     {
-      _completedLevels |= 1 << (_selectedLevel - 1);
+      var selectedLevel = _selection.PuzzleNumber!.Value;
+      _completedLevels |= 1 << (selectedLevel - 1);
       SaveProgress();
-      _selectedLevel = PuzzleLevels.NextLevel(_selectedLevel);
+      _selection = GameSelection.Puzzle(PuzzleLevels.NextLevel(selectedLevel));
       Start();
     }
     else if (_game.Phase == GamePhase.Over) Start();
@@ -261,7 +254,7 @@ public partial class GameController : Control
   {
     _game.SetPaused(true);
     _pauseMenu.Visible = _result.Visible = false;
-    _modes.Render(_game, _selectedMode, _selectedLevel, _completedLevels, _audio.Enabled);
+    _modes.Render(CreateOverlayContext());
     _modes.Visible = true;
     ResetRepeat();
   }
@@ -271,7 +264,7 @@ public partial class GameController : Control
     if (_game.IsFinished) return;
     _game.SetPaused(true);
     _modes.Visible = _result.Visible = false;
-    _pauseMenu.Render(_game, _selectedMode, _selectedLevel, _completedLevels, _audio.Enabled);
+    _pauseMenu.Render(CreateOverlayContext());
     _pauseMenu.Visible = true;
     ResetRepeat();
   }
@@ -279,8 +272,7 @@ public partial class GameController : Control
   private void OpenResult()
   {
     _modes.Visible = _pauseMenu.Visible = false;
-    _result.Render(_game, _selectedMode, _selectedLevel, _completedLevels, _audio.Enabled,
-      _pollutionBestCleared, _pollutionBestScore);
+    _result.Render(CreateOverlayContext());
     _result.Visible = true;
     ResetRepeat();
   }
@@ -295,11 +287,18 @@ public partial class GameController : Control
 
   private void RefreshOverlay()
   {
-    if (_modes.Visible) _modes.Render(_game, _selectedMode, _selectedLevel, _completedLevels, _audio.Enabled);
-    if (_pauseMenu.Visible) _pauseMenu.Render(_game, _selectedMode, _selectedLevel, _completedLevels, _audio.Enabled);
-    if (_result.Visible) _result.Render(_game, _selectedMode, _selectedLevel, _completedLevels, _audio.Enabled,
-      _pollutionBestCleared, _pollutionBestScore);
+    if (_modes.Visible) _modes.Render(CreateOverlayContext());
+    if (_pauseMenu.Visible) _pauseMenu.Render(CreateOverlayContext());
+    if (_result.Visible) _result.Render(CreateOverlayContext());
   }
+
+  private GameOverlayContext CreateOverlayContext() => new(
+    _game,
+    _selection,
+    _completedLevels,
+    _audio.Enabled,
+    _pollutionBestCleared,
+    _pollutionBestScore);
 
   private void ChangeLanguage()
   {

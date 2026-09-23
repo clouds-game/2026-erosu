@@ -6,10 +6,16 @@ public sealed record ClearWave(
   IReadOnlyList<Piece> Pieces,
   int Chain,
   ScoreAward Award,
-  IReadOnlySet<int>? PollutedPieceIds = null)
+  IReadOnlySet<int> PollutedPieceIds)
 {
   public int Points => Award.Total;
-  public int PollutionCleared => PollutedPieceIds?.Count ?? 0;
+  public int PollutionCleared => PollutedPieceIds.Count;
+}
+
+internal readonly record struct SessionRandomStreams(Random Pieces, Random Mode)
+{
+  public static SessionRandomStreams Split(Random source) =>
+	new(new Random(source.Next()), new Random(source.Next()));
 }
 
 public sealed class GameSession
@@ -70,19 +76,32 @@ public sealed class GameSession
 	Spawn();
   }
 
-  private GameSession(Random random, bool contamination)
+  private GameSession(PieceBag bag, ContaminationGenerator contamination)
   {
 	Mode = GameMode.Contamination;
 	Board = new Board();
-	_bag = new PieceBag(random, balancedColors: true);
-	_contamination = new ContaminationGenerator(random);
+	_bag = bag;
+	_contamination = contamination;
 	for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
 	AddContaminationBand(initial: true);
 	Spawn();
   }
 
-  public static GameSession CreateContamination(Random? random = null) =>
-	new(random ?? new Random(), contamination: true);
+  public static GameSession Create(GameSelection selection, Random? random = null) => selection.Mode switch
+  {
+	GameMode.FreePlay => new GameSession(random),
+	GameMode.Puzzle => new GameSession(PuzzleLevels.All.Single(level => level.Number == selection.PuzzleNumber)),
+	GameMode.Contamination => CreateContamination(random),
+	_ => throw new ArgumentOutOfRangeException(nameof(selection))
+  };
+
+  public static GameSession CreateContamination(Random? random = null)
+  {
+	var streams = SessionRandomStreams.Split(random ?? new Random());
+	return new GameSession(
+	  new PieceBag(streams.Pieces, balancedColors: true),
+	  new ContaminationGenerator(streams.Mode));
+  }
 
   public static GameSession CreateDemo()
   {
@@ -94,7 +113,7 @@ public sealed class GameSession
   }
 
   public bool IsPolluted(int pieceId) => _polluted.Contains(pieceId) ||
-	(Wave?.PollutedPieceIds?.Contains(pieceId) ?? false);
+	(Wave?.PollutedPieceIds.Contains(pieceId) ?? false);
 
   public void SetPaused(bool paused)
   {
@@ -261,7 +280,7 @@ public sealed class GameSession
   {
 	var nextWave = ContaminationWave + 1;
 	var incoming = _contamination!.CreateBand(nextWave);
-	if (!Board.TryRaiseAndAdd(ContaminationRules.BandHeight, incoming))
+	if (Board.TryRaiseAndAdd(ContaminationRules.BandHeight, incoming) == RaiseResult.Overflow)
 	{
 	  Active = null;
 	  _risePending = false;

@@ -13,6 +13,10 @@
     @if (!Has(cell.X + 1, cell.Y)) { <path d="@($"M{x + 39} {y}v40")" class="outline" /> }
     @if (!Ghost)
     {
+      @if (Polluted)
+      {
+        <rect x="@(x + 5)" y="@(y + 5)" width="30" height="30" class="polluted" />
+      }
       <g transform="@($"translate({x + 20} {y + 20})")" class="mark">
         @switch (Piece.Color)
         {
@@ -29,6 +33,7 @@
 @code {
   [Parameter, EditorRequired] public Piece Piece { get; set; } = null!;
   [Parameter] public bool Ghost { get; set; }
+  [Parameter] public bool Polluted { get; set; }
   private static readonly string[] Palette = ["#ff8278", "#8ee2c4", "#f6ce71", "#aaa2f7"];
   private string Color => Palette[Piece.Color];
   private bool Has(int x, int y) => Piece.Cells.Contains(new Cell(x, y));

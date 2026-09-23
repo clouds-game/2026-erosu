@@ -89,3 +89,18 @@ export function loadCompleted(): number {
 export function saveCompleted(completed: number): void {
   try { localStorage.setItem('chroma_completed', String(completed)); } catch { /* Saving is optional. */ }
 }
+
+export function loadPollutionBestCleared(): number {
+  try { return Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_pollution_best_cleared')) || 0)); }
+  catch { return 0; }
+}
+export function loadPollutionBestScore(): number {
+  try { return Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_pollution_best_score')) || 0)); }
+  catch { return 0; }
+}
+export function savePollutionBest(cleared: number, score: number): void {
+  try {
+    localStorage.setItem('chroma_pollution_best_cleared', String(cleared));
+    localStorage.setItem('chroma_pollution_best_score', String(score));
+  } catch { /* Saving is optional. */ }
+}

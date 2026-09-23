@@ -24,7 +24,8 @@ public partial class BoardView : Control
 
     var game = Session;
     if (game is null) return;
-    foreach (var piece in game.Board.Pieces) PiecePainter.Draw(this, piece, Vector2.Zero, CellSize);
+    foreach (var piece in game.Board.Pieces)
+      PiecePainter.Draw(this, piece, Vector2.Zero, CellSize, polluted: game.IsPolluted(piece.Id));
     if (game.Phase == GamePhase.Falling)
     {
       var ghost = game.Ghost();
@@ -35,7 +36,7 @@ public partial class BoardView : Control
     {
       var flash = 0.15f + 0.75f * Mathf.Sin((float)game.ClearProgress * Mathf.Pi);
       foreach (var piece in game.Wave.Pieces)
-        PiecePainter.Draw(this, piece, Vector2.Zero, CellSize, flash: flash);
+        PiecePainter.Draw(this, piece, Vector2.Zero, CellSize, flash: flash, polluted: game.IsPolluted(piece.Id));
     }
   }
 }

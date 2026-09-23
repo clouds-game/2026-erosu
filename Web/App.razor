@@ -10,7 +10,7 @@
         <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="#303946" /></pattern></defs>
         <rect width="400" height="720" fill="#1b212c" />
         <rect width="400" height="720" fill="url(#grid)" />
-        @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
+        @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" Polluted="game.IsPolluted(piece.Id)" /> }
         @if (game.Phase == GamePhase.Falling)
         {
           @if (game.Ghost() is { } ghost) { <PieceView Piece="ghost" Ghost="true" /> }
@@ -19,7 +19,7 @@
         @if (game.Wave is { } wave)
         {
           <g opacity="@(1 - game.ClearProgress * 0.8)">
-            @foreach (var piece in wave.Pieces) { <PieceView Piece="piece" /> }
+            @foreach (var piece in wave.Pieces) { <PieceView Piece="piece" Polluted="game.IsPolluted(piece.Id)" /> }
           </g>
         }
       </svg>
@@ -28,26 +28,30 @@
         <div class="overlay">
           <strong>@T(game.Paused ? "paused" : game.Phase == GamePhase.Won ? PuzzleLevels.CompletionKey(game.Puzzle!) : game.Puzzle is not null ? "puzzle_failed" : "game_over")</strong>
           <button @onclick="Confirm">@T(game.Paused ? "resume" : game.Phase == GamePhase.Won ? PuzzleLevels.ContinueKey(game.Puzzle!) : "play_again")</button>
-          <small>@(game.Paused ? T("resume_hint") : T("score_value", UiText.Number(game.Score)))</small>
+          <small>@(game.Paused ? T("resume_hint") : game.Mode == GameMode.Contamination
+            ? T("pollution_result", game.PollutionCleared, UiText.Number(game.Score), game.ContaminationWave)
+            : T("score_value", UiText.Number(game.Score)))</small>
         </div>
       }
       else if (notice_key.Length > 0) { <div class="notice" role="status">@T(notice_key, notice_arguments)</div> }
     </section>
     <aside>
       <div class="overview">
-        <select class="mode" aria-label="@T("mode")" value="@selected_level" @onchange="SelectLevel" @onfocus="PauseForFocus">
-          <option value="0">@T("free_play")</option>
+        <select class="mode" aria-label="@T("mode")" value="@SelectionValue" @onchange="SelectMode" @onfocus="PauseForFocus">
+          <option value="free">@T("free_play")</option>
+          <option value="contamination">@T("pollution_mode")</option>
           @foreach (var tutorial in new[] { false, true })
           {
             <optgroup label="@T(tutorial ? "learn" : "challenges")">
               @foreach (var level in PuzzleLevels.All.Where(level => level.IsTutorial == tutorial))
               {
-                <option value="@level.Number">@T("puzzle_label", PuzzleLevels.DisplayNumber(level), T(level.TitleKey))@(IsCompleted(level.Number) ? " *" : "")</option>
+                <option value="@($"puzzle:{level.Number}")">@T("puzzle_label", PuzzleLevels.DisplayNumber(level), T(level.TitleKey))@(IsCompleted(level.Number) ? " *" : "")</option>
               }
             </optgroup>
           }
         </select>
-        <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
+        <span class="muted">@T(game.Mode == GameMode.Contamination ? "purified" : "score")</span>
+        <strong id="score">@(game.Mode == GameMode.Contamination ? game.PollutionCleared : UiText.Number(game.Score))</strong>
         @if (game.Puzzle is { } puzzle)
         {
           <p class="puzzle-goal">@T(puzzle.GoalKey, puzzle.Target)</p>
@@ -63,6 +67,18 @@
             </div>
           }
           @if (IsCompleted(puzzle.Number)) { <span class="muted">@T("completed")</span> }
+        }
+        else if (game.Mode == GameMode.Contamination)
+        {
+          <span class="muted">@T("pollution_best", pollution_best_cleared, UiText.Number(pollution_best_score))</span>
+          <span class="next-label muted">@T("next")</span>
+          <div class="previews">
+            @foreach (var piece in game.Next)
+            {
+              <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+            }
+          </div>
+          <dl><dt>@T("score")</dt><dd>@UiText.Number(game.Score)</dd><dt>@T("wave")</dt><dd>@game.ContaminationWave</dd><dt>@T("rise_in")</dt><dd>@game.LocksUntilRise</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
         }
         else
         {
@@ -81,7 +97,10 @@
         <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
         <button @onclick="TogglePause" disabled="@game.IsFinished">@T(game.Paused ? "resume" : "pause") [P]</button>
         <button @onclick="() => Start()">@T("restart") [R]</button>
-        <button @onclick="ShowHintOrDemo" disabled="@(game.Puzzle is not null && game.IsFinished)">@T(game.Puzzle is null ? "demo" : "hint") [F2]</button>
+        @if (game.Mode != GameMode.Contamination)
+        {
+          <button @onclick="ShowHintOrDemo" disabled="@(game.Puzzle is not null && game.IsFinished)">@T(game.Mode == GameMode.FreePlay ? "demo" : "hint") [F2]</button>
+        }
         <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
         <label class="language"><span>@T("language")</span>
           <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
@@ -111,10 +130,13 @@
   private readonly CancellationTokenSource cancellation = new();
   private readonly HashSet<string> held = [];
   private Task? loop;
+  private GameMode selected_mode = GameMode.Puzzle;
   private int selected_level = PuzzleLevels.DefaultLevel;
   private int completed_levels;
   private bool ready;
   private int best;
+  private int pollution_best_cleared;
+  private int pollution_best_score;
   private bool sound_enabled;
   private readonly UiText texts = new();
   private string notice_key = "";
@@ -124,16 +146,24 @@
   private int held_direction;
   private double repeat_time;
   private bool repeating;
+  private string SelectionValue => selected_mode switch
+  {
+    GameMode.FreePlay => "free",
+    GameMode.Contamination => "contamination",
+    _ => $"puzzle:{selected_level}"
+  };
 
   protected override void OnInitialized() => Start();
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=challenge-3");
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=purify-1");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
     best = await interop.InvokeAsync<int>("loadBest");
+    pollution_best_cleared = await interop.InvokeAsync<int>("loadPollutionBestCleared");
+    pollution_best_score = await interop.InvokeAsync<int>("loadPollutionBestScore");
     completed_levels = (await interop.InvokeAsync<int>("loadCompleted")) & PuzzleLevels.ProgressMask;
     callback = DotNetObjectReference.Create(this);
     await interop.InvokeVoidAsync("connect", callback);
@@ -184,15 +214,22 @@
         held_direction = game.AcceptsInput ? direction : 0;
         game.Advance(delta, held.Contains("ArrowDown") || held.Contains("KeyS"));
         if (!game.Paused && (notice_time -= delta) <= 0) notice_key = "";
-        if (game.Phase == GamePhase.Won && !IsCompleted(selected_level))
+        if (game.Mode == GameMode.Puzzle && game.Phase == GamePhase.Won && !IsCompleted(selected_level))
         {
           completed_levels |= 1 << (selected_level - 1);
           if (interop is not null) await interop.InvokeVoidAsync("saveCompleted", completed_levels);
         }
-        if (game.Puzzle is null && game.Score > best)
+        if (game.Mode == GameMode.FreePlay && game.Score > best)
         {
           best = game.Score;
           if (interop is not null) await interop.InvokeVoidAsync("saveBest", best);
+        }
+        if (game.Mode == GameMode.Contamination && (game.PollutionCleared > pollution_best_cleared ||
+          game.PollutionCleared == pollution_best_cleared && game.Score > pollution_best_score))
+        {
+          pollution_best_cleared = game.PollutionCleared;
+          pollution_best_score = game.Score;
+          if (interop is not null) await interop.InvokeVoidAsync("savePollutionBest", pollution_best_cleared, pollution_best_score);
         }
         await InvokeAsync(StateHasChanged);
       }
@@ -202,11 +239,17 @@
 
   private void Start(bool demo = false)
   {
-    if (demo) selected_level = 0;
-    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[selected_level - 1]);
+    if (demo) { selected_mode = GameMode.FreePlay; selected_level = 0; }
+    game = demo ? GameSession.CreateDemo() : selected_mode switch
+    {
+      GameMode.FreePlay => new GameSession(),
+      GameMode.Contamination => GameSession.CreateContamination(),
+      _ => new GameSession(PuzzleLevels.All[selected_level - 1])
+    };
     held.Clear();
     held_direction = 0;
-    notice_key = game.Puzzle is { IsTutorial: false } ? "challenge_intro" : game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";
+    notice_key = game.Mode == GameMode.Contamination ? "pollution_intro" :
+      game.Puzzle is { IsTutorial: false } ? "challenge_intro" : game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";
     notice_arguments = [];
     notice_time = 3;
     game.Matched += wave =>
@@ -217,6 +260,13 @@
       PlayTone(360 + wave.Chain * 140, 0.25);
     };
     game.PieceLocked += () => PlayTone(160, 0.08);
+    game.ContaminationRose += () =>
+    {
+      notice_key = "pollution_rise";
+      notice_arguments = [];
+      notice_time = 1.8;
+      PlayTone(180, 0.12);
+    };
   }
 
   [JSInvokable]
@@ -252,18 +302,23 @@
     else if (game.Paused) TogglePause();
   }
   private bool IsCompleted(int number) => number > 0 && (completed_levels & (1 << (number - 1))) != 0;
-  private void SelectLevel(ChangeEventArgs args)
+  private void SelectMode(ChangeEventArgs args)
   {
-    if (!int.TryParse(args.Value?.ToString(), out var number) || number < 0 || number > PuzzleLevels.All.Count) return;
-    selected_level = number;
+    var value = args.Value?.ToString() ?? "";
+    if (value == "free") { selected_mode = GameMode.FreePlay; selected_level = 0; }
+    else if (value == "contamination") selected_mode = GameMode.Contamination;
+    else if (value.StartsWith("puzzle:") && int.TryParse(value[7..], out var number) && number > 0 && number <= PuzzleLevels.All.Count)
+    { selected_mode = GameMode.Puzzle; selected_level = number; }
+    else return;
     Start();
   }
   private void ShowHintOrDemo()
   {
-    if (game.Puzzle is null) { Start(true); return; }
+    if (game.Mode == GameMode.FreePlay) { Start(true); return; }
+    if (game.Mode == GameMode.Contamination) return;
     game.SetPaused(false);
     held.Clear();
-    notice_key = game.Puzzle.HintKey;
+    notice_key = game.Puzzle!.HintKey;
     notice_arguments = [];
     notice_time = 12;
   }

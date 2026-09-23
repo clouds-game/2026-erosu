@@ -13,6 +13,7 @@ public partial class GameHud : HBoxContainer
   public event Action? PauseRequested;
 
   private Label _stage = null!;
+  private Label _secondary = null!;
   private Label _instruction = null!;
   private Label _key = null!;
   private Label _feedback = null!;
@@ -36,6 +37,8 @@ public partial class GameHud : HBoxContainer
 
     _stage = AddLabel(left, "", 27, PixelUi.Cream);
     _stage.HorizontalAlignment = HorizontalAlignment.Center;
+    _secondary = AddLabel(left, "", 18, PixelUi.Muted);
+    _secondary.HorizontalAlignment = HorizontalAlignment.Center;
     Spacer(left);
     _progress = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
     _progress.AddThemeConstantOverride("separation", 12);
@@ -90,13 +93,24 @@ public partial class GameHud : HBoxContainer
   {
     var puzzle = game.Puzzle;
     var tutorial = puzzle is { IsTutorial: true };
-    _stage.Text = puzzle is null ? UiText.Number(game.Score)
-      : PuzzleLevels.DisplayNumber(puzzle).ToString("00") + " / 03";
-    _stage.AddThemeFontSizeOverride("font_size", puzzle is null ? 35 : 27);
+    _stage.Text = game.Mode switch
+    {
+      GameMode.FreePlay => UiText.Number(game.Score),
+      GameMode.Contamination => Texts.Get("purified_value", game.PollutionCleared),
+      _ => PuzzleLevels.DisplayNumber(puzzle!).ToString("00") + " / 03"
+    };
+    _stage.AddThemeFontSizeOverride("font_size", game.Mode == GameMode.Puzzle ? 27 : 35);
+    _secondary.Visible = game.Mode == GameMode.Contamination;
+    _secondary.Text = _secondary.Visible ? Texts.Get("score_value", UiText.Number(game.Score)) : "";
     _levels.Text = Texts.Get("choose_mode");
-    _speed.Visible = puzzle is null;
-    _speed.Text = puzzle is null ? "LV " + game.Level.ToString("00") : "";
-    _progress.Visible = puzzle is not null;
+    _speed.Visible = game.Mode != GameMode.Puzzle;
+    _speed.Text = game.Mode switch
+    {
+      GameMode.FreePlay => "LV " + game.Level.ToString("00"),
+      GameMode.Contamination => Texts.Get("pollution_status", game.ContaminationWave, game.LocksUntilRise),
+      _ => ""
+    };
+    _progress.Visible = game.Mode == GameMode.Puzzle;
     if (puzzle is not null)
     {
       var total = tutorial ? 3 : Math.Min(_progressTiles.Length, puzzle.Sequence.Count);

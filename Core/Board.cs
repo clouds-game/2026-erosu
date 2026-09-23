@@ -58,6 +58,28 @@ public sealed class Board
     _pieces.RemoveAll(piece => ids.Contains(piece.Id));
   }
 
+  public bool TryRaiseAndAdd(int rows, IReadOnlyList<Piece> incoming)
+  {
+    if (rows <= 0) throw new ArgumentOutOfRangeException(nameof(rows));
+    var raised = _pieces.Select(piece => piece.Offset(0, -rows)).ToArray();
+    if (raised.SelectMany(piece => piece.Cells).Any(cell => cell.Y < 0)) return false;
+
+    var candidate = new Board();
+    try
+    {
+      foreach (var piece in raised) candidate.Add(piece);
+      foreach (var piece in incoming) candidate.Add(piece);
+    }
+    catch (InvalidOperationException)
+    {
+      return false;
+    }
+
+    _pieces.Clear();
+    _pieces.AddRange(candidate._pieces);
+    return true;
+  }
+
   public bool StepGravity()
   {
     var occupied = new Dictionary<Cell, int>();

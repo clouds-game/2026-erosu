@@ -15,7 +15,7 @@ public static class PiecePainter
   ];
 
   public static void Draw(CanvasItem target, Piece piece, Vector2 origin, float size,
-    bool ghost = false, float flash = 0)
+    bool ghost = false, float flash = 0, bool polluted = false)
   {
     var tint = new Color(1, 1, 1, ghost ? 0.42f : 1);
     foreach (var cell in piece.Cells)
@@ -29,6 +29,14 @@ public static class PiecePainter
           new Color(1, 1, 1, flash * 0.7f));
     }
     if (ghost) return;
+    if (polluted)
+    {
+      foreach (var cell in piece.Cells)
+      {
+        var position = origin + new Vector2(cell.X, cell.Y) * size + Vector2.One * 4;
+        target.DrawRect(new Rect2(position, Vector2.One * (size - 8)), PixelUi.Cream, false, 2);
+      }
+    }
     // A single Kenney symbol identifies the whole shape as one game piece.
     var first = piece.Cells.OrderBy(cell => cell.Y).ThenBy(cell => cell.X).First();
     var topLeft = origin + new Vector2(first.X, first.Y) * size;

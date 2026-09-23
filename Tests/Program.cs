@@ -38,6 +38,90 @@ var tests = new (string Name, Action Run)[]
       Check(text.Get("match", 3, UiText.Number(2100), 2).Contains("2,100"));
     }
   }),
+  ("Contamination pressure interval decreases every three waves", () =>
+  {
+    Check(Enumerable.Range(1, 15).Select(ContaminationRules.RiseInterval).SequenceEqual(
+      new[] { 10, 10, 10, 9, 9, 9, 8, 8, 8, 7, 7, 7, 6, 6, 6 }));
+    Check(ContaminationRules.RiseInterval(100) == 6);
+  }),
+  ("Every contamination band is stable, distinct-colored, and match-free", () =>
+  {
+    var templates = ContaminationGenerator.AllTemplates();
+    Check(templates.Count == 8);
+    foreach (var pieces in templates)
+    {
+      var board = BoardOf(pieces.ToArray());
+      Check(pieces.Count is 3 or 4);
+      Check(pieces.All(piece => piece.Cells.Count == 4));
+      Check(pieces.SelectMany(piece => piece.Cells).Distinct().Count() == pieces.Count * 4);
+      Check(pieces.Select(piece => piece.Color).Distinct().Count() == pieces.Count);
+      Check(pieces.SelectMany(piece => piece.Cells).All(cell => cell.X is >= 0 and < Board.Width && cell.Y is >= 0 and < Board.Height));
+      Check(!board.StepGravity() && board.FindMatches().Count == 0);
+    }
+  }),
+  ("Board rise is atomic on success and overflow", () =>
+  {
+    var board = BoardOf(Piece.Create(1, Shape.O, 0, 0, 16));
+    var incoming = new[] { Piece.Create(-1, Shape.O, 1, 4, 16) };
+    Check(board.TryRaiseAndAdd(3, incoming));
+    Check(board.Pieces.Single(piece => piece.Id == 1).Cells.Min(cell => cell.Y) == 13);
+    Check(board.Pieces.Single(piece => piece.Id == -1).Cells.Min(cell => cell.Y) == 16);
+
+    var blocked = BoardOf(Piece.Create(2, Shape.O, 0, 0, 0));
+    var before = blocked.Pieces.SelectMany(piece => piece.Cells).ToArray();
+    Check(!blocked.TryRaiseAndAdd(3, incoming));
+    Check(blocked.Pieces.Count == 1 && blocked.Pieces[0].Cells.SequenceEqual(before));
+  }),
+  ("Contamination sessions start deterministically with marked whole blocks", () =>
+  {
+    var first = GameSession.CreateContamination(new Random(19));
+    var second = GameSession.CreateContamination(new Random(19));
+    Check(first.Mode == GameMode.Contamination && first.ContaminationWave == 1 && first.LocksUntilRise == 10);
+    Check(first.PollutionRemaining == first.Board.Pieces.Count && first.PollutionCleared == 0);
+    Check(first.Board.Pieces.All(piece => piece.Id < 0 && first.IsPolluted(piece.Id)));
+    static string Signature(Piece piece) => $"{piece.Id}:{piece.Shape}:{piece.Color}:" +
+      string.Join(';', piece.Cells.Select(cell => $"{cell.X},{cell.Y}"));
+    Check(first.Board.Pieces.Select(Signature).SequenceEqual(second.Board.Pieces.Select(Signature)));
+    Check(Signature(first.Active!) == Signature(second.Active!) &&
+      first.Next.Select(Signature).SequenceEqual(second.Next.Select(Signature)));
+  }),
+  ("Contamination rises only after ten committed pieces finish resolving", () =>
+  {
+    var game = GameSession.CreateContamination(new Random(4));
+    for (var turn = 0; turn < 10 && !game.IsFinished; turn++)
+    {
+      var target = new[] { 0, 3, 6, 1, 5 }[turn % 5];
+      while (game.Active is not null && game.Active.Cells.Min(cell => cell.X) > target) game.Move(-1, 0);
+      while (game.Active is not null && game.Active.Cells.Min(cell => cell.X) < target) game.Move(1, 0);
+      game.HardDrop();
+      for (var tick = 0; tick < 1000 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(0.05);
+      if (turn < 9) Check(game.ContaminationWave == 1);
+    }
+    Check(!game.IsFinished && game.Locked == 10 && game.ContaminationWave == 2 && game.LocksUntilRise == 10);
+    Check(game.PollutionCleared <= game.Cleared && game.PollutionRemaining > 0);
+  }),
+  ("Ordinary matches purify marked whole blocks during seeded play", () =>
+  {
+    GameSession? observed = null;
+    for (var seed = 0; seed < 24 && observed is null; seed++)
+    {
+      var controls = new Random(seed * 31 + 7);
+      var game = GameSession.CreateContamination(new Random(seed));
+      for (var turn = 0; turn < 80 && !game.IsFinished && game.PollutionCleared == 0; turn++)
+      {
+        for (var rotation = controls.Next(4); rotation > 0; rotation--) game.Rotate();
+        var direction = controls.Next(-5, 6);
+        for (var step = 0; step < Math.Abs(direction); step++) game.Move(Math.Sign(direction), 0);
+        game.HardDrop();
+        for (var tick = 0; tick < 1000 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(0.05);
+      }
+      if (game.PollutionCleared > 0) observed = game;
+    }
+    Check(observed is not null);
+    var result = observed!;
+    Check(result.PollutionCleared > 0 && result.Cleared >= result.PollutionCleared);
+    Check(result.Board.Pieces.Where(piece => result.IsPolluted(piece.Id)).Count() == result.PollutionRemaining);
+  }),
   ("Every challenge has a verified solution with its intended clear rhythm", () =>
   {
     var solutions = new[]
@@ -312,6 +396,9 @@ var tests = new (string Name, Action Run)[]
     Check(second.Select(piece => piece.Shape).Distinct().Count() == 7);
     Check(first.Concat(second).Select(piece => piece.Id).Distinct().Count() == 14);
     Check(first.Concat(second).All(piece => piece.Color is >= 0 and < 4));
+    var balanced = new PieceBag(new Random(5), balancedColors: true);
+    var colors = Enumerable.Range(0, 8).Select(_ => balanced.Take().Color).Order().ToArray();
+    Check(colors.SequenceEqual(new[] { 0, 0, 1, 1, 2, 2, 3, 3 }));
   }),
   ("Seeded games keep four-cell shapes valid throughout play", () =>
   {

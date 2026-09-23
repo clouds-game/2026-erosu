@@ -1,7 +1,9 @@
-@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=challenge-3') format('opentype'); font-display: swap; }
-@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=challenge-3') format('opentype'); font-display: swap; }
-html:lang(zh-CN) { font-family: ChromaSC, sans-serif; }
-html:lang(ja) { font-family: ChromaJP, sans-serif; }
+@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=purify-1') format('opentype'); font-display: swap; }
+@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=purify-1') format('opentype'); font-display: swap; }
+@font-face { font-family: FusionSC; src: url('fonts/Fusion-zh_hans.ttf?v=purify-1') format('truetype'); font-display: swap; }
+@font-face { font-family: FusionJP; src: url('fonts/Fusion-ja.ttf?v=purify-1') format('truetype'); font-display: swap; }
+html:lang(zh-CN) { font-family: ChromaSC, FusionSC, sans-serif; }
+html:lang(ja) { font-family: ChromaJP, FusionJP, sans-serif; }
 :root { color-scheme: dark; font-family: system-ui, sans-serif; color: #e6edf3; background: #101319; }
 * { box-sizing: border-box; }
 body { margin: 0; }
@@ -16,6 +18,7 @@ button:disabled { opacity: .4; cursor: default; }
 .playfield > svg { width: 100%; height: 100%; display: block; }
 .outline { fill: none; stroke: #101319; stroke-width: 3; }
 .mark { color: #101319; fill: none; stroke: currentColor; opacity: .4; stroke-width: 1.2; }
+.polluted { fill: none; stroke: #fff4cf; stroke-width: 2; vector-effect: non-scaling-stroke; }
 aside { line-height: 1.35; grid-column: 2; grid-row: 1 / -1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
 .overview, .actions { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .muted, .keys, dl { color: #8391a5; font-size: 13px; }

@@ -8,6 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="../Assets/Fonts/*.otf;../Assets/Fonts/*.txt;../Assets/Fonts/*.md" Link="wwwroot/fonts/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Assets/Fonts/Fusion/*.ttf" Link="wwwroot/fonts/Fusion-%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Assets/Fonts/Fusion/OFL.txt" Link="wwwroot/fonts/Fusion-OFL.txt" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="../Localization/strings.json" LogicalName="ChromaDrop.Localization.strings.json" />
     <Compile Include="../Localization/**/*.cs" Link="Localization/%(Filename)%(Extension)" />
     <Content Include="../Localization/strings.json" Link="wwwroot/locales.json" CopyToOutputDirectory="PreserveNewest" />

@@ -1,0 +1,591 @@
+{
+  "evaluation_seeds": [
+    3000000,
+    3000001,
+    3000002,
+    3000003,
+    3000004,
+    3000005,
+    3000006,
+    3000007,
+    3000008,
+    3000009,
+    3000010,
+    3000011,
+    3000012,
+    3000013,
+    3000014,
+    3000015,
+    3000016,
+    3000017,
+    3000018,
+    3000019
+  ],
+  "max_pieces": 300,
+  "model": "AI/models/starter.json",
+  "source_sha256": "1e284480c57fde8b00799b287000308ba678dcf033bc642aec8cab90a2e215f3",
+  "random": {
+    "mean_score": 1610,
+    "mean_locked": 18.85,
+    "truncated_games": 0,
+    "rejected_actions": 5,
+    "runs": [
+      {
+        "seed": 3000000,
+        "score": 0,
+        "locked": 14,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000001,
+        "score": 3300,
+        "locked": 18,
+        "cleared": 3,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000002,
+        "score": 0,
+        "locked": 19,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 2
+      },
+      {
+        "seed": 3000003,
+        "score": 1900,
+        "locked": 20,
+        "cleared": 3,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000004,
+        "score": 0,
+        "locked": 14,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000005,
+        "score": 10000,
+        "locked": 25,
+        "cleared": 12,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000006,
+        "score": 4100,
+        "locked": 24,
+        "cleared": 4,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 1
+      },
+      {
+        "seed": 3000007,
+        "score": 2700,
+        "locked": 21,
+        "cleared": 3,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 1
+      },
+      {
+        "seed": 3000008,
+        "score": 0,
+        "locked": 19,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000009,
+        "score": 1900,
+        "locked": 21,
+        "cleared": 3,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 1
+      },
+      {
+        "seed": 3000010,
+        "score": 0,
+        "locked": 16,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000011,
+        "score": 0,
+        "locked": 21,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000012,
+        "score": 0,
+        "locked": 16,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000013,
+        "score": 0,
+        "locked": 17,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000014,
+        "score": 0,
+        "locked": 17,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000015,
+        "score": 2200,
+        "locked": 19,
+        "cleared": 3,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000016,
+        "score": 0,
+        "locked": 19,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000017,
+        "score": 4300,
+        "locked": 22,
+        "cleared": 6,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000018,
+        "score": 0,
+        "locked": 16,
+        "cleared": 0,
+        "best_chain": 0,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000019,
+        "score": 1800,
+        "locked": 19,
+        "cleared": 3,
+        "best_chain": 1,
+        "truncated": false,
+        "rejected_actions": 0
+      }
+    ]
+  },
+  "baseline": {
+    "mean_score": 210040,
+    "mean_locked": 296.9,
+    "truncated_games": 18,
+    "rejected_actions": 1,
+    "runs": [
+      {
+        "seed": 3000000,
+        "score": 208400,
+        "locked": 283,
+        "cleared": 255,
+        "best_chain": 2,
+        "truncated": false,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000001,
+        "score": 203600,
+        "locked": 300,
+        "cleared": 288,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000002,
+        "score": 220000,
+        "locked": 300,
+        "cleared": 296,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000003,
+        "score": 211700,
+        "locked": 300,
+        "cleared": 292,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000004,
+        "score": 196900,
+        "locked": 300,
+        "cleared": 284,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000005,
+        "score": 214700,
+        "locked": 300,
+        "cleared": 290,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000006,
+        "score": 202100,
+        "locked": 300,
+        "cleared": 295,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000007,
+        "score": 213200,
+        "locked": 300,
+        "cleared": 295,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000008,
+        "score": 249100,
+        "locked": 300,
+        "cleared": 295,
+        "best_chain": 4,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000009,
+        "score": 225100,
+        "locked": 300,
+        "cleared": 289,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000010,
+        "score": 200900,
+        "locked": 300,
+        "cleared": 290,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000011,
+        "score": 204100,
+        "locked": 300,
+        "cleared": 286,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000012,
+        "score": 198100,
+        "locked": 300,
+        "cleared": 286,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000013,
+        "score": 208600,
+        "locked": 300,
+        "cleared": 290,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000014,
+        "score": 231200,
+        "locked": 300,
+        "cleared": 281,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000015,
+        "score": 222600,
+        "locked": 300,
+        "cleared": 286,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000016,
+        "score": 171400,
+        "locked": 255,
+        "cleared": 227,
+        "best_chain": 2,
+        "truncated": false,
+        "rejected_actions": 1
+      },
+      {
+        "seed": 3000017,
+        "score": 206200,
+        "locked": 300,
+        "cleared": 292,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000018,
+        "score": 209200,
+        "locked": 300,
+        "cleared": 293,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000019,
+        "score": 203700,
+        "locked": 300,
+        "cleared": 286,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      }
+    ]
+  },
+  "trained": {
+    "mean_score": 220760,
+    "mean_locked": 300,
+    "truncated_games": 19,
+    "rejected_actions": 2,
+    "runs": [
+      {
+        "seed": 3000000,
+        "score": 213800,
+        "locked": 300,
+        "cleared": 294,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000001,
+        "score": 210000,
+        "locked": 300,
+        "cleared": 289,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000002,
+        "score": 211000,
+        "locked": 300,
+        "cleared": 293,
+        "best_chain": 1,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000003,
+        "score": 241100,
+        "locked": 300,
+        "cleared": 291,
+        "best_chain": 3,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000004,
+        "score": 232600,
+        "locked": 300,
+        "cleared": 273,
+        "best_chain": 2,
+        "truncated": false,
+        "rejected_actions": 1
+      },
+      {
+        "seed": 3000005,
+        "score": 207300,
+        "locked": 300,
+        "cleared": 287,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000006,
+        "score": 213900,
+        "locked": 300,
+        "cleared": 274,
+        "best_chain": 3,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000007,
+        "score": 231900,
+        "locked": 300,
+        "cleared": 297,
+        "best_chain": 3,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000008,
+        "score": 215300,
+        "locked": 300,
+        "cleared": 282,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000009,
+        "score": 227800,
+        "locked": 300,
+        "cleared": 296,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000010,
+        "score": 218200,
+        "locked": 300,
+        "cleared": 293,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000011,
+        "score": 203500,
+        "locked": 300,
+        "cleared": 292,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000012,
+        "score": 249600,
+        "locked": 300,
+        "cleared": 292,
+        "best_chain": 3,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000013,
+        "score": 217100,
+        "locked": 300,
+        "cleared": 298,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000014,
+        "score": 207700,
+        "locked": 300,
+        "cleared": 295,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000015,
+        "score": 232200,
+        "locked": 300,
+        "cleared": 288,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000016,
+        "score": 209700,
+        "locked": 300,
+        "cleared": 291,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000017,
+        "score": 229200,
+        "locked": 300,
+        "cleared": 291,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 1
+      },
+      {
+        "seed": 3000018,
+        "score": 225600,
+        "locked": 300,
+        "cleared": 293,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      },
+      {
+        "seed": 3000019,
+        "score": 217700,
+        "locked": 300,
+        "cleared": 300,
+        "best_chain": 2,
+        "truncated": true,
+        "rejected_actions": 0
+      }
+    ]
+  }
+}

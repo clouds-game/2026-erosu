@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "features": [
+    "height",
+    "holes",
+    "roughness",
+    "landing_height",
+    "same_color_neighbors",
+    "other_neighbors"
+  ],
+  "weights": [
+    1.0058432610330437,
+    -1.6788239348133975,
+    0.09082271906348546,
+    -0.7575626736036534,
+    3.0718792585890125,
+    -0.7459224600350765
+  ],
+  "algorithm": "cross_entropy",
+  "training_seeds": [
+    670487,
+    116739,
+    26225,
+    777572,
+    288389,
+    256787,
+    234053,
+    146316,
+    772246,
+    107473,
+    709570,
+    776646
+  ],
+  "training_seed": 42,
+  "max_pieces": 150,
+  "population": 16,
+  "history": [
+    {
+      "generation": 1,
+      "best_fitness": 125.15
+    },
+    {
+      "generation": 2,
+      "best_fitness": 128.43333333333334
+    },
+    {
+      "generation": 3,
+      "best_fitness": 128.43333333333334
+    },
+    {
+      "generation": 4,
+      "best_fitness": 129.11666666666667
+    },
+    {
+      "generation": 5,
+      "best_fitness": 129.11666666666667
+    },
+    {
+      "generation": 6,
+      "best_fitness": 129.11666666666667
+    },
+    {
+      "generation": 7,
+      "best_fitness": 129.11666666666667
+    },
+    {
+      "generation": 8,
+      "best_fitness": 129.11666666666667
+    }
+  ],
+  "source_sha256": "1e284480c57fde8b00799b287000308ba678dcf033bc642aec8cab90a2e215f3",
+  "git_commit": "8cfc5aa88c3cd7db7213b7f1f5724c9795dfeae3"
+}

@@ -50,6 +50,35 @@ python3 -m AI.train play --seed 2000100 --max-pieces 150
 设计参考：[Tetris 交叉熵训练研究](https://www.cs.utexas.edu/~shivaram/readings/b2hd-ThierryScherrer2010-b.html)。
 已查看 Godot 插件方案；本项目已有不依赖引擎的 JSON 主机，无需为训练引入 Godot 场景或插件。
 
+## 首次训练记录
+
+仓库附带 `AI/models/starter.json` 和逐局报告 `AI/models/evaluation.json`。
+模型训练使用种子 42、8 代、每代 16 个候选、12 个训练种子、每局最多 150 块。
+可直接运行：
+
+```sh
+python3 -m AI.train play --model AI/models/starter.json --seed 3000100
+python3 -m AI.train evaluate --model AI/models/starter.json --seed 3000000 --episodes 20 --max-pieces 300
+```
+
+独立评估种子为 3000000–3000019，每局最多 300 块：
+
+| 策略 | 平均得分 | 平均锁定块数 |
+| --- | ---: | ---: |
+| 随机落点 | 1,610 | 18.85 |
+| 初始手写权重 | 210,040 | 296.9 |
+| CEM 训练权重 | 220,760 | 300 |
+
+训练模型在本样本上比初始策略高约 5.1%；19 局达到上限，1 局在第 300 块结束，
+不能据此声称能无限生存。初始策略有 18 局达到上限。训练策略共发生 2 次被阻止操作，
+实际对局仍完全由引擎执行。
+这只是小样本描述性结果，不是统计显著性结论。更早的三种子试训在另外 20 个种子上
+反而比初始策略低 4.3%，因此扩大训练集后，使用全新的种子范围进行本次最终评价。
+禁止把反复挑选评估种子的结果当作泛化证据。
+
+示例种子 3000100 的 150 块对局得到 112,400 分、消除 135 块、最高 3 连锁；
+实际命令记录可用 `play` 重建。
+
 ## 测试
 
 ```sh

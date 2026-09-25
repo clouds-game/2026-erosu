@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Before / after training replay</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 20px; background: #101319; color: #e6edf3; font: 15px system-ui; }
+  main { max-width: 940px; margin: auto; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { color: #aab5c5; margin: 8px 0; }
+  .boards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  h2 { font-size: 18px; margin: 12px 0; }
+  canvas { display: block; height: min(52vh,480px); max-width: 100%; aspect-ratio: 10/18; background: #1b2636; }
+  .stats { margin: 8px 0; font-variant-numeric: tabular-nums; min-height: 44px; }
+  button, select { font: inherit; color: inherit; background: #263448; border: 1px solid #66758c; border-radius: 5px; padding: 7px 12px; }
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+  input { flex: 1; min-width: 160px; }
+  output { min-width: 105px; font-variant-numeric: tabular-nums; }
+</style>
+<main>
+  <h1>Before / after training</h1>
+  <p id="meta"></p>
+  <div class="boards">
+    <section><h2>Before · initial heuristic</h2><canvas id="before" width="300" height="540" aria-label="Before training board"></canvas><div class="stats" id="before-stats"></div><p id="before-result"></p></section>
+    <section><h2>After · trained weights</h2><canvas id="after" width="300" height="540" aria-label="After training board"></canvas><div class="stats" id="after-stats"></div><p id="after-result"></p></section>
+  </div>
+  <div class="controls">
+    <button id="back" aria-label="Previous piece">←</button><button id="play">Play</button><button id="forward" aria-label="Next piece">→</button>
+    <input id="position" aria-label="Piece position" type="range" min="0" value="0" step="1"><output id="turn"></output>
+    <select id="speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+  </div>
+  <p>Aligned by placed-piece number; moves and clear animations use normalized playback time. This is not a reaction-speed comparison.</p>
+</main>
+<script id="replay-data" type="application/json">__REPLAY_DATA__</script>
+<script>
+  const data = JSON.parse(document.getElementById('replay-data').textContent);
+  const colors = ['#ff8278', '#8ee2c4', '#f6ce71', '#aaa2f7', '#e58bd3'];
+  const marks = ['●', '□', '+', '/', '×'];
+  const ids = ['before', 'after'];
+  const total = Math.max(...data.policies.map(p => p.turns.length));
+  let turn = 0, fraction = 0, playing = false, last = 0;
+  const slider = document.getElementById('position');
+  slider.max = total - 1;
+  document.getElementById('meta').textContent = `Seed ${data.seed} · ${data.max_pieces}-piece limit · both trajectories verified against the engine`;
+  data.policies.forEach((p, i) => {
+    const r = p.result;
+    document.getElementById(ids[i] + '-result').textContent = `Final: ${r.score.toLocaleString()} points · ${r.locked} pieces · best chain ${r.best_chain} · ${r.truncated ? 'turn limit reached' : 'game over'}`;
+  });
+  function piece(ctx, p, alpha = 1) {
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = colors[p.color];
+    const cells = new Set(p.cells.map(c => `${c.x},${c.y}`));
+    for (const c of p.cells) ctx.fillRect(c.x * 30, c.y * 30, 30, 30);
+    ctx.strokeStyle = '#101319'; ctx.lineWidth = 3;
+    for (const c of p.cells) {
+      const x = c.x * 30, y = c.y * 30;
+      for (const [dx, dy, ax, ay, bx, by] of [[0,-1,x,y,x+30,y],[0,1,x,y+30,x+30,y+30],[-1,0,x,y,x,y+30],[1,0,x+30,y,x+30,y+30]]) {
+        if (!cells.has(`${c.x+dx},${c.y+dy}`)) { ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); }
+      }
+    }
+    const first = [...p.cells].sort((a,b) => a.y-b.y || a.x-b.x)[0];
+    ctx.fillStyle = '#101319'; ctx.font = '17px system-ui'; ctx.textAlign = 'center';
+    ctx.fillText(marks[p.color], first.x*30+15, first.y*30+21);
+    ctx.globalAlpha = 1;
+  }
+  function draw() {
+    data.policies.forEach((p, i) => {
+      const group = p.turns[Math.min(turn, p.turns.length-1)];
+      const index = turn >= p.turns.length ? group.length-1 : Math.min(group.length-1, Math.floor(fraction*group.length));
+      const s = group[index], ctx = document.getElementById(ids[i]).getContext('2d');
+      ctx.clearRect(0,0,300,540);
+      for (const p of s.pieces) piece(ctx,p);
+      if (s.wave) for (const p of s.wave.pieces) piece(ctx,p,0.4);
+      if (s.active) piece(ctx,s.active,0.75);
+      document.getElementById(ids[i]+'-stats').textContent = `${s.score.toLocaleString()} points · cleared ${s.cleared} · chain best ${s.best_chain} · ${s.phase}`;
+    });
+    slider.value = turn;
+    document.getElementById('turn').textContent = `Piece ${turn+1} / ${total}`;
+    document.getElementById('play').textContent = playing ? 'Pause' : 'Play';
+  }
+  function seek(value) { playing=false; turn=Math.max(0,Math.min(total-1,value)); fraction=0; draw(); }
+  slider.oninput=()=>seek(Number(slider.value));
+  document.getElementById('back').onclick=()=>seek(turn-1);
+  document.getElementById('forward').onclick=()=>seek(turn+1);
+  document.getElementById('play').onclick=()=>{ if(turn===total-1 && fraction>=1){turn=0;fraction=0;} playing=!playing; draw(); };
+  function animate(now) {
+    if (playing && last) {
+      fraction += Math.min(now-last,100)/1600 * Number(document.getElementById('speed').value);
+      if (fraction >= 1) { if(turn < total-1){turn++;fraction=0;}else{fraction=1;playing=false;} }
+      draw();
+    }
+    last=now; requestAnimationFrame(animate);
+  }
+  draw(); requestAnimationFrame(animate);
+</script>
+</html>

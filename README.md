@@ -46,6 +46,7 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 
 [轨迹与回放](docs/轨迹与回放.md)：`./tools/play --record 文件.jsonl` 录制 JSON 会话，
 `./tools/play --replay 文件.jsonl --step` 在终端逐步回放并验证。
+`python3 -m AI.compare --seed 3000100` 生成训练前后同种子的双盘 HTML 回放。
 
 | 按键 | 功能 |
 | --- | --- |

@@ -27,6 +27,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet run --project Tests/ChromaDrop.Tests.csproj -c Release
+      - run: dotnet build Headless/ChromaDrop.Headless.csproj -c Release --nologo
       - run: python3 -m unittest discover -s tools -p 'test_*.py'
 
   desktop:

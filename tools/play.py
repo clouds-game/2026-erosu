@@ -1,4 +1,4 @@
-"""准备 Godot C# 项目并启动本地游戏。"""
+"""构建并启动 Godot 游戏或无界面 JSON 引擎。"""
 
 import argparse
 import os
@@ -43,12 +43,24 @@ def run(*command: str) -> None:
 
 def main() -> None:
   parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument("--headless", action="store_true", help="运行外部 tick 驱动的 JSON 引擎，无需 Godot")
   parser.add_argument("--godot", help="Godot .NET 可执行文件路径；也可使用 GODOT_BIN")
   parser.add_argument("--demo", action="store_true", help="启动后直接载入三消示例")
-  parser.add_argument("--prepare-only", action="store_true", help="只构建并导入资源，不打开窗口")
+  parser.add_argument("--prepare-only", action="store_true", help="只准备构建及所需资源，不启动")
   args, game_args = parser.parse_known_args()
   if game_args[:1] == ["--"]:
     game_args.pop(0)
+
+  if args.headless:
+    if args.godot or args.demo or game_args:
+      parser.error("--headless 不接受 --godot、--demo 或游戏参数；请通过 JSON 控制对局。")
+    print("构建无界面引擎。", file=sys.stderr, flush=True)
+    subprocess.run(
+      ["dotnet", "build", "Headless/ChromaDrop.Headless.csproj", "-c", "Release", "--nologo"],
+      cwd=ROOT, check=True, stdin=subprocess.DEVNULL, stdout=sys.stderr)
+    if not args.prepare_only:
+      run("dotnet", str(ROOT / "Headless/bin/Release/net8.0/ChromaDrop.Headless.dll"))
+    return
 
   godot = find_godot(args.godot)
   print("[1/2] 构建 C# 项目", flush=True)

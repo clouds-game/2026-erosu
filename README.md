@@ -36,6 +36,10 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 
 ## 操作
 
+程序化对局可使用纯 .NET [无界面 JSON 引擎](docs/无界面引擎.md)，通过 stdin/stdout
+交换逐行 JSON，由调用方提交 tick 驱动时间。使用 `./tools/play --headless` 启动，
+或在 Windows 使用 `python tools/play.py --headless`；构建日志输出到 stderr。
+
 | 按键 | 功能 |
 | --- | --- |
 | ← / → 或 A / D | 左右移动；支持长按连续移动 |

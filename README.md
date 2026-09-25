@@ -12,18 +12,20 @@ Godot + C# 原生下落益智游戏。进入游戏后直接显示棋盘，不设
 2. 构建 C# 项目，按 F5 运行主场景。
 3. 默认进入三关挑战组；侧栏可直接选择各项挑战、三个学习关卡或自由模式。
 
-本机命令：
+本机命令（自动构建 C#、导入资源并启动游戏）：
 
 ```sh
-dotnet build ChromaDrop.csproj
-/Applications/Godot_mono.app/Contents/MacOS/Godot --path .
+python3 tools/play.py
 ```
 
 直接载入示例：
 
 ```sh
-/Applications/Godot_mono.app/Contents/MacOS/Godot --path . -- --demo
+python3 tools/play.py --demo
 ```
+
+脚本默认查找 macOS `/Applications/Godot_mono.app`、`godot` 或 `godot4`。其他位置可使用
+`python3 tools/play.py --godot /path/to/Godot` 或设置 `GODOT_BIN`。
 
 独立运行规则测试，不需要启动 Godot，也没有第三方测试包依赖：
 

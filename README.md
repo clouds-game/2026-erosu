@@ -44,6 +44,9 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 `python3 -m AI.train evaluate --seed 2000000` 与随机及初始策略对比，
 `python3 -m AI.train play` 记录 AI 对局。先构建无界面引擎。
 
+[轨迹与回放](docs/轨迹与回放.md)：`./tools/play --record 文件.jsonl` 录制 JSON 会话，
+`./tools/play --replay 文件.jsonl --step` 在终端逐步回放并验证。
+
 | 按键 | 功能 |
 | --- | --- |
 | ← / → 或 A / D | 左右移动；支持长按连续移动 |

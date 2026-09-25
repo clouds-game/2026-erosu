@@ -18,6 +18,8 @@ python3 -m AI.train play --seed 2000100 --max-pieces 150
 `evaluation.json` 保存随机策略、手写初始策略、训练策略在同一组种子上的逐局结果；
 `game.jsonl` 保存单局全部 JSON 请求及响应，可审查、回放或作为以后可视化的数据源。
 `play` 当前在 CLI 运行并记录对局，不打开 Godot 窗口。
+轨迹使用 [版本化 JSONL 格式](轨迹与回放.md)，可通过 `./tools/play --replay build/ai/game.jsonl`
+重演并验证全部响应。
 各路径分别由 `--model`、`--report`、`--trace` 指定。
 
 ## 架构与时序

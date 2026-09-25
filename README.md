@@ -40,6 +40,10 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 交换逐行 JSON，由调用方提交 tick 驱动时间。使用 `./tools/play --headless` 启动，
 或在 Windows 使用 `python tools/play.py --headless`；构建日志输出到 stderr。
 
+[Python AI 训练](docs/AI训练.md)：`python3 -m AI.train train` 训练策略，
+`python3 -m AI.train evaluate --seed 2000000` 与随机及初始策略对比，
+`python3 -m AI.train play` 记录 AI 对局。先构建无界面引擎。
+
 | 按键 | 功能 |
 | --- | --- |
 | ← / → 或 A / D | 左右移动；支持长按连续移动 |

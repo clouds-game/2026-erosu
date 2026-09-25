@@ -44,6 +44,11 @@ def run(*command: str) -> None:
 def main() -> None:
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument("--headless", action="store_true", help="运行外部 tick 驱动的 JSON 引擎，无需 Godot")
+  trajectory = parser.add_mutually_exclusive_group()
+  trajectory.add_argument("--record", type=Path, help="录制 JSON 轨迹到新文件（隐含 --headless）")
+  trajectory.add_argument("--replay", type=Path, help="验证并回放 JSON 轨迹（隐含 --headless）")
+  parser.add_argument("--render", action="store_true", help="终端显示回放棋盘")
+  parser.add_argument("--step", action="store_true", help="回放时按 Enter 单步推进")
   parser.add_argument("--godot", help="Godot .NET 可执行文件路径；也可使用 GODOT_BIN")
   parser.add_argument("--demo", action="store_true", help="启动后直接载入三消示例")
   parser.add_argument("--prepare-only", action="store_true", help="只准备构建及所需资源，不启动")
@@ -51,7 +56,11 @@ def main() -> None:
   if game_args[:1] == ["--"]:
     game_args.pop(0)
 
-  if args.headless:
+  if (args.render or args.step) and not args.replay:
+    parser.error("--render / --step 需要 --replay")
+  if (args.record or args.replay) and args.prepare_only:
+    parser.error("轨迹录制/回放不能与 --prepare-only 同用")
+  if args.headless or args.record or args.replay:
     if args.godot or args.demo or game_args:
       parser.error("--headless 不接受 --godot、--demo 或游戏参数；请通过 JSON 控制对局。")
     print("构建无界面引擎。", file=sys.stderr, flush=True)
@@ -59,7 +68,16 @@ def main() -> None:
       ["dotnet", "build", "Headless/ChromaDrop.Headless.csproj", "-c", "Release", "--nologo"],
       cwd=ROOT, check=True, stdin=subprocess.DEVNULL, stdout=sys.stderr)
     if not args.prepare_only:
-      run("dotnet", str(ROOT / "Headless/bin/Release/net8.0/ChromaDrop.Headless.dll"))
+      if args.record or args.replay:
+        command = [sys.executable, "-m", "AI.trajectory", "record" if args.record else "replay",
+          str((args.record or args.replay).resolve())]
+        if args.render:
+          command.append("--render")
+        if args.step:
+          command.append("--step")
+        run(*command)
+      else:
+        run("dotnet", str(ROOT / "Headless/bin/Release/net8.0/ChromaDrop.Headless.dll"))
     return
 
   godot = find_godot(args.godot)

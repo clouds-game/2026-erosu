@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 import subprocess
+from .trajectory import Recorder
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,23 +14,27 @@ class Engine:
   def __init__(self, trace=None):
     if not ENGINE.is_file():
       raise FileNotFoundError("Run python3 tools/play.py --headless --prepare-only first")
-    self.trace = trace
+    self.trace = Recorder(trace, ENGINE) if trace is not None else None
     self.process = subprocess.Popen(
       ["dotnet", str(ENGINE)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
       text=True, bufsize=1, cwd=ROOT)
 
   def command(self, command, **fields):
     request = {"command": command, **fields}
+    response = self.exchange(request)
+    if not response["ok"]:
+      raise RuntimeError(response["error"])
+    return response
+
+  def exchange(self, request):
     self.process.stdin.write(json.dumps(request) + "\n")
     self.process.stdin.flush()
     line = self.process.stdout.readline()
     if not line:
       raise RuntimeError(f"Engine exited unexpectedly: {self.process.poll()}")
     response = json.loads(line)
-    if not response["ok"]:
-      raise RuntimeError(response["error"])
     if self.trace:
-      self.trace.write(json.dumps({"request": request, "response": response}) + "\n")
+      self.trace.record(request, response)
     return response
 
   def close(self):
@@ -45,4 +50,8 @@ class Engine:
     return self
 
   def __exit__(self, *args):
-    self.close()
+    try:
+      if self.trace and args[0] is None:
+        self.trace.finish()
+    finally:
+      self.close()

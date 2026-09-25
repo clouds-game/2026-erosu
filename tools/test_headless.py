@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 import subprocess
+import sys
 import time
 import unittest
 
@@ -98,6 +99,23 @@ class HeadlessTests(unittest.TestCase):
     self.assertEqual("won", result["state"]["phase"])
     self.assertEqual([1, 2, 3], [event["chain"] for event in events])
     self.assertEqual(20900, result["state"]["score"])
+
+
+class LauncherTests(unittest.TestCase):
+  def test_launcher_keeps_build_logs_off_protocol_and_preserves_input(self):
+    commands = [
+      {"command": "start", "mode": "endless", "seed": 42},
+      {"command": "tick", "count": 60},
+    ]
+    result = subprocess.run(
+      [sys.executable, str(ROOT / "tools/play.py"), "--headless"],
+      input="".join(json.dumps(command) + "\n" for command in commands),
+      capture_output=True, text=True, timeout=120, cwd=ROOT.parent)
+    self.assertEqual(0, result.returncode, result.stderr)
+    replies = [json.loads(line) for line in result.stdout.splitlines()]
+    self.assertEqual(2, len(replies))
+    self.assertTrue(all(reply["ok"] for reply in replies))
+    self.assertEqual(60, replies[1]["ticks"])
 
 
 if __name__ == "__main__":

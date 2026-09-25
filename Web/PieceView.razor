@@ -20,6 +20,7 @@
           case 1: <rect x="-2.5" y="-2.5" width="5" height="5" /> break;
           case 2: <path d="M-3 0h6M0 -3v6" /> break;
           case 3: <path d="M-2 3l4 -6" /> break;
+          case 4: <path d="M-3 -3l6 6M3 -3l-6 6" /> break;
         }
       </g>
     }
@@ -29,7 +30,7 @@
 @code {
   [Parameter, EditorRequired] public Piece Piece { get; set; } = null!;
   [Parameter] public bool Ghost { get; set; }
-  private static readonly string[] Palette = ["#ff8278", "#8ee2c4", "#f6ce71", "#aaa2f7"];
+  private static readonly string[] Palette = ["#ff8278", "#8ee2c4", "#f6ce71", "#aaa2f7", "#e58bd3"];
   private string Color => Palette[Piece.Color];
   private bool Has(int x, int y) => Piece.Cells.Contains(new Cell(x, y));
 }

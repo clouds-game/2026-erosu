@@ -311,7 +311,15 @@ var tests = new (string Name, Action Run)[]
     Check(first.Select(piece => piece.Shape).Distinct().Count() == 7);
     Check(second.Select(piece => piece.Shape).Distinct().Count() == 7);
     Check(first.Concat(second).Select(piece => piece.Id).Distinct().Count() == 14);
-    Check(first.Concat(second).All(piece => piece.Color is >= 0 and < 4));
+    Check(first.Concat(second).All(piece => piece.Color is >= 0 and < PieceBag.ColorCount));
+  }),
+  ("Weighted color deck has five bounded frequencies", () =>
+  {
+    var bag = new PieceBag(new Random(5));
+    var colors = Enumerable.Range(0, 40).Select(_ => bag.Take().Color).ToArray();
+    var counts = colors.GroupBy(color => color).ToDictionary(group => group.Key, group => group.Count());
+    Check(counts.Count == PieceBag.ColorCount);
+    Check(Enumerable.Range(0, PieceBag.ColorCount).Select(color => counts[color]).SequenceEqual([10, 9, 8, 7, 6]));
   }),
   ("Seeded games keep four-cell shapes valid throughout play", () =>
   {

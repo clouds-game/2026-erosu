@@ -15,17 +15,18 @@ Godot + C# 原生下落益智游戏。进入游戏后直接显示棋盘，不设
 本机命令（自动构建 C#、导入资源并启动游戏）：
 
 ```sh
-python3 tools/play.py
+./tools/play
 ```
 
 直接载入示例：
 
 ```sh
-python3 tools/play.py --demo
+./tools/play --demo
 ```
 
 脚本默认查找 macOS `/Applications/Godot_mono.app`、`godot` 或 `godot4`。其他位置可使用
-`python3 tools/play.py --godot /path/to/Godot` 或设置 `GODOT_BIN`。
+`./tools/play --godot /path/to/Godot` 或设置 `GODOT_BIN`。Windows 可直接运行
+`python tools/play.py`。
 
 独立运行规则测试，不需要启动 Godot，也没有第三方测试包依赖：
 

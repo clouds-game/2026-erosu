@@ -41,7 +41,7 @@ public partial class GameController : Control
     {
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
       _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & PuzzleLevels.ProgressMask;
-      _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
+      _best = Math.Max(0, save.GetValue("progress", "best_score_rare_seven_v1", 0).AsInt32());
       _audio.Enabled = save.GetValue("settings", "sound_enabled", true).AsBool();
     }
     var captureLanguage = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture-lang="));
@@ -309,8 +309,9 @@ public partial class GameController : Control
   private void SaveProgress()
   {
     var save = new ConfigFile();
+    save.Load(SavePath);
     save.SetValue("settings", "language", _texts.Language);
-    save.SetValue("progress", "best_score", _best);
+    save.SetValue("progress", "best_score_rare_seven_v1", _best);
     save.SetValue("progress", "completed_levels", _completedLevels);
     save.SetValue("settings", "sound_enabled", _audio.Enabled);
     var result = save.Save(SavePath);

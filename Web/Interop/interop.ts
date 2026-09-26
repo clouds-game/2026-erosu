@@ -36,10 +36,10 @@ export function connect(callback: DotNetCallback): void {
 
 export function disconnect(): void { detach?.(); detach = undefined; }
 export function loadBest(): number {
-  try { return Math.max(0, Number(localStorage.getItem('chroma_best')) || 0); } catch { return 0; }
+  try { return Math.max(0, Number(localStorage.getItem('chroma_best_rare_seven_v1')) || 0); } catch { return 0; }
 }
 export function saveBest(score: number): void {
-  try { localStorage.setItem('chroma_best', String(score)); } catch { /* Saving is optional. */ }
+  try { localStorage.setItem('chroma_best_rare_seven_v1', String(score)); } catch { /* Saving is optional. */ }
 }
 export function tone(frequency: number, duration: number): void {
   audio ??= new AudioContext();

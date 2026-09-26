@@ -38,6 +38,7 @@ def compare(model, seed, max_pieces, output):
       result = episode(engine, seed, policy, max_pieces)
     verified = replay(path)
     _, steps = read(path)
+    data["colors"] = steps[0]["response"]["state"]["colors"]
     data['policies'].append({'name': name, 'result': result, 'verified_steps': verified['steps'],
       'turns': frames(steps)})
   # Identical seed should expose the same piece identities/shapes/colors, independent of decisions.

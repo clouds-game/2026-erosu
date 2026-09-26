@@ -88,3 +88,5 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线地址：[开始游戏](https://clouds-game.github.io/2026-erosu/)。
 
 界面支持 English / 简体中文 / 日本語，可在游戏侧栏切换并记住偏好。详见 [界面国际化](docs/界面国际化.md)。
+
+颜色与奖励调参、固定 AI 生存分布：[颜色压力实验](docs/颜色压力实验.md)。

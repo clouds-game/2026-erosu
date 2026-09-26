@@ -35,8 +35,8 @@
 <script id="replay-data" type="application/json">__REPLAY_DATA__</script>
 <script>
   const data = JSON.parse(document.getElementById('replay-data').textContent);
-  const colors = ['#ff8278', '#8ee2c4', '#f6ce71', '#aaa2f7', '#e58bd3'];
-  const marks = ['●', '□', '+', '/', '×'];
+  const colors = data.colors.map(color => color.hex);
+  const marks = data.colors.map(color => color.mark);
   const ids = ['before', 'after'];
   const total = Math.max(...data.policies.map(p => p.turns.length));
   let turn = 0, fraction = 0, playing = false, last = 0;

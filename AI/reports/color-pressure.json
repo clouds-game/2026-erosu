@@ -1,0 +1,5592 @@
+{
+  "version": 1,
+  "model": "AI/models/starter.json",
+  "model_sha256": "c39337e5386ceccce5ed8792030c36f7de2e2912d59299490722e1730b852a7f",
+  "engine_sha256": "a41c5dd726a319bbfa85c14622c9fca3a2253c7bb2a0980c6c0764151a29539e",
+  "source_sha256": "3bfb185e7484dd615786a0eb04c6cef1d3820edc0fd6818c1b8481f2e4c572d4",
+  "seeds": [
+    3001000,
+    3001001,
+    3001002,
+    3001003,
+    3001004,
+    3001005,
+    3001006,
+    3001007,
+    3001008,
+    3001009,
+    3001010,
+    3001011,
+    3001012,
+    3001013,
+    3001014,
+    3001015,
+    3001016,
+    3001017,
+    3001018,
+    3001019,
+    3001020,
+    3001021,
+    3001022,
+    3001023,
+    3001024,
+    3001025,
+    3001026,
+    3001027,
+    3001028,
+    3001029
+  ],
+  "max_pieces": 300,
+  "profiles": {
+    "classic": {
+      "weights": [
+        10,
+        9,
+        8,
+        7,
+        6,
+        0,
+        0
+      ],
+      "colors": [
+        {
+          "id": 0,
+          "key": "red",
+          "hex": "#ff8278",
+          "mark": "\u25cf",
+          "clear_bonus": 0
+        },
+        {
+          "id": 1,
+          "key": "green",
+          "hex": "#8ee2c4",
+          "mark": "\u25a0",
+          "clear_bonus": 0
+        },
+        {
+          "id": 2,
+          "key": "yellow",
+          "hex": "#f6ce71",
+          "mark": "+",
+          "clear_bonus": 0
+        },
+        {
+          "id": 3,
+          "key": "purple",
+          "hex": "#aaa2f7",
+          "mark": "/",
+          "clear_bonus": 0
+        },
+        {
+          "id": 4,
+          "key": "pink",
+          "hex": "#e58bd3",
+          "mark": "\u00d7",
+          "clear_bonus": 0
+        },
+        {
+          "id": 5,
+          "key": "cyan",
+          "hex": "#59cde8",
+          "mark": "=",
+          "clear_bonus": 500
+        },
+        {
+          "id": 6,
+          "key": "gold",
+          "hex": "#d99b24",
+          "mark": "\u25c6",
+          "clear_bonus": 3000
+        }
+      ],
+      "policies": {
+        "baseline": {
+          "summary": {
+            "episodes": 30,
+            "mean_locked_capped": 293.3666666666667,
+            "p10_locked_capped": 288,
+            "median_locked_capped": 300.0,
+            "p90_locked_capped": 300,
+            "reached": {
+              "50": 1.0,
+              "100": 1.0,
+              "150": 1.0,
+              "300": 0.9
+            },
+            "terminated": 3,
+            "truncated": 27,
+            "mean_score": 214430,
+            "mean_rarity_points": 0,
+            "gold_clear_episodes": 0,
+            "rejected_actions": 1
+          },
+          "runs": [
+            {
+              "seed": 3001000,
+              "score": 227000,
+              "locked": 300,
+              "cleared": 279,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                68,
+                60,
+                53,
+                43,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                63,
+                57,
+                48,
+                39,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001001,
+              "score": 207800,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                70,
+                57,
+                52,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                70,
+                55,
+                52,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001002,
+              "score": 236800,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                70,
+                62,
+                50,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                71,
+                69,
+                61,
+                48,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001003,
+              "score": 207700,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                67,
+                60,
+                53,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                71,
+                65,
+                60,
+                50,
+                46,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001004,
+              "score": 206100,
+              "locked": 300,
+              "cleared": 286,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                68,
+                60,
+                52,
+                43,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                66,
+                58,
+                49,
+                39,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001005,
+              "score": 205900,
+              "locked": 300,
+              "cleared": 287,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                67,
+                60,
+                51,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                64,
+                57,
+                48,
+                44,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001006,
+              "score": 207100,
+              "locked": 300,
+              "cleared": 294,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                68,
+                61,
+                51,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                61,
+                49,
+                46,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001007,
+              "score": 214400,
+              "locked": 300,
+              "cleared": 287,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                66,
+                60,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                66,
+                57,
+                49,
+                40,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001008,
+              "score": 226300,
+              "locked": 300,
+              "cleared": 289,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                67,
+                61,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                64,
+                60,
+                51,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001009,
+              "score": 229300,
+              "locked": 300,
+              "cleared": 293,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                66,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                65,
+                58,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001010,
+              "score": 219200,
+              "locked": 300,
+              "cleared": 294,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                67,
+                61,
+                50,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                66,
+                60,
+                49,
+                44,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001011,
+              "score": 149200,
+              "locked": 227,
+              "cleared": 199,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "classic",
+              "placed_by_color": [
+                57,
+                52,
+                45,
+                40,
+                33,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                54,
+                48,
+                36,
+                34,
+                27,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001012,
+              "score": 211500,
+              "locked": 300,
+              "cleared": 283,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                59,
+                51,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                70,
+                67,
+                57,
+                47,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001013,
+              "score": 201200,
+              "locked": 300,
+              "cleared": 285,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                67,
+                60,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                63,
+                57,
+                51,
+                39,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001014,
+              "score": 194400,
+              "locked": 288,
+              "cleared": 259,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                72,
+                65,
+                58,
+                51,
+                42,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                66,
+                60,
+                51,
+                45,
+                37,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001015,
+              "score": 281700,
+              "locked": 300,
+              "cleared": 296,
+              "best_chain": 4,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                69,
+                60,
+                51,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                67,
+                60,
+                50,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001016,
+              "score": 248700,
+              "locked": 300,
+              "cleared": 291,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                58,
+                51,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                68,
+                57,
+                51,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001017,
+              "score": 210200,
+              "locked": 300,
+              "cleared": 294,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                65,
+                60,
+                52,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                77,
+                63,
+                58,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001018,
+              "score": 240100,
+              "locked": 300,
+              "cleared": 291,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                66,
+                61,
+                53,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                63,
+                58,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001019,
+              "score": 217200,
+              "locked": 300,
+              "cleared": 297,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                68,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                73,
+                66,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001020,
+              "score": 208900,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                67,
+                61,
+                51,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                64,
+                61,
+                50,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001021,
+              "score": 209600,
+              "locked": 300,
+              "cleared": 283,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                65,
+                62,
+                52,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                70,
+                63,
+                57,
+                51,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001022,
+              "score": 217600,
+              "locked": 300,
+              "cleared": 289,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                69,
+                58,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                69,
+                55,
+                51,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001023,
+              "score": 126000,
+              "locked": 186,
+              "cleared": 158,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                47,
+                43,
+                39,
+                30,
+                27,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                39,
+                36,
+                33,
+                28,
+                22,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001024,
+              "score": 202500,
+              "locked": 300,
+              "cleared": 289,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                67,
+                61,
+                51,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                63,
+                58,
+                49,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001025,
+              "score": 213300,
+              "locked": 300,
+              "cleared": 294,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                68,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                73,
+                66,
+                59,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001026,
+              "score": 203600,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                78,
+                65,
+                61,
+                54,
+                42,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                63,
+                60,
+                52,
+                41,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001027,
+              "score": 251800,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                59,
+                51,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                73,
+                68,
+                58,
+                49,
+                44,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001028,
+              "score": 226900,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                68,
+                62,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                62,
+                52,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001029,
+              "score": 230900,
+              "locked": 300,
+              "cleared": 293,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                65,
+                60,
+                53,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                63,
+                58,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            }
+          ]
+        },
+        "trained": {
+          "summary": {
+            "episodes": 30,
+            "mean_locked_capped": 300,
+            "p10_locked_capped": 300,
+            "median_locked_capped": 300.0,
+            "p90_locked_capped": 300,
+            "reached": {
+              "50": 1.0,
+              "100": 1.0,
+              "150": 1.0,
+              "300": 1.0
+            },
+            "terminated": 0,
+            "truncated": 30,
+            "mean_score": 221763.33333333334,
+            "mean_rarity_points": 0,
+            "gold_clear_episodes": 0,
+            "rejected_actions": 0
+          },
+          "runs": [
+            {
+              "seed": 3001000,
+              "score": 211800,
+              "locked": 300,
+              "cleared": 296,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                68,
+                60,
+                53,
+                43,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                67,
+                60,
+                51,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001001,
+              "score": 224200,
+              "locked": 300,
+              "cleared": 277,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                70,
+                57,
+                52,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                73,
+                64,
+                52,
+                48,
+                40,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001002,
+              "score": 233100,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                70,
+                62,
+                50,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                71,
+                67,
+                60,
+                49,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001003,
+              "score": 207600,
+              "locked": 300,
+              "cleared": 288,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                67,
+                60,
+                53,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                57,
+                48,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001004,
+              "score": 237000,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 4,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                68,
+                60,
+                52,
+                43,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                66,
+                58,
+                49,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001005,
+              "score": 219700,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                67,
+                60,
+                51,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                64,
+                60,
+                48,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001006,
+              "score": 242100,
+              "locked": 300,
+              "cleared": 293,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                68,
+                61,
+                51,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                71,
+                68,
+                60,
+                49,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001007,
+              "score": 211900,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                66,
+                60,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                63,
+                58,
+                52,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001008,
+              "score": 240900,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                67,
+                61,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                65,
+                59,
+                53,
+                43,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001009,
+              "score": 208300,
+              "locked": 300,
+              "cleared": 287,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                66,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                64,
+                57,
+                52,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001010,
+              "score": 201900,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 1,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                67,
+                61,
+                50,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                66,
+                61,
+                48,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001011,
+              "score": 213600,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                59,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                73,
+                69,
+                59,
+                52,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001012,
+              "score": 225000,
+              "locked": 300,
+              "cleared": 297,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                59,
+                51,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                69,
+                58,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001013,
+              "score": 203500,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                67,
+                60,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                57,
+                51,
+                44,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001014,
+              "score": 223400,
+              "locked": 300,
+              "cleared": 289,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                71,
+                58,
+                54,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                70,
+                69,
+                56,
+                52,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001015,
+              "score": 223100,
+              "locked": 300,
+              "cleared": 291,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                69,
+                60,
+                51,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                67,
+                58,
+                49,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001016,
+              "score": 236900,
+              "locked": 300,
+              "cleared": 293,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                58,
+                51,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                66,
+                56,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001017,
+              "score": 235200,
+              "locked": 300,
+              "cleared": 296,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                65,
+                60,
+                52,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                63,
+                60,
+                51,
+                46,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001018,
+              "score": 211900,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                66,
+                61,
+                53,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                61,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001019,
+              "score": 213300,
+              "locked": 300,
+              "cleared": 296,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                68,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                73,
+                66,
+                61,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001020,
+              "score": 239300,
+              "locked": 300,
+              "cleared": 300,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                67,
+                61,
+                51,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                67,
+                61,
+                51,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001021,
+              "score": 220900,
+              "locked": 300,
+              "cleared": 288,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                65,
+                62,
+                52,
+                47,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                63,
+                60,
+                48,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001022,
+              "score": 242800,
+              "locked": 300,
+              "cleared": 294,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                76,
+                69,
+                58,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                76,
+                67,
+                57,
+                52,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001023,
+              "score": 202700,
+              "locked": 300,
+              "cleared": 288,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                66,
+                61,
+                52,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                63,
+                60,
+                48,
+                45,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001024,
+              "score": 221900,
+              "locked": 300,
+              "cleared": 288,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                67,
+                61,
+                51,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                74,
+                66,
+                57,
+                49,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001025,
+              "score": 207600,
+              "locked": 300,
+              "cleared": 286,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                74,
+                68,
+                61,
+                52,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                71,
+                66,
+                60,
+                48,
+                41,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001026,
+              "score": 251400,
+              "locked": 300,
+              "cleared": 296,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                78,
+                65,
+                61,
+                54,
+                42,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                77,
+                64,
+                61,
+                54,
+                40,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001027,
+              "score": 204300,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                75,
+                69,
+                59,
+                51,
+                46,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                65,
+                57,
+                49,
+                44,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001028,
+              "score": 235200,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                73,
+                68,
+                62,
+                53,
+                44,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                60,
+                51,
+                41,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001029,
+              "score": 202400,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "classic",
+              "placed_by_color": [
+                77,
+                65,
+                60,
+                53,
+                45,
+                0,
+                0
+              ],
+              "cleared_by_color": [
+                75,
+                63,
+                59,
+                51,
+                42,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            }
+          ]
+        }
+      }
+    },
+    "rare_six": {
+      "weights": [
+        25,
+        22,
+        19,
+        17,
+        14,
+        0,
+        3
+      ],
+      "colors": [
+        {
+          "id": 0,
+          "key": "red",
+          "hex": "#ff8278",
+          "mark": "\u25cf",
+          "clear_bonus": 0
+        },
+        {
+          "id": 1,
+          "key": "green",
+          "hex": "#8ee2c4",
+          "mark": "\u25a0",
+          "clear_bonus": 0
+        },
+        {
+          "id": 2,
+          "key": "yellow",
+          "hex": "#f6ce71",
+          "mark": "+",
+          "clear_bonus": 0
+        },
+        {
+          "id": 3,
+          "key": "purple",
+          "hex": "#aaa2f7",
+          "mark": "/",
+          "clear_bonus": 0
+        },
+        {
+          "id": 4,
+          "key": "pink",
+          "hex": "#e58bd3",
+          "mark": "\u00d7",
+          "clear_bonus": 0
+        },
+        {
+          "id": 5,
+          "key": "cyan",
+          "hex": "#59cde8",
+          "mark": "=",
+          "clear_bonus": 500
+        },
+        {
+          "id": 6,
+          "key": "gold",
+          "hex": "#d99b24",
+          "mark": "\u25c6",
+          "clear_bonus": 3000
+        }
+      ],
+      "policies": {
+        "baseline": {
+          "summary": {
+            "episodes": 30,
+            "mean_locked_capped": 232.96666666666667,
+            "p10_locked_capped": 138,
+            "median_locked_capped": 256.5,
+            "p90_locked_capped": 300,
+            "reached": {
+              "50": 1.0,
+              "100": 0.9666666666666667,
+              "150": 0.8666666666666667,
+              "300": 0.4
+            },
+            "terminated": 19,
+            "truncated": 11,
+            "mean_score": 182906.66666666666,
+            "mean_rarity_points": 10000,
+            "gold_clear_episodes": 20,
+            "rejected_actions": 24
+          },
+          "runs": [
+            {
+              "seed": 3001000,
+              "score": 82400,
+              "locked": 144,
+              "cleared": 109,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 6,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                33,
+                33,
+                26,
+                25,
+                23,
+                0,
+                4
+              ],
+              "cleared_by_color": [
+                25,
+                30,
+                18,
+                21,
+                15,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001001,
+              "score": 100400,
+              "locked": 166,
+              "cleared": 135,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                40,
+                37,
+                31,
+                28,
+                25,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                36,
+                30,
+                27,
+                21,
+                21,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001002,
+              "score": 39300,
+              "locked": 84,
+              "cleared": 51,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                19,
+                20,
+                15,
+                16,
+                11,
+                0,
+                3
+              ],
+              "cleared_by_color": [
+                9,
+                12,
+                12,
+                12,
+                6,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001003,
+              "score": 82800,
+              "locked": 138,
+              "cleared": 105,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                33,
+                33,
+                27,
+                21,
+                19,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                27,
+                27,
+                21,
+                18,
+                12,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001004,
+              "score": 236500,
+              "locked": 300,
+              "cleared": 275,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                62,
+                53,
+                47,
+                38,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001005,
+              "score": 231700,
+              "locked": 300,
+              "cleared": 287,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                66,
+                55,
+                49,
+                39,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001006,
+              "score": 262800,
+              "locked": 300,
+              "cleared": 280,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                69,
+                63,
+                54,
+                48,
+                40,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001007,
+              "score": 157600,
+              "locked": 204,
+              "cleared": 175,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                53,
+                45,
+                38,
+                34,
+                28,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                49,
+                39,
+                33,
+                30,
+                21,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001008,
+              "score": 104200,
+              "locked": 156,
+              "cleared": 123,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                39,
+                34,
+                28,
+                28,
+                22,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                33,
+                33,
+                24,
+                21,
+                12,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001009,
+              "score": 238900,
+              "locked": 283,
+              "cleared": 252,
+              "best_chain": 3,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                72,
+                63,
+                53,
+                47,
+                41,
+                0,
+                7
+              ],
+              "cleared_by_color": [
+                66,
+                59,
+                48,
+                42,
+                34,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001010,
+              "score": 258500,
+              "locked": 300,
+              "cleared": 280,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                64,
+                57,
+                45,
+                36,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001011,
+              "score": 238300,
+              "locked": 300,
+              "cleared": 278,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                70,
+                63,
+                56,
+                49,
+                34,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001012,
+              "score": 255300,
+              "locked": 300,
+              "cleared": 279,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                70,
+                65,
+                52,
+                47,
+                39,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001013,
+              "score": 252700,
+              "locked": 300,
+              "cleared": 276,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                74,
+                63,
+                55,
+                45,
+                36,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001014,
+              "score": 212100,
+              "locked": 247,
+              "cleared": 214,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 6,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                61,
+                54,
+                44,
+                43,
+                38,
+                0,
+                7
+              ],
+              "cleared_by_color": [
+                52,
+                50,
+                36,
+                37,
+                36,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001015,
+              "score": 108000,
+              "locked": 168,
+              "cleared": 135,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                41,
+                37,
+                31,
+                28,
+                25,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                36,
+                30,
+                24,
+                22,
+                20,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001016,
+              "score": 147600,
+              "locked": 188,
+              "cleared": 157,
+              "best_chain": 3,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                46,
+                43,
+                36,
+                32,
+                26,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                39,
+                38,
+                33,
+                28,
+                19,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001017,
+              "score": 254700,
+              "locked": 300,
+              "cleared": 292,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                64,
+                55,
+                49,
+                42,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001018,
+              "score": 256100,
+              "locked": 300,
+              "cleared": 281,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                62,
+                52,
+                48,
+                40,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001019,
+              "score": 256000,
+              "locked": 293,
+              "cleared": 262,
+              "best_chain": 3,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                73,
+                65,
+                57,
+                51,
+                38,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                69,
+                61,
+                50,
+                45,
+                31,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001020,
+              "score": 174500,
+              "locked": 233,
+              "cleared": 197,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 3,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                59,
+                54,
+                41,
+                41,
+                31,
+                0,
+                7
+              ],
+              "cleared_by_color": [
+                50,
+                44,
+                36,
+                37,
+                24,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001021,
+              "score": 70300,
+              "locked": 119,
+              "cleared": 88,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                29,
+                27,
+                22,
+                20,
+                17,
+                0,
+                4
+              ],
+              "cleared_by_color": [
+                25,
+                21,
+                15,
+                15,
+                12,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001022,
+              "score": 128700,
+              "locked": 156,
+              "cleared": 124,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                46,
+                33,
+                27,
+                25,
+                20,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                42,
+                27,
+                24,
+                15,
+                12,
+                0,
+                4
+              ],
+              "rarity_points": 12000
+            },
+            {
+              "seed": 3001023,
+              "score": 250600,
+              "locked": 300,
+              "cleared": 269,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                67,
+                61,
+                51,
+                45,
+                39,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001024,
+              "score": 261100,
+              "locked": 300,
+              "cleared": 279,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                65,
+                54,
+                45,
+                36,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001025,
+              "score": 99900,
+              "locked": 166,
+              "cleared": 133,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                39,
+                38,
+                34,
+                30,
+                21,
+                0,
+                4
+              ],
+              "cleared_by_color": [
+                30,
+                33,
+                27,
+                27,
+                16,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001026,
+              "score": 128500,
+              "locked": 182,
+              "cleared": 154,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                43,
+                41,
+                35,
+                33,
+                24,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                39,
+                37,
+                30,
+                27,
+                21,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001027,
+              "score": 122300,
+              "locked": 196,
+              "cleared": 163,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                50,
+                44,
+                37,
+                32,
+                27,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                46,
+                39,
+                30,
+                27,
+                21,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001028,
+              "score": 262900,
+              "locked": 300,
+              "cleared": 284,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                63,
+                55,
+                48,
+                40,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001029,
+              "score": 212500,
+              "locked": 266,
+              "cleared": 233,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                65,
+                59,
+                51,
+                45,
+                38,
+                0,
+                8
+              ],
+              "cleared_by_color": [
+                61,
+                54,
+                46,
+                39,
+                30,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            }
+          ]
+        },
+        "trained": {
+          "summary": {
+            "episodes": 30,
+            "mean_locked_capped": 231.63333333333333,
+            "p10_locked_capped": 120,
+            "median_locked_capped": 243.0,
+            "p90_locked_capped": 300,
+            "reached": {
+              "50": 1.0,
+              "100": 0.9333333333333333,
+              "150": 0.9,
+              "300": 0.4
+            },
+            "terminated": 18,
+            "truncated": 12,
+            "mean_score": 185330,
+            "mean_rarity_points": 11800,
+            "gold_clear_episodes": 21,
+            "rejected_actions": 22
+          },
+          "runs": [
+            {
+              "seed": 3001000,
+              "score": 277000,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                66,
+                54,
+                48,
+                40,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001001,
+              "score": 249100,
+              "locked": 300,
+              "cleared": 288,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                63,
+                54,
+                51,
+                39,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001002,
+              "score": 176000,
+              "locked": 213,
+              "cleared": 185,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                52,
+                47,
+                40,
+                35,
+                33,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                45,
+                43,
+                34,
+                30,
+                30,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001003,
+              "score": 117300,
+              "locked": 169,
+              "cleared": 140,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                43,
+                39,
+                29,
+                28,
+                24,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                42,
+                34,
+                24,
+                21,
+                19,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001004,
+              "score": 257700,
+              "locked": 300,
+              "cleared": 277,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                69,
+                63,
+                53,
+                49,
+                37,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001005,
+              "score": 150200,
+              "locked": 221,
+              "cleared": 195,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                57,
+                48,
+                43,
+                36,
+                30,
+                0,
+                7
+              ],
+              "cleared_by_color": [
+                54,
+                42,
+                40,
+                31,
+                25,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001006,
+              "score": 101000,
+              "locked": 153,
+              "cleared": 127,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                40,
+                32,
+                30,
+                25,
+                22,
+                0,
+                4
+              ],
+              "cleared_by_color": [
+                33,
+                27,
+                27,
+                22,
+                18,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001007,
+              "score": 209900,
+              "locked": 256,
+              "cleared": 230,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                63,
+                54,
+                51,
+                45,
+                36,
+                0,
+                7
+              ],
+              "cleared_by_color": [
+                58,
+                51,
+                46,
+                39,
+                33,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001008,
+              "score": 254900,
+              "locked": 300,
+              "cleared": 293,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                66,
+                56,
+                50,
+                39,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001009,
+              "score": 31300,
+              "locked": 67,
+              "cleared": 39,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                20,
+                15,
+                11,
+                12,
+                6,
+                0,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                9,
+                9,
+                6,
+                0,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001010,
+              "score": 240400,
+              "locked": 300,
+              "cleared": 290,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                65,
+                57,
+                50,
+                40,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001011,
+              "score": 143200,
+              "locked": 201,
+              "cleared": 173,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                50,
+                44,
+                38,
+                34,
+                29,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                45,
+                42,
+                32,
+                27,
+                24,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001012,
+              "score": 143600,
+              "locked": 182,
+              "cleared": 157,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                43,
+                40,
+                36,
+                33,
+                24,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                36,
+                36,
+                33,
+                28,
+                21,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001013,
+              "score": 129000,
+              "locked": 177,
+              "cleared": 152,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                45,
+                40,
+                34,
+                28,
+                24,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                42,
+                38,
+                30,
+                24,
+                18,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001014,
+              "score": 102600,
+              "locked": 159,
+              "cleared": 132,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                41,
+                37,
+                32,
+                24,
+                21,
+                0,
+                4
+              ],
+              "cleared_by_color": [
+                36,
+                33,
+                30,
+                18,
+                15,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001015,
+              "score": 123700,
+              "locked": 157,
+              "cleared": 130,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                39,
+                35,
+                29,
+                26,
+                23,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                30,
+                30,
+                24,
+                24,
+                19,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001016,
+              "score": 253100,
+              "locked": 300,
+              "cleared": 277,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                64,
+                54,
+                45,
+                36,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001017,
+              "score": 221700,
+              "locked": 300,
+              "cleared": 284,
+              "best_chain": 1,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                69,
+                66,
+                52,
+                49,
+                39,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001018,
+              "score": 156500,
+              "locked": 212,
+              "cleared": 182,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 4,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                53,
+                47,
+                40,
+                35,
+                31,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                48,
+                43,
+                36,
+                31,
+                24,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001019,
+              "score": 70300,
+              "locked": 120,
+              "cleared": 91,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                29,
+                27,
+                23,
+                19,
+                17,
+                0,
+                5
+              ],
+              "cleared_by_color": [
+                25,
+                21,
+                18,
+                15,
+                12,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001020,
+              "score": 270300,
+              "locked": 296,
+              "cleared": 271,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                74,
+                66,
+                55,
+                50,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                68,
+                63,
+                51,
+                46,
+                37,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001021,
+              "score": 31200,
+              "locked": 67,
+              "cleared": 39,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                18,
+                12,
+                13,
+                13,
+                9,
+                0,
+                2
+              ],
+              "cleared_by_color": [
+                12,
+                6,
+                9,
+                9,
+                3,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001022,
+              "score": 274000,
+              "locked": 300,
+              "cleared": 289,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                64,
+                55,
+                48,
+                40,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001023,
+              "score": 172300,
+              "locked": 230,
+              "cleared": 201,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                57,
+                48,
+                41,
+                41,
+                35,
+                0,
+                8
+              ],
+              "cleared_by_color": [
+                54,
+                45,
+                33,
+                36,
+                30,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            },
+            {
+              "seed": 3001024,
+              "score": 260700,
+              "locked": 300,
+              "cleared": 295,
+              "best_chain": 3,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                66,
+                54,
+                51,
+                42,
+                0,
+                9
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001025,
+              "score": 268600,
+              "locked": 300,
+              "cleared": 285,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                75,
+                64,
+                55,
+                48,
+                39,
+                0,
+                4
+              ],
+              "rarity_points": 12000
+            },
+            {
+              "seed": 3001026,
+              "score": 151800,
+              "locked": 202,
+              "cleared": 177,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                51,
+                45,
+                38,
+                34,
+                28,
+                0,
+                6
+              ],
+              "cleared_by_color": [
+                46,
+                41,
+                36,
+                30,
+                24,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001027,
+              "score": 266000,
+              "locked": 300,
+              "cleared": 280,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                72,
+                63,
+                54,
+                46,
+                39,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001028,
+              "score": 252900,
+              "locked": 300,
+              "cleared": 283,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                75,
+                66,
+                57,
+                51,
+                42,
+                0,
+                9
+              ],
+              "cleared_by_color": [
+                73,
+                63,
+                53,
+                49,
+                39,
+                0,
+                6
+              ],
+              "rarity_points": 18000
+            },
+            {
+              "seed": 3001029,
+              "score": 203600,
+              "locked": 267,
+              "cleared": 240,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_six",
+              "placed_by_color": [
+                65,
+                59,
+                52,
+                45,
+                38,
+                0,
+                8
+              ],
+              "cleared_by_color": [
+                59,
+                55,
+                47,
+                42,
+                34,
+                0,
+                3
+              ],
+              "rarity_points": 9000
+            }
+          ]
+        }
+      }
+    },
+    "rare_seven": {
+      "weights": [
+        22,
+        20,
+        18,
+        16,
+        14,
+        7,
+        3
+      ],
+      "colors": [
+        {
+          "id": 0,
+          "key": "red",
+          "hex": "#ff8278",
+          "mark": "\u25cf",
+          "clear_bonus": 0
+        },
+        {
+          "id": 1,
+          "key": "green",
+          "hex": "#8ee2c4",
+          "mark": "\u25a0",
+          "clear_bonus": 0
+        },
+        {
+          "id": 2,
+          "key": "yellow",
+          "hex": "#f6ce71",
+          "mark": "+",
+          "clear_bonus": 0
+        },
+        {
+          "id": 3,
+          "key": "purple",
+          "hex": "#aaa2f7",
+          "mark": "/",
+          "clear_bonus": 0
+        },
+        {
+          "id": 4,
+          "key": "pink",
+          "hex": "#e58bd3",
+          "mark": "\u00d7",
+          "clear_bonus": 0
+        },
+        {
+          "id": 5,
+          "key": "cyan",
+          "hex": "#59cde8",
+          "mark": "=",
+          "clear_bonus": 500
+        },
+        {
+          "id": 6,
+          "key": "gold",
+          "hex": "#d99b24",
+          "mark": "\u25c6",
+          "clear_bonus": 3000
+        }
+      ],
+      "policies": {
+        "baseline": {
+          "summary": {
+            "episodes": 30,
+            "mean_locked_capped": 143.46666666666667,
+            "p10_locked_capped": 91,
+            "median_locked_capped": 132.5,
+            "p90_locked_capped": 203,
+            "reached": {
+              "50": 1.0,
+              "100": 0.8,
+              "150": 0.36666666666666664,
+              "300": 0.0
+            },
+            "terminated": 30,
+            "truncated": 0,
+            "mean_score": 103546.66666666667,
+            "mean_rarity_points": 6700,
+            "gold_clear_episodes": 12,
+            "rejected_actions": 30
+          },
+          "runs": [
+            {
+              "seed": 3001000,
+              "score": 45000,
+              "locked": 91,
+              "cleared": 57,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                21,
+                17,
+                15,
+                15,
+                13,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                12,
+                9,
+                12,
+                6,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001001,
+              "score": 135200,
+              "locked": 164,
+              "cleared": 132,
+              "best_chain": 3,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                35,
+                33,
+                29,
+                27,
+                23,
+                12,
+                5
+              ],
+              "cleared_by_color": [
+                30,
+                27,
+                24,
+                21,
+                21,
+                9,
+                0
+              ],
+              "rarity_points": 4500
+            },
+            {
+              "seed": 3001002,
+              "score": 66700,
+              "locked": 103,
+              "cleared": 72,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                22,
+                22,
+                18,
+                16,
+                15,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                18,
+                15,
+                15,
+                12,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001003,
+              "score": 88600,
+              "locked": 130,
+              "cleared": 98,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                27,
+                28,
+                25,
+                20,
+                16,
+                10,
+                4
+              ],
+              "cleared_by_color": [
+                22,
+                24,
+                21,
+                15,
+                10,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001004,
+              "score": 89100,
+              "locked": 112,
+              "cleared": 86,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                21,
+                19,
+                17,
+                20,
+                7,
+                4
+              ],
+              "cleared_by_color": [
+                21,
+                15,
+                15,
+                9,
+                18,
+                5,
+                3
+              ],
+              "rarity_points": 11500
+            },
+            {
+              "seed": 3001005,
+              "score": 94900,
+              "locked": 136,
+              "cleared": 108,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                28,
+                27,
+                27,
+                20,
+                20,
+                10,
+                4
+              ],
+              "cleared_by_color": [
+                24,
+                21,
+                24,
+                15,
+                18,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001006,
+              "score": 47200,
+              "locked": 90,
+              "cleared": 57,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                20,
+                18,
+                16,
+                14,
+                13,
+                7,
+                2
+              ],
+              "cleared_by_color": [
+                15,
+                15,
+                9,
+                9,
+                6,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001007,
+              "score": 62800,
+              "locked": 98,
+              "cleared": 67,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                21,
+                20,
+                18,
+                16,
+                13,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                16,
+                18,
+                12,
+                9,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001008,
+              "score": 45900,
+              "locked": 94,
+              "cleared": 57,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                22,
+                18,
+                17,
+                15,
+                12,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                15,
+                12,
+                12,
+                3,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001009,
+              "score": 57600,
+              "locked": 101,
+              "cleared": 69,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                23,
+                20,
+                18,
+                16,
+                14,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                18,
+                15,
+                12,
+                12,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001010,
+              "score": 120300,
+              "locked": 177,
+              "cleared": 145,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                38,
+                32,
+                33,
+                29,
+                26,
+                13,
+                6
+              ],
+              "cleared_by_color": [
+                34,
+                27,
+                28,
+                24,
+                20,
+                9,
+                3
+              ],
+              "rarity_points": 13500
+            },
+            {
+              "seed": 3001011,
+              "score": 133200,
+              "locked": 190,
+              "cleared": 157,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                40,
+                38,
+                34,
+                30,
+                28,
+                14,
+                6
+              ],
+              "cleared_by_color": [
+                37,
+                33,
+                28,
+                26,
+                21,
+                12,
+                0
+              ],
+              "rarity_points": 6000
+            },
+            {
+              "seed": 3001012,
+              "score": 75100,
+              "locked": 117,
+              "cleared": 86,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                24,
+                21,
+                18,
+                18,
+                9,
+                3
+              ],
+              "cleared_by_color": [
+                18,
+                21,
+                14,
+                15,
+                15,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001013,
+              "score": 168200,
+              "locked": 194,
+              "cleared": 164,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                43,
+                39,
+                34,
+                30,
+                28,
+                14,
+                6
+              ],
+              "cleared_by_color": [
+                39,
+                33,
+                29,
+                27,
+                24,
+                9,
+                3
+              ],
+              "rarity_points": 13500
+            },
+            {
+              "seed": 3001014,
+              "score": 158900,
+              "locked": 175,
+              "cleared": 147,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                39,
+                35,
+                33,
+                26,
+                24,
+                13,
+                5
+              ],
+              "cleared_by_color": [
+                37,
+                33,
+                27,
+                19,
+                18,
+                10,
+                3
+              ],
+              "rarity_points": 14000
+            },
+            {
+              "seed": 3001015,
+              "score": 150400,
+              "locked": 201,
+              "cleared": 167,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                44,
+                40,
+                37,
+                32,
+                28,
+                14,
+                6
+              ],
+              "cleared_by_color": [
+                40,
+                36,
+                30,
+                22,
+                27,
+                9,
+                3
+              ],
+              "rarity_points": 13500
+            },
+            {
+              "seed": 3001016,
+              "score": 64100,
+              "locked": 109,
+              "cleared": 78,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                23,
+                19,
+                18,
+                15,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                21,
+                18,
+                15,
+                12,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001017,
+              "score": 68700,
+              "locked": 107,
+              "cleared": 73,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                21,
+                20,
+                16,
+                15,
+                8,
+                3
+              ],
+              "cleared_by_color": [
+                18,
+                12,
+                15,
+                13,
+                12,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001018,
+              "score": 179400,
+              "locked": 226,
+              "cleared": 197,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                50,
+                45,
+                41,
+                35,
+                32,
+                17,
+                6
+              ],
+              "cleared_by_color": [
+                46,
+                42,
+                37,
+                28,
+                28,
+                13,
+                3
+              ],
+              "rarity_points": 15500
+            },
+            {
+              "seed": 3001019,
+              "score": 70600,
+              "locked": 106,
+              "cleared": 69,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                22,
+                18,
+                16,
+                14,
+                8,
+                4
+              ],
+              "cleared_by_color": [
+                15,
+                15,
+                12,
+                12,
+                9,
+                3,
+                3
+              ],
+              "rarity_points": 10500
+            },
+            {
+              "seed": 3001020,
+              "score": 102500,
+              "locked": 146,
+              "cleared": 114,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 6,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                32,
+                27,
+                30,
+                22,
+                22,
+                7,
+                6
+              ],
+              "cleared_by_color": [
+                27,
+                21,
+                24,
+                21,
+                18,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001021,
+              "score": 104500,
+              "locked": 128,
+              "cleared": 99,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                28,
+                26,
+                22,
+                19,
+                18,
+                11,
+                4
+              ],
+              "cleared_by_color": [
+                23,
+                21,
+                19,
+                15,
+                15,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001022,
+              "score": 182500,
+              "locked": 237,
+              "cleared": 204,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                53,
+                46,
+                41,
+                39,
+                33,
+                18,
+                7
+              ],
+              "cleared_by_color": [
+                50,
+                39,
+                39,
+                34,
+                27,
+                12,
+                3
+              ],
+              "rarity_points": 15000
+            },
+            {
+              "seed": 3001023,
+              "score": 52400,
+              "locked": 93,
+              "cleared": 57,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                21,
+                19,
+                16,
+                15,
+                12,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                15,
+                9,
+                9,
+                6,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001024,
+              "score": 105000,
+              "locked": 142,
+              "cleared": 109,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                29,
+                27,
+                29,
+                25,
+                18,
+                9,
+                5
+              ],
+              "cleared_by_color": [
+                24,
+                19,
+                24,
+                21,
+                15,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001025,
+              "score": 56100,
+              "locked": 88,
+              "cleared": 63,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                19,
+                19,
+                14,
+                16,
+                11,
+                6,
+                3
+              ],
+              "cleared_by_color": [
+                18,
+                15,
+                9,
+                9,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001026,
+              "score": 201700,
+              "locked": 247,
+              "cleared": 213,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                55,
+                51,
+                46,
+                39,
+                33,
+                17,
+                6
+              ],
+              "cleared_by_color": [
+                50,
+                46,
+                44,
+                32,
+                24,
+                14,
+                3
+              ],
+              "rarity_points": 16000
+            },
+            {
+              "seed": 3001027,
+              "score": 152400,
+              "locked": 203,
+              "cleared": 176,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                44,
+                41,
+                36,
+                34,
+                28,
+                14,
+                6
+              ],
+              "cleared_by_color": [
+                42,
+                37,
+                33,
+                30,
+                25,
+                6,
+                3
+              ],
+              "rarity_points": 12000
+            },
+            {
+              "seed": 3001028,
+              "score": 107700,
+              "locked": 135,
+              "cleared": 105,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                32,
+                23,
+                24,
+                23,
+                19,
+                11,
+                3
+              ],
+              "cleared_by_color": [
+                27,
+                21,
+                18,
+                18,
+                12,
+                6,
+                3
+              ],
+              "rarity_points": 12000
+            },
+            {
+              "seed": 3001029,
+              "score": 119700,
+              "locked": 164,
+              "cleared": 135,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                34,
+                32,
+                28,
+                27,
+                24,
+                13,
+                6
+              ],
+              "cleared_by_color": [
+                30,
+                27,
+                21,
+                24,
+                18,
+                12,
+                3
+              ],
+              "rarity_points": 15000
+            }
+          ]
+        },
+        "trained": {
+          "summary": {
+            "episodes": 30,
+            "mean_locked_capped": 137.8,
+            "p10_locked_capped": 56,
+            "median_locked_capped": 112.0,
+            "p90_locked_capped": 260,
+            "reached": {
+              "50": 1.0,
+              "100": 0.6,
+              "150": 0.36666666666666664,
+              "300": 0.03333333333333333
+            },
+            "terminated": 29,
+            "truncated": 1,
+            "mean_score": 99570,
+            "mean_rarity_points": 6583.333333333333,
+            "gold_clear_episodes": 9,
+            "rejected_actions": 26
+          },
+          "runs": [
+            {
+              "seed": 3001000,
+              "score": 90000,
+              "locked": 143,
+              "cleared": 113,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                29,
+                28,
+                25,
+                23,
+                23,
+                11,
+                4
+              ],
+              "cleared_by_color": [
+                22,
+                24,
+                21,
+                22,
+                21,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001001,
+              "score": 67400,
+              "locked": 99,
+              "cleared": 72,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                22,
+                20,
+                17,
+                16,
+                14,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                18,
+                15,
+                15,
+                12,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001002,
+              "score": 57200,
+              "locked": 92,
+              "cleared": 60,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                18,
+                19,
+                18,
+                14,
+                14,
+                6,
+                3
+              ],
+              "cleared_by_color": [
+                12,
+                15,
+                12,
+                12,
+                9,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001003,
+              "score": 80000,
+              "locked": 121,
+              "cleared": 91,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                26,
+                25,
+                23,
+                19,
+                16,
+                8,
+                4
+              ],
+              "cleared_by_color": [
+                21,
+                21,
+                18,
+                15,
+                10,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001004,
+              "score": 129800,
+              "locked": 172,
+              "cleared": 144,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                40,
+                33,
+                31,
+                29,
+                24,
+                10,
+                5
+              ],
+              "cleared_by_color": [
+                39,
+                30,
+                27,
+                24,
+                18,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001005,
+              "score": 75700,
+              "locked": 123,
+              "cleared": 97,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                26,
+                25,
+                23,
+                17,
+                19,
+                9,
+                4
+              ],
+              "cleared_by_color": [
+                21,
+                24,
+                18,
+                15,
+                16,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001006,
+              "score": 68100,
+              "locked": 110,
+              "cleared": 81,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                22,
+                20,
+                18,
+                14,
+                9,
+                3
+              ],
+              "cleared_by_color": [
+                21,
+                18,
+                12,
+                15,
+                9,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001007,
+              "score": 23400,
+              "locked": 62,
+              "cleared": 30,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                13,
+                9,
+                13,
+                10,
+                10,
+                6,
+                1
+              ],
+              "cleared_by_color": [
+                6,
+                3,
+                12,
+                6,
+                3,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001008,
+              "score": 261300,
+              "locked": 297,
+              "cleared": 269,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                66,
+                59,
+                54,
+                48,
+                41,
+                20,
+                9
+              ],
+              "cleared_by_color": [
+                59,
+                54,
+                52,
+                44,
+                36,
+                18,
+                6
+              ],
+              "rarity_points": 27000
+            },
+            {
+              "seed": 3001009,
+              "score": 22000,
+              "locked": 56,
+              "cleared": 27,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                14,
+                11,
+                13,
+                6,
+                7,
+                2,
+                3
+              ],
+              "cleared_by_color": [
+                12,
+                6,
+                6,
+                0,
+                3,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001010,
+              "score": 114600,
+              "locked": 153,
+              "cleared": 123,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                33,
+                29,
+                26,
+                26,
+                21,
+                12,
+                6
+              ],
+              "cleared_by_color": [
+                32,
+                24,
+                21,
+                25,
+                15,
+                6,
+                0
+              ],
+              "rarity_points": 3000
+            },
+            {
+              "seed": 3001011,
+              "score": 130800,
+              "locked": 169,
+              "cleared": 139,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                36,
+                32,
+                32,
+                27,
+                25,
+                13,
+                4
+              ],
+              "cleared_by_color": [
+                30,
+                27,
+                27,
+                24,
+                22,
+                9,
+                0
+              ],
+              "rarity_points": 4500
+            },
+            {
+              "seed": 3001012,
+              "score": 20900,
+              "locked": 55,
+              "cleared": 30,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                12,
+                11,
+                10,
+                10,
+                7,
+                3,
+                2
+              ],
+              "cleared_by_color": [
+                9,
+                9,
+                3,
+                6,
+                3,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001013,
+              "score": 42800,
+              "locked": 73,
+              "cleared": 46,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                13,
+                14,
+                15,
+                11,
+                11,
+                6,
+                3
+              ],
+              "cleared_by_color": [
+                10,
+                12,
+                9,
+                9,
+                6,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001014,
+              "score": 71800,
+              "locked": 110,
+              "cleared": 85,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                26,
+                22,
+                20,
+                17,
+                14,
+                8,
+                3
+              ],
+              "cleared_by_color": [
+                24,
+                19,
+                18,
+                12,
+                9,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001015,
+              "score": 47400,
+              "locked": 93,
+              "cleared": 63,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                22,
+                19,
+                17,
+                14,
+                11,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                15,
+                15,
+                9,
+                6,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001016,
+              "score": 203300,
+              "locked": 256,
+              "cleared": 226,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 3,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                59,
+                48,
+                47,
+                43,
+                36,
+                16,
+                7
+              ],
+              "cleared_by_color": [
+                54,
+                45,
+                42,
+                39,
+                31,
+                12,
+                3
+              ],
+              "rarity_points": 15000
+            },
+            {
+              "seed": 3001017,
+              "score": 159200,
+              "locked": 207,
+              "cleared": 179,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 3,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                46,
+                41,
+                37,
+                33,
+                29,
+                15,
+                6
+              ],
+              "cleared_by_color": [
+                39,
+                38,
+                33,
+                30,
+                24,
+                12,
+                3
+              ],
+              "rarity_points": 15000
+            },
+            {
+              "seed": 3001018,
+              "score": 127400,
+              "locked": 160,
+              "cleared": 131,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                34,
+                33,
+                29,
+                25,
+                24,
+                11,
+                4
+              ],
+              "cleared_by_color": [
+                32,
+                30,
+                24,
+                18,
+                18,
+                6,
+                3
+              ],
+              "rarity_points": 12000
+            },
+            {
+              "seed": 3001019,
+              "score": 39900,
+              "locked": 81,
+              "cleared": 48,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                18,
+                17,
+                13,
+                14,
+                10,
+                6,
+                3
+              ],
+              "cleared_by_color": [
+                9,
+                15,
+                9,
+                9,
+                6,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001020,
+              "score": 208000,
+              "locked": 260,
+              "cleared": 231,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                57,
+                54,
+                46,
+                39,
+                35,
+                21,
+                8
+              ],
+              "cleared_by_color": [
+                52,
+                51,
+                41,
+                35,
+                31,
+                15,
+                6
+              ],
+              "rarity_points": 25500
+            },
+            {
+              "seed": 3001021,
+              "score": 286900,
+              "locked": 300,
+              "cleared": 283,
+              "best_chain": 2,
+              "truncated": true,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                66,
+                60,
+                54,
+                48,
+                42,
+                21,
+                9
+              ],
+              "cleared_by_color": [
+                63,
+                58,
+                54,
+                45,
+                38,
+                19,
+                6
+              ],
+              "rarity_points": 27500
+            },
+            {
+              "seed": 3001022,
+              "score": 124500,
+              "locked": 160,
+              "cleared": 133,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                42,
+                34,
+                25,
+                22,
+                21,
+                11,
+                5
+              ],
+              "cleared_by_color": [
+                36,
+                30,
+                21,
+                19,
+                18,
+                6,
+                3
+              ],
+              "rarity_points": 12000
+            },
+            {
+              "seed": 3001023,
+              "score": 21400,
+              "locked": 54,
+              "cleared": 30,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                9,
+                6,
+                11,
+                9,
+                11,
+                5,
+                3
+              ],
+              "cleared_by_color": [
+                6,
+                3,
+                9,
+                6,
+                6,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001024,
+              "score": 227500,
+              "locked": 264,
+              "cleared": 237,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                60,
+                48,
+                49,
+                42,
+                39,
+                17,
+                9
+              ],
+              "cleared_by_color": [
+                55,
+                43,
+                46,
+                39,
+                36,
+                12,
+                6
+              ],
+              "rarity_points": 24000
+            },
+            {
+              "seed": 3001025,
+              "score": 27500,
+              "locked": 60,
+              "cleared": 33,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                11,
+                14,
+                8,
+                12,
+                8,
+                5,
+                2
+              ],
+              "cleared_by_color": [
+                6,
+                12,
+                6,
+                6,
+                3,
+                0,
+                0
+              ],
+              "rarity_points": 0
+            },
+            {
+              "seed": 3001026,
+              "score": 52700,
+              "locked": 91,
+              "cleared": 64,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                18,
+                19,
+                18,
+                15,
+                12,
+                6,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                18,
+                9,
+                12,
+                6,
+                4,
+                0
+              ],
+              "rarity_points": 2000
+            },
+            {
+              "seed": 3001027,
+              "score": 77000,
+              "locked": 114,
+              "cleared": 90,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 1,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                22,
+                25,
+                19,
+                19,
+                17,
+                9,
+                3
+              ],
+              "cleared_by_color": [
+                21,
+                21,
+                18,
+                15,
+                12,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            },
+            {
+              "seed": 3001028,
+              "score": 63300,
+              "locked": 92,
+              "cleared": 66,
+              "best_chain": 1,
+              "truncated": false,
+              "rejected_actions": 2,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                21,
+                16,
+                17,
+                14,
+                14,
+                7,
+                3
+              ],
+              "cleared_by_color": [
+                15,
+                9,
+                15,
+                12,
+                9,
+                3,
+                3
+              ],
+              "rarity_points": 10500
+            },
+            {
+              "seed": 3001029,
+              "score": 65300,
+              "locked": 107,
+              "cleared": 79,
+              "best_chain": 2,
+              "truncated": false,
+              "rejected_actions": 0,
+              "color_profile": "rare_seven",
+              "placed_by_color": [
+                24,
+                21,
+                18,
+                18,
+                15,
+                7,
+                4
+              ],
+              "cleared_by_color": [
+                21,
+                18,
+                12,
+                15,
+                10,
+                3,
+                0
+              ],
+              "rarity_points": 1500
+            }
+          ]
+        }
+      }
+    }
+  }
+}

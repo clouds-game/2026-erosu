@@ -34,6 +34,21 @@ class HeadlessTests(unittest.TestCase):
   def start(self):
     return self.send({"command": "start", "mode": "endless", "seed": 42})
 
+  def test_color_profiles_are_observable_and_invalid_profiles_preserve_state(self):
+    initial = self.start()["state"]
+    self.assertEqual("rare_seven", initial["color_profile"])
+    self.assertEqual([22, 20, 18, 16, 14, 7, 3], initial["color_weights"])
+    self.assertEqual(3000, initial["colors"][6]["clear_bonus"])
+    for request in [
+      {"command": "start", "mode": "endless", "seed": 42, "color_profile": "unknown"},
+      {"command": "start", "mode": "puzzle", "level": 1, "color_profile": "classic"},
+    ]:
+      result = self.send(request)
+      self.assertFalse(result["ok"])
+      self.assertEqual(initial, result["state"])
+    classic = self.send({"command": "start", "mode": "endless", "seed": 42, "color_profile": "classic"})["state"]
+    self.assertEqual([10, 9, 8, 7, 6, 0, 0], classic["color_weights"])
+
   def test_external_time_and_batch_equivalence(self):
     initial = self.start()
     time.sleep(0.1)

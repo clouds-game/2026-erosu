@@ -5,9 +5,10 @@ public sealed record ScoreAward(
   int Altitude,
   int Compactness,
   int MultiClear,
-  int Combo)
+  int Combo,
+  int Rarity = 0)
 {
-  public int Total => Base + Altitude + Compactness + MultiClear + Combo;
+  public int Total => Base + Altitude + Compactness + MultiClear + Combo + Rarity;
 }
 
 public static class ScoreRules
@@ -34,7 +35,8 @@ public static class ScoreRules
       altitudeRows * AltitudePerRow,
       compactness,
       multiClear,
-      (chain - 1) * ComboPerStep);
+      (chain - 1) * ComboPerStep,
+      pieces.Sum(piece => ColorRules.All[piece.Color].ClearBonus));
   }
 
   private static int RoundToHundred(double value) =>

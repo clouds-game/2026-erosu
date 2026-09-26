@@ -14,14 +14,13 @@ public static class PiecePainter
     new Rect2(72, 126, 16, 16), // arrow
     new Rect2(54, 90, 16, 16)   // cross
   ];
-  private static readonly Color FifthColor = new("e58bd3");
 
   public static void Draw(CanvasItem target, Piece piece, Vector2 origin, float size,
     bool ghost = false, float flash = 0)
   {
-    var baseTint = piece.Color == 4 ? FifthColor : Colors.White;
+    var baseTint = piece.Color >= 4 ? new Color(ColorRules.All[piece.Color].Hex) : Colors.White;
     var tint = new Color(baseTint.R, baseTint.G, baseTint.B, ghost ? 0.42f : 1);
-    var tileRegion = piece.Color == 4 ? PixelUi.WhiteTileRegion : PixelUi.TileRegion(piece.Color);
+    var tileRegion = piece.Color >= 4 ? PixelUi.WhiteTileRegion : PixelUi.TileRegion(piece.Color);
     foreach (var cell in piece.Cells)
     {
       var position = origin + new Vector2(cell.X, cell.Y) * size;
@@ -33,10 +32,23 @@ public static class PiecePainter
           new Color(1, 1, 1, flash * 0.7f));
     }
     if (ghost) return;
-    // A single Kenney symbol identifies the whole shape as one game piece.
+    // A single symbol identifies the whole shape as one game piece.
     var first = piece.Cells.OrderBy(cell => cell.Y).ThenBy(cell => cell.X).First();
     var topLeft = origin + new Vector2(first.X, first.Y) * size;
     var markSize = size / 2;
+    if (piece.Color >= 5)
+    {
+      var center = topLeft + Vector2.One * size / 2;
+      var radius = size / 7;
+      if (piece.Color == 5)
+      {
+        target.DrawLine(center + new Vector2(-radius, -radius / 2), center + new Vector2(radius, -radius / 2), PixelUi.Ink, 2);
+        target.DrawLine(center + new Vector2(-radius, radius / 2), center + new Vector2(radius, radius / 2), PixelUi.Ink, 2);
+      }
+      else target.DrawPolyline([center + new Vector2(0, -radius), center + new Vector2(radius, 0),
+        center + new Vector2(0, radius), center + new Vector2(-radius, 0), center + new Vector2(0, -radius)], PixelUi.Ink, 2);
+      return;
+    }
     target.DrawTextureRectRegion(PixelUi.Sheet,
       new Rect2(topLeft + Vector2.One * (size - markSize) / 2, Vector2.One * markSize),
       Marks[piece.Color], PixelUi.Ink);

@@ -1,0 +1,21 @@
+name: Request branch preview update
+
+on:
+  push:
+    branches: [develop20260926, experiment1]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  request:
+    name: Request a Pages build on main
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Dispatch the central publishing workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"

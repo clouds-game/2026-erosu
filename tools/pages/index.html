@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chroma Drop</title>
+    <link rel="stylesheet" href="./selector.css" />
+    <script type="module" src="./selector.js"></script>
+  </head>
+  <body>
+    <header class="version_bar">
+      <label for="branch">Branch</label>
+      <select id="branch" disabled></select>
+      <a id="commit" hidden target="_blank" rel="noopener noreferrer"></a>
+    </header>
+    <p id="error" role="alert" hidden></p>
+    <iframe id="game" title="Chroma Drop" allow="fullscreen; gamepad" allowfullscreen hidden></iframe>
+  </body>
+</html>

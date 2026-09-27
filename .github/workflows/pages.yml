@@ -1,0 +1,140 @@
+name: Publish branch previews
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Serialize the entire build, so queued runs resolve the latest branch heads.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    name: Resolve branch commits
+    if: github.ref == 'refs/heads/main' && vars.PAGES_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.branches.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - id: branches
+        run: |
+          python3 tools/pages_site.py snapshot --output build/pages_snapshot.json
+          echo "matrix=$(jq -c '{include: .branches}' build/pages_snapshot.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pages-snapshot
+          path: build/pages_snapshot.json
+          if-no-files-found: error
+
+  web:
+    name: Web (${{ matrix.name }})
+    needs: snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.snapshot.outputs.matrix) }}
+    steps:
+      - name: Check out publishing tools
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: publishing
+      - name: Check out the exact game commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ matrix.commit }}
+          path: game
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: game/Web/package-lock.json
+      - name: Test this branch's game rules
+        run: dotnet run --project game/Tests/ChromaDrop.Tests.csproj -c Release
+      - run: npm ci --prefix game/Web --ignore-scripts
+      - run: npm run build --prefix game/Web
+      - run: dotnet publish game/Web/ChromaDrop.Web.csproj -c Release -o build/web
+      - name: Set this branch's Pages base path
+        env:
+          BRANCH_NAME: ${{ matrix.name }}
+        run: |
+          base_path=$(PYTHONPATH=publishing/tools python3 -c 'import os; from pages_site import branch_base_path; print(branch_base_path(os.environ["GITHUB_REPOSITORY"], os.environ["BRANCH_NAME"]))')
+          python3 publishing/tools/prepare_pages.py build/web/wwwroot --base-path "$base_path"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: pages-web-${{ matrix.name }}
+          path: build/web/wwwroot
+          include-hidden-files: true
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy all branch previews
+    needs: [snapshot, web]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: Web/package-lock.json
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: pages-snapshot
+          path: build
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: pages-web-*
+          path: build/branch-builds
+      - name: Test publishing tools and build selector
+        run: |
+          python3 -m unittest discover -s tools -p 'test_pages_site.py'
+          npm ci --prefix Web --ignore-scripts
+          node Web/node_modules/typescript/bin/tsc -p tools/pages/tsconfig.json --outDir build/pages-selector
+      - name: Assemble the complete site
+        run: >-
+          python3 tools/pages_site.py assemble
+          --snapshot build/pages_snapshot.json
+          --artifacts build/branch-builds
+          --selector-script build/pages-selector/selector.js
+          --output build/pages
+      - name: Skip publication if a branch has changed during the build
+        id: current
+        run: |
+          current=$(python3 tools/pages_site.py is-current --snapshot build/pages_snapshot.json)
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          if [[ "$current" != true ]]; then
+            echo "Branch heads changed; the queued run will publish the newer commits." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+        if: steps.current.outputs.current == 'true'
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        if: steps.current.outputs.current == 'true'
+        with:
+          path: build/pages
+      - uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        if: steps.current.outputs.current == 'true'
+        id: deployment
+      - name: Verify the live selector, commits, and every WebAssembly build
+        if: steps.current.outputs.current == 'true'
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: python3 tools/check_pages.py "$PAGE_URL" --snapshot build/pages_snapshot.json

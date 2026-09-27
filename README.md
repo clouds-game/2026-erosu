@@ -70,7 +70,7 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 - `Assets/`：项目资源；当前几何图形由 Godot 绘制。
 - `Tests/`：规则与状态机测试，失败时返回非零退出码。
 - `Web/`：共享 C# 规则的 .NET WebAssembly 网页版。
-- `.github/workflows/`：Windows / macOS 打包、Web 构建、GitHub Pages 和标签发布。
+- `.github/workflows/`：Windows / macOS 打包、Web 构建、多分支 GitHub Pages 和标签发布。
 - `tools/`：校验 Godot 下载、导出桌面包和准备 Pages 路径的脚本。
 - `docs/`：中文玩法、美术、开发与验证文档。
 - `archive/web-prototype/`：保留早期网页实验，仅供对照，不属于当前 Godot 构建。
@@ -85,6 +85,8 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 
 [下载最新 Nightly](https://github.com/clouds-game/2026-erosu/releases/tag/nightly)：每次成功的主分支构建及每天北京时间 02:23 更新同一个滚动预发布，包含 Windows / macOS 包、校验文件和构建提交信息。
 
-详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线地址：[开始游戏](https://clouds-game.github.io/2026-erosu/)。
+详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线入口：[选择分支试玩](https://clouds-game.github.io/2026-erosu/)，可切换 `main`、`develop20260926` 和 `experiment1`。每次分支推送后更新该分支的最新提交；入口显示实际构建提交。
+
+也可直接打开 [main](https://clouds-game.github.io/2026-erosu/main/)、[develop20260926](https://clouds-game.github.io/2026-erosu/develop20260926/) 或 [experiment1](https://clouds-game.github.io/2026-erosu/experiment1/)。分享入口的 `?branch=experiment1` 链接可直接选中对应分支。
 
 界面支持 English / 简体中文 / 日本語，可在游戏侧栏切换并记住偏好。详见 [界面国际化](docs/界面国际化.md)。

@@ -1,0 +1,49 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #161616;
+  color: #eee;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.version_bar {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #333;
+  font-size: 0.875rem;
+}
+
+select {
+  max-width: min(60vw, 24rem);
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  font-family: monospace;
+}
+
+#game {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: 0;
+}
+
+#error {
+  margin: 1rem;
+}
+
+[hidden] {
+  display: none !important;
+}

@@ -12,12 +12,24 @@
         <rect width="400" height="720" fill="url(#grid)" />
         @{ var riseOffset = game.Phase == GamePhase.Rising ? (1 - game.TransitionProgress) * (game.Transition?.Rows ?? 0) * 40 : 0; }
         <g transform="@($"translate(0 {riseOffset:0.###})")">
-          @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
+          @foreach (var piece in game.Board.Pieces)
+          {
+            <PieceView @key="piece.Id" Piece="piece" TurnsRemaining="game.TurnsRemaining(piece)" AriaLabel="@PieceLabel(piece)" />
+          }
         </g>
+        @if (game.Phase == GamePhase.Expiring && game.Transition is { } transition)
+        {
+          <g>
+            @foreach (var piece in transition.RemovedPieces)
+            {
+              <PieceView Piece="piece" Opacity="@(1 - game.TransitionProgress)" AriaLabel="@PieceLabel(piece)" />
+            }
+          </g>
+        }
         @if (game.Phase == GamePhase.Falling)
         {
           @if (game.Ghost() is { } ghost) { <PieceView Piece="ghost" Ghost="true" /> }
-          @if (game.Active is { } active) { <PieceView Piece="active" /> }
+          @if (game.Active is { } active) { <PieceView Piece="active" AriaLabel="@PieceLabel(active)" /> }
         }
         @if (game.Wave is { } wave)
         {
@@ -64,7 +76,7 @@
             <div class="previews">
               @foreach (var piece in game.Next)
               {
-                <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+                <svg viewBox="-20 -10 200 100" role="img" aria-label="@PieceLabel(piece)"><PieceView Piece="piece" /></svg>
               }
             </div>
           }
@@ -81,7 +93,7 @@
           <div class="previews">
             @foreach (var piece in game.Next)
             {
-              <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+              <svg viewBox="-20 -10 200 100" role="img" aria-label="@PieceLabel(piece)"><PieceView Piece="piece" /></svg>
             }
           </div>
           <dl>
@@ -313,6 +325,15 @@
     notice_arguments = [];
   }
   private int Record(string metric) => records.GetValueOrDefault(ModeCatalog.RecordKey(game.Mode, metric));
+  private string PieceLabel(Piece piece) => piece.Kind switch
+  {
+    PieceKind.SpecialUnknown => T("piece_special"),
+    PieceKind.Black => game.TurnsRemaining(piece) is { } remaining
+      ? T("piece_black", remaining)
+      : T("piece_black_active"),
+    PieceKind.White => T("piece_white"),
+    _ => T("preview", piece.Shape, piece.Color + 1)
+  };
   private string ResultSummary()
   {
     var counter = game.Metrics.FirstOrDefault(metric => metric.Definition.Display == MetricDisplay.Counter);

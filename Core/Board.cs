@@ -33,6 +33,7 @@ public sealed class Board
     var matches = new List<Piece>();
     foreach (var piece in _pieces)
     {
+      if (piece.Kind != PieceKind.Normal) continue;
       if (!visited.Add(piece.Id)) continue;
       var group = new List<Piece> { piece };
       for (var i = 0; i < group.Count; i++)
@@ -42,7 +43,7 @@ public sealed class Board
           foreach (var neighbor in Neighbors)
           {
             if (occupied.TryGetValue(cell.Offset(neighbor.X, neighbor.Y), out var other) &&
-              other.Color == piece.Color && visited.Add(other.Id))
+              other.Kind == PieceKind.Normal && other.Color == piece.Color && visited.Add(other.Id))
               group.Add(other);
           }
         }

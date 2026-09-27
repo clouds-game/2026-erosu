@@ -1,13 +1,21 @@
 namespace ChromaDrop.Core;
 
 public enum Shape { I, O, T, L, J, S, Z }
+public enum PieceKind { Normal, SpecialUnknown, Black, White }
 
 public readonly record struct Cell(int X, int Y)
 {
   public Cell Offset(int x, int y) => new(X + x, Y + y);
 }
 
-public sealed record Piece(int Id, Shape Shape, int Color, IReadOnlyList<Cell> Cells, bool IsPollution = false)
+public sealed record Piece(
+  int Id,
+  Shape Shape,
+  int Color,
+  IReadOnlyList<Cell> Cells,
+  bool IsPollution = false,
+  PieceKind Kind = PieceKind.Normal,
+  int? ExpiresAtLock = null)
 {
   public Piece Offset(int x, int y) => this with
   {

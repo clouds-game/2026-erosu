@@ -436,7 +436,7 @@ var tests = new (string Name, Action Run)[]
       }
     }
   })
-}.Concat(ModeArchitectureTests.Cases).ToArray();
+}.Concat(ModeArchitectureTests.Cases).Concat(BlackWhiteModeTests.Cases).ToArray();
 
 var failures = 0;
 foreach (var test in tests)
@@ -455,6 +455,7 @@ static void Check(bool condition, string? message = null)
 static string PieceState(Piece piece) => string.Join(";", new[]
 {
   piece.Id.ToString(), piece.Shape.ToString(), piece.Color.ToString(), piece.IsPollution.ToString(),
+  piece.Kind.ToString(), piece.ExpiresAtLock?.ToString() ?? "-",
   string.Join(",", piece.Cells.Select(cell => $"{cell.X}:{cell.Y}"))
 });
 

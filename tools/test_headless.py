@@ -74,6 +74,15 @@ class HeadlessTests(unittest.TestCase):
     result = self.send({"command": "tick", "count": 120})
     self.assertEqual("won", result["state"]["phase"])
 
+  def test_black_white_mode_conceals_preview_and_reveals_active_piece(self):
+    result = self.send({"command": "start", "mode": "black_white", "seed": 0})
+    state = result["state"]
+    self.assertEqual("black_white", state["mode"])
+    self.assertNotEqual("special_unknown", state["active"]["kind"])
+    self.assertTrue(all(piece["kind"] in ("normal", "special_unknown") for piece in state["next"]))
+    self.assertTrue(any(piece["kind"] == "special_unknown" for piece in state["next"]))
+    self.assertTrue(all(piece["turns_remaining"] is None for piece in state["next"]))
+
   def test_malformed_json_recovers_and_eof_exits(self):
     self.process.stdin.write('{broken\n')
     self.process.stdin.flush()

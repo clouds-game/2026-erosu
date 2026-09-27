@@ -32,9 +32,11 @@ internal static class ModeArchitectureTests
   {
     var free = GameSessionFactory.Create(GameSelection.Free, 10);
     var pollution = GameSessionFactory.Create(GameSelection.Pollution, 10);
+    var blackWhite = GameSessionFactory.Create(GameSelection.BlackWhite, 10);
     var puzzle = GameSessionFactory.Create(GameSelection.Puzzle(PuzzleLevels.All[0].Number), 10);
     Assert(free.Mode == ModeId.Free && free.Puzzle is null && free.Metrics.Any(metric => metric.Key == "score"));
     Assert(pollution.Mode == ModeId.Pollution && pollution.Metric("next_rise")?.Value == 6);
+    Assert(blackWhite.Mode == ModeId.BlackWhite && blackWhite.Presentation.Help.Action == HelpAction.Rules);
     Assert(puzzle.Mode == ModeId.Puzzle && puzzle.Puzzle == PuzzleLevels.All[0] && puzzle.Next.Count == puzzle.Remaining - 1);
     Assert(free.Presentation.Help.Action == HelpAction.Demo);
     Assert(pollution.Presentation.Help.Action == HelpAction.Rules);

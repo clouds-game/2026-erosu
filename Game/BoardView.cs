@@ -29,7 +29,12 @@ public partial class BoardView : Control
     var riseOffset = game.Phase == GamePhase.Rising
       ? new Vector2(0, (float)((1 - game.TransitionProgress) * (game.Transition?.Rows ?? 0) * CellSize))
       : Vector2.Zero;
-    foreach (var piece in game.Board.Pieces) PiecePainter.Draw(this, piece, riseOffset, CellSize);
+    foreach (var piece in game.Board.Pieces)
+      PiecePainter.Draw(this, piece, riseOffset, CellSize, turnsRemaining: game.TurnsRemaining(piece));
+    if (game.Phase == GamePhase.Expiring && game.Transition is { } transition)
+      foreach (var piece in transition.RemovedPieces)
+        PiecePainter.Draw(this, piece, Vector2.Zero, CellSize,
+          opacity: (float)(1 - game.TransitionProgress));
     if (game.Phase == GamePhase.Falling)
     {
       var ghost = game.Ghost();

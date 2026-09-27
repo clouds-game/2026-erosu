@@ -2,7 +2,7 @@ namespace ChromaDrop.Core;
 
 [Obsolete("Use ModeId and GameSessionFactory for new code.")]
 public enum SessionMode { Free, Pollution, Puzzle }
-public enum GamePhase { Falling, Clearing, Settling, Rising, Over, Won }
+public enum GamePhase { Falling = 0, Clearing = 1, Settling = 2, Rising = 3, Over = 4, Won = 5, Expiring = 6 }
 public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, ScoreAward Award)
 {
   public int Points => Award.Total;
@@ -11,15 +11,15 @@ public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, ScoreAwar
 #pragma warning disable CS0618 // Compatibility constructors intentionally reference the legacy enum.
 public sealed class GameSession
 {
-  private sealed record LegacySetup(IGameModeRules Rules, Board Board, PieceBag Bag);
+  private sealed record LegacySetup(IGameModeRules Rules, Board Board, IPieceSource Bag);
   private readonly IGameModeRules _rules;
-  private readonly PieceBag? _bag;
+  private readonly IPieceSource? _bag;
   private readonly Queue<Piece> _next = new();
   private double _timer;
   private double _lockTimer;
   private int _chain;
 
-  internal GameSession(IGameModeRules rules, Board board, PieceBag? bag, IEnumerable<Piece>? sequence)
+  internal GameSession(IGameModeRules rules, Board board, IPieceSource? bag, IEnumerable<Piece>? sequence)
   {
 	_rules = rules;
 	_bag = bag;
@@ -82,7 +82,12 @@ public sealed class GameSession
   public int Locked { get; private set; }
   public int Level => Math.Min(11, 1 + Locked / 15);
   public double ClearProgress => Math.Clamp(_timer / 0.42, 0, 1);
-  public double TransitionProgress => Phase == GamePhase.Rising ? Math.Clamp(_timer / 0.22, 0, 1) : 1;
+  public double TransitionProgress => Phase switch
+  {
+	GamePhase.Rising => Math.Clamp(_timer / 0.22, 0, 1),
+	GamePhase.Expiring => Math.Clamp(_timer / 0.28, 0, 1),
+	_ => 1
+  };
   public bool AcceptsInput => !Paused && Phase == GamePhase.Falling;
   public IReadOnlyList<RunMetric> Metrics => _rules.GetMetrics(this);
   public string ResultTitleKey => _rules.ResultTitleKey(this);
@@ -93,6 +98,10 @@ public sealed class GameSession
   public event Action<ModeTransition>? TransitionStarted;
 
   public RunMetric? Metric(string key) => Metrics.FirstOrDefault(metric => metric.Key == key);
+  public int? TurnsRemaining(Piece piece) => Active?.Id != piece.Id
+	&& piece is { Kind: PieceKind.Black, ExpiresAtLock: int expires }
+	? Math.Clamp(expires - Locked, 0, BlackWhiteModeRules.BlackLifetime)
+	: null;
 
   public static GameSession CreateDemo()
   {
@@ -204,6 +213,14 @@ public sealed class GameSession
 		  CheckMatches();
 		}
 		break;
+	  case GamePhase.Expiring:
+		if (_timer >= 0.28)
+		{
+		  _timer = 0;
+		  Transition = null;
+		  Phase = GamePhase.Settling;
+		}
+		break;
 	}
   }
 
@@ -215,7 +232,7 @@ public sealed class GameSession
 	  Phase = GamePhase.Over;
 	  return;
 	}
-	var piece = _next.Dequeue();
+	var piece = _rules.ActivatePiece(this, _next.Dequeue());
 	if (_bag is not null) _next.Enqueue(_bag.Take());
 	var width = piece.Cells.Max(cell => cell.X) + 1;
 	Active = piece.Offset((Board.Width - width) / 2, 0);
@@ -241,7 +258,7 @@ public sealed class GameSession
 
   private void CheckMatches()
   {
-	var matches = Board.FindMatches();
+	var matches = _rules.FindMatches(Board);
 	if (matches.Count == 0)
 	{
 	  if (_rules.IsComplete(this))
@@ -259,7 +276,7 @@ public sealed class GameSession
 		  Active = null;
 		  return;
 		}
-		Phase = GamePhase.Rising;
+		Phase = transition.Kind == ModeTransitionKind.Rising ? GamePhase.Rising : GamePhase.Expiring;
 		_timer = 0;
 		TransitionStarted?.Invoke(transition);
 		return;

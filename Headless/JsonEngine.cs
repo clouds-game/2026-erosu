@@ -52,7 +52,7 @@ public sealed class JsonEngine
           : (GameSelection?)null;
         if (standalone is not null)
         {
-          Require(!seen.Contains("level"), "Endless and pollution modes do not accept level.");
+          Require(!seen.Contains("level"), "Standalone modes do not accept level.");
           next = GameSessionFactory.Create(standalone.Value, request.GetProperty("seed").GetInt32());
         }
         else
@@ -130,8 +130,16 @@ public sealed class JsonEngine
     PollutionCleared = game.Metric("purified")?.Value ?? 0,
     PollutionCountdown = game.Metric("next_rise")?.Value ?? 0,
     game.Metrics,
-    game.Remaining, game.ClearProgress, RiseProgress = game.TransitionProgress, game.Active, Ghost = game.Ghost(),
-    game.Next, Pieces = game.Board.Pieces, game.Wave
+    game.Remaining, game.ClearProgress, RiseProgress = game.TransitionProgress,
+    Active = PieceSnapshot(game, game.Active), Ghost = PieceSnapshot(game, game.Ghost()),
+    Next = game.Next.Select(piece => PieceSnapshot(game, piece)),
+    Pieces = game.Board.Pieces.Select(piece => PieceSnapshot(game, piece)), game.Wave
+  };
+
+  private static object? PieceSnapshot(GameSession game, Piece? piece) => piece is null ? null : new
+  {
+    piece.Id, piece.Shape, piece.Color, piece.Cells, piece.IsPollution, piece.Kind, piece.ExpiresAtLock,
+    TurnsRemaining = game.TurnsRemaining(piece)
   };
 
   private static void Require(bool condition, string message)

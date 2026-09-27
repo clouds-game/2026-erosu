@@ -1,6 +1,11 @@
 namespace ChromaDrop.Core;
 
-public sealed class PieceBag(Random random, int firstId = 1, bool pollution = false)
+internal interface IPieceSource
+{
+  Piece Take();
+}
+
+public sealed class PieceBag(Random random, int firstId = 1, bool pollution = false) : IPieceSource
 {
   public const int ColorCount = 5;
   private static readonly int[] ColorWeights = [10, 9, 8, 7, 6];
@@ -27,5 +32,23 @@ public sealed class PieceBag(Random random, int firstId = 1, bool pollution = fa
     var piece = Piece.Create(_nextId, _shapes.Pop(), _colors.Pop()) with { IsPollution = pollution };
     _nextId += pollution ? -1 : 1;
     return piece;
+  }
+}
+
+internal sealed class BlackWhitePieceSource(IPieceSource pieces, Random candidateRandom) : IPieceSource
+{
+  public const int BagSize = 5;
+  private readonly Stack<bool> _candidates = new();
+
+  public Piece Take()
+  {
+    if (_candidates.Count == 0)
+    {
+      var candidates = new[] { true, false, false, false, false };
+      candidateRandom.Shuffle(candidates);
+      foreach (var candidate in candidates) _candidates.Push(candidate);
+    }
+    var piece = pieces.Take();
+    return !_candidates.Pop() ? piece : piece with { Color = -1, Kind = PieceKind.SpecialUnknown };
   }
 }

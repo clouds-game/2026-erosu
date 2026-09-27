@@ -1,7 +1,11 @@
-<g opacity="@(Ghost ? "0.3" : "1")">
+<g opacity="@(Ghost ? 0.3 : Opacity)" aria-label="@AriaLabel">
   @foreach (var cell in Piece.Cells)
   {
     <rect x="@(cell.X * 40)" y="@(cell.Y * 40)" width="40" height="40" fill="@Color" />
+    @if (Piece.Kind == PieceKind.SpecialUnknown)
+    {
+      <rect x="@(cell.X * 40)" y="@(cell.Y * 40)" width="20" height="40" fill="#171c27" />
+    }
   }
   @foreach (var cell in Piece.Cells)
   {
@@ -11,22 +15,50 @@
     @if (!Has(cell.X, cell.Y + 1)) { <path d="@($"M{x} {y + 39}h40")" class="outline" /> }
     @if (!Has(cell.X - 1, cell.Y)) { <path d="@($"M{x + 1} {y}v40")" class="outline" /> }
     @if (!Has(cell.X + 1, cell.Y)) { <path d="@($"M{x + 39} {y}v40")" class="outline" /> }
+    @if (Piece.Kind == PieceKind.Black)
+    {
+      <rect x="@(x + 2)" y="@(y + 2)" width="36" height="36" class="special-outline" />
+    }
     @if (!Ghost)
     {
       @if (Piece.IsPollution)
       {
         <path d="@($"M{x + 4} {y + 16}l10 -10M{x + 26} {y + 16}l10 -10M{x + 4} {y + 34}l10 -10M{x + 26} {y + 34}l10 -10")" class="pollution-mark" />
       }
-      <g transform="@($"translate({x + 20} {y + 20})")" class="mark">
-        @switch (Piece.Color)
+      @if (Piece.Kind == PieceKind.Normal)
+      {
+        <g transform="@($"translate({x + 20} {y + 20})")" class="mark">
+          @switch (Piece.Color)
+          {
+            case 0: <circle r="2" fill="currentColor" /> break;
+            case 1: <rect x="-2.5" y="-2.5" width="5" height="5" /> break;
+            case 2: <path d="M-3 0h6M0 -3v6" /> break;
+            case 3: <path d="M-2 3l4 -6" /> break;
+            case 4: <path d="M-3 -3l6 6M3 -3l-6 6" /> break;
+          }
+        </g>
+      }
+      else if (IsFirst(cell))
+      {
+        <g transform="@($"translate({x + 20} {y + 20})")" class="mark">
+        @switch (Piece.Kind)
         {
-          case 0: <circle r="2" fill="currentColor" /> break;
-          case 1: <rect x="-2.5" y="-2.5" width="5" height="5" /> break;
-          case 2: <path d="M-3 0h6M0 -3v6" /> break;
-          case 3: <path d="M-2 3l4 -6" /> break;
-          case 4: <path d="M-3 -3l6 6M3 -3l-6 6" /> break;
+          case PieceKind.SpecialUnknown:
+            <circle cx="-4" r="2.5" fill="#f6f1e4" /><circle cx="4" r="2.5" fill="#253044" />
+            break;
+          case PieceKind.White:
+            <circle r="5" class="white-mark" />
+            break;
+          case PieceKind.Black when TurnsRemaining is > 0 and <= 3:
+            @for (var i = 0; i < TurnsRemaining.Value; i++)
+            {
+              var dotX = (i - (TurnsRemaining.Value - 1) / 2.0) * 7;
+              <circle cx="@dotX" r="2.2" fill="#f6f1e4" />
+            }
+            break;
         }
-      </g>
+        </g>
+      }
     }
   }
 </g>
@@ -34,7 +66,16 @@
 @code {
   [Parameter, EditorRequired] public Piece Piece { get; set; } = null!;
   [Parameter] public bool Ghost { get; set; }
+  [Parameter] public int? TurnsRemaining { get; set; }
+  [Parameter] public double Opacity { get; set; } = 1;
+  [Parameter] public string? AriaLabel { get; set; }
   private static readonly string[] Palette = ["#ff8278", "#8ee2c4", "#f6ce71", "#aaa2f7", "#e58bd3"];
-  private string Color => Palette[Piece.Color];
+  private string Color => Piece.Kind switch
+  {
+    PieceKind.Black => "#171c27",
+    PieceKind.White or PieceKind.SpecialUnknown => "#f6f1e4",
+    _ => Palette[Piece.Color]
+  };
   private bool Has(int x, int y) => Piece.Cells.Contains(new Cell(x, y));
+  private bool IsFirst(Cell cell) => cell == Piece.Cells.OrderBy(item => item.Y).ThenBy(item => item.X).First();
 }

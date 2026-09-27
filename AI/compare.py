@@ -14,16 +14,30 @@ from .trajectory import read, replay
 def frames(steps):
   turns = [[]]
   for step in steps:
+    if step['request']['command'] in ('placements', 'afterstates', 'state'):
+      continue
     state = step['response']['state']
     if state is None:
       continue
-    turns[-1].append({key: state[key] for key in
-      ['pieces', 'active', 'wave', 'phase', 'score', 'locked', 'cleared', 'best_chain']})
+    frame = {key: state[key] for key in
+      ['pieces', 'active', 'wave', 'phase', 'score', 'locked', 'cleared', 'best_chain']}
+    previous = turns[-1][-1] if turns[-1] else None
+    if previous and frame == {key: value for key, value in previous.items() if key != 'repeat'}:
+      previous['repeat'] = previous.get('repeat', 1) + 1
+    else:
+      turns[-1].append(frame)
     if state['phase'] in ('falling', 'over', 'won') and state['locked'] == len(turns):
       turns.append([])
   if not turns[-1]:
     turns.pop()
   return turns
+
+
+def write_viewer(path, data):
+  template = (ROOT / 'AI/replay_compare.html').read_text(encoding='utf-8')
+  script = (ROOT / 'AI/replay_compare.js').read_text(encoding='utf-8')
+  html = template.replace('__REPLAY_DATA__', json.dumps(data).replace('<', '\\u003c'))
+  path.write_text(html.replace('__REPLAY_SCRIPT__', script), encoding='utf-8')
 
 
 def compare(model, seed, max_pieces, output):
@@ -57,8 +71,7 @@ def compare(model, seed, max_pieces, output):
   summary = {key: value for key, value in data.items() if key != 'policies'}
   summary['policies'] = [{key: value for key, value in policy.items() if key != 'turns'} for policy in data['policies']]
   save(output / 'summary.json', summary)
-  template = (ROOT / 'AI/replay_compare.html').read_text(encoding='utf-8')
-  (output / 'index.html').write_text(template.replace('__REPLAY_DATA__', json.dumps(data).replace('<', '\\u003c')), encoding='utf-8')
+  write_viewer(output / 'index.html', data)
   return summary
 
 

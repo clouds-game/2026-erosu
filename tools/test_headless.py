@@ -49,6 +49,48 @@ class HeadlessTests(unittest.TestCase):
     classic = self.send({"command": "start", "mode": "endless", "seed": 42, "color_profile": "classic"})["state"]
     self.assertEqual([10, 9, 8, 7, 6, 0, 0], classic["color_weights"])
 
+  def test_anchored_start_is_opt_in_seeded_and_preserved_by_queries(self):
+    plain = self.start()['state']
+    self.assertFalse(plain['anchored_blocks'])
+    explicit = self.send({'command': 'start', 'mode': 'endless', 'seed': 42, 'anchored_blocks': False})
+    self.assertEqual(plain, explicit['state'])
+    request = {'command': 'start', 'mode': 'endless', 'seed': 42, 'anchored_blocks': True}
+    initial = self.send(request)['state']
+    self.assertEqual(3, len(initial['pieces']))
+    self.assertTrue(all(piece['anchored'] and piece['shape'] == 'single' and len(piece['cells']) == 1 for piece in initial['pieces']))
+    self.assertEqual(initial, self.send(request)['state'])
+    for command in ['placements', 'afterstates', 'state']:
+      self.assertEqual(initial, self.send({'command': command})['state'])
+    for invalid in [
+      {'command': 'start', 'mode': 'puzzle', 'level': 1, 'anchored_blocks': True},
+      {**request, 'anchored_blocks': 'true'},
+    ]:
+      rejected = self.send(invalid)
+      self.assertFalse(rejected['ok'])
+      self.assertEqual(initial, rejected['state'])
+    current = initial
+    for turn in range(1, 6):
+      actions = self.send({'command': 'placements'})['actions']
+      action = max((item for item in actions if item['piece']),
+        key=lambda item: min(cell['y'] for cell in item['piece']['cells']))['action']
+      preview = self.send({'command': 'afterstates'})['actions'][action]['state']
+      self.assertEqual(current['incoming_anchor'] is not None, preview['anchored_spawn_pending'])
+      self.send({'command': 'place', 'action': action})
+      advanced = self.send({'command': 'tick', 'count': 120})['state']
+      anchors = [piece for piece in advanced['pieces'] if piece.get('anchored')]
+      generated = [piece for piece in advanced['pieces'] if piece['id'] not in {item['id'] for item in preview['pieces']}]
+      self.assertLessEqual(len(generated), 1)
+      self.assertTrue(all(piece.get('anchored') for piece in generated))
+      if generated:
+        self.assertEqual(current['incoming_anchor']['color'], generated[0]['color'])
+      current = advanced
+      self.assertTrue(all(len(piece['cells']) == 1 for piece in anchors))
+    anchors_before = anchors
+    paused = self.send({'command': 'pause', 'paused': True})
+    later = self.send({'command': 'tick', 'count': 3600})
+    self.assertEqual(paused['state'], later['state'])
+    self.assertEqual(anchors_before, [piece for piece in later['state']['pieces'] if piece.get('anchored')])
+
   def test_external_time_and_batch_equivalence(self):
     initial = self.start()
     time.sleep(0.1)

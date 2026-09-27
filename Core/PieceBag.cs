@@ -12,7 +12,8 @@ public sealed class PieceBag(Random random, ColorProfile? profile = null)
   {
     if (_shapes.Count == 0)
     {
-      var shapes = Enum.GetValues<Shape>();
+      // Single-cell obstacles are never part of the falling seven-bag.
+      Shape[] shapes = [Shape.I, Shape.O, Shape.T, Shape.L, Shape.J, Shape.S, Shape.Z];
       random.Shuffle(shapes);
       foreach (var shape in shapes) _shapes.Push(shape);
     }

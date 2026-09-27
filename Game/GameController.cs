@@ -17,6 +17,8 @@ public partial class GameController : Control
   private int _selectedLevel = 1;
   private int _completedLevels;
   private int _best;
+  private bool _anchoredBlocks;
+  private string BestScoreKey => _anchoredBlocks ? "best_score_anchored_v2" : "best_score_rare_seven_v1";
   private double _noticeTimer;
   private int _heldDirection;
   private double _repeatTimer;
@@ -36,12 +38,13 @@ public partial class GameController : Control
     _audio = new GameAudio();
     AddChild(_audio);
     _texts.SetLanguage(OS.GetLocale());
+    _anchoredBlocks = OS.GetCmdlineUserArgs().Contains("--anchored-blocks");
     var save = new ConfigFile();
     if (save.Load(SavePath) == Error.Ok)
     {
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
       _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & PuzzleLevels.ProgressMask;
-      _best = Math.Max(0, save.GetValue("progress", "best_score_rare_seven_v1", 0).AsInt32());
+      _best = Math.Max(0, save.GetValue("progress", BestScoreKey, 0).AsInt32());
       _audio.Enabled = save.GetValue("settings", "sound_enabled", true).AsBool();
     }
     var captureLanguage = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture-lang="));
@@ -72,6 +75,7 @@ public partial class GameController : Control
     var levelArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-level="));
     if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
       && captureLevel >= 0 && captureLevel <= PuzzleLevels.All.Count) _selectedLevel = captureLevel;
+    if (_anchoredBlocks) _selectedLevel = 0;
     Start(args.Contains("--demo"));
     if (args.Contains("--capture-modes")) OpenModes();
     if (args.Contains("--capture-pause")) OpenPause();
@@ -180,7 +184,7 @@ public partial class GameController : Control
   private void Start(bool demo = false)
   {
     if (demo) _selectedLevel = 0;
-    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
+    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession(anchoredBlocks: _anchoredBlocks) : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
     _board.Session = _game;
     _hud.ClearFeedback();
     _modes.Visible = _pauseMenu.Visible = _result.Visible = false;
@@ -311,7 +315,7 @@ public partial class GameController : Control
     var save = new ConfigFile();
     save.Load(SavePath);
     save.SetValue("settings", "language", _texts.Language);
-    save.SetValue("progress", "best_score_rare_seven_v1", _best);
+    save.SetValue("progress", BestScoreKey, _best);
     save.SetValue("progress", "completed_levels", _completedLevels);
     save.SetValue("settings", "sound_enabled", _audio.Enabled);
     var result = save.Save(SavePath);

@@ -32,6 +32,21 @@ class TrajectoryTests(unittest.TestCase):
     self.assertEqual(7, result["steps"])
     self.assertTrue(result["state"]["paused"])
 
+  def test_anchored_game_roundtrip(self):
+    with self.path.open('w') as stream, Engine(stream) as engine:
+      initial = engine.command('start', mode='endless', seed=42, anchored_blocks=True)
+      self.assertTrue(all(piece['anchored'] and len(piece['cells']) == 1 for piece in initial['state']['pieces']))
+      for turn in range(5):
+        action = max((item for item in engine.command('placements')['actions'] if item['piece']),
+          key=lambda item: min(cell['y'] for cell in item['piece']['cells']))['action']
+        engine.command('place', action=action)
+        expected = engine.command('tick', count=120)
+      self.assertTrue(any(piece.get('anchored', False) for piece in expected['state']['pieces']))
+    result = replay(self.path)
+    self.assertTrue(result['verified'])
+    self.assertEqual(expected['state'], result['state'])
+    self.assertTrue(result['state']['anchored_blocks'])
+
   def test_truncation_and_corruption_are_rejected(self):
     self.record()
     original = self.path.read_text().splitlines()

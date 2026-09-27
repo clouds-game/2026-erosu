@@ -1,6 +1,8 @@
+using System.Text.Json.Serialization;
+
 namespace ChromaDrop.Core;
 
-public enum Shape { I, O, T, L, J, S, Z }
+public enum Shape { I, O, T, L, J, S, Z, Single }
 
 public readonly record struct Cell(int X, int Y)
 {
@@ -9,6 +11,9 @@ public readonly record struct Cell(int X, int Y)
 
 public sealed record Piece(int Id, Shape Shape, int Color, IReadOnlyList<Cell> Cells)
 {
+  [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+  public bool Anchored { get; init; }
+
   public Piece Offset(int x, int y) => this with
   {
     Cells = Cells.Select(cell => cell.Offset(x, y)).ToArray()
@@ -18,6 +23,7 @@ public sealed record Piece(int Id, Shape Shape, int Color, IReadOnlyList<Cell> C
   {
     Cell[] cells = shape switch
     {
+      Shape.Single => [new(0, 0)],
       Shape.I => [new(0, 0), new(1, 0), new(2, 0), new(3, 0)],
       Shape.O => [new(0, 0), new(1, 0), new(0, 1), new(1, 1)],
       Shape.T => [new(1, 0), new(0, 1), new(1, 1), new(2, 1)],

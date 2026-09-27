@@ -35,11 +35,17 @@ export function connect(callback: DotNetCallback): void {
 }
 
 export function disconnect(): void { detach?.(); detach = undefined; }
-export function loadBest(): number {
-  try { return Math.max(0, Number(localStorage.getItem('chroma_best_rare_seven_v1')) || 0); } catch { return 0; }
+export function anchoredBlocksEnabled(): boolean {
+  return new URLSearchParams(window.location.search).get('anchored_blocks') === 'true';
 }
-export function saveBest(score: number): void {
-  try { localStorage.setItem('chroma_best_rare_seven_v1', String(score)); } catch { /* Saving is optional. */ }
+function bestKey(anchored_blocks: boolean): string {
+  return anchored_blocks ? 'chroma_best_anchored_v2' : 'chroma_best_rare_seven_v1';
+}
+export function loadBest(anchored_blocks = false): number {
+  try { return Math.max(0, Number(localStorage.getItem(bestKey(anchored_blocks))) || 0); } catch { return 0; }
+}
+export function saveBest(score: number, anchored_blocks = false): void {
+  try { localStorage.setItem(bestKey(anchored_blocks), String(score)); } catch { /* Saving is optional. */ }
 }
 export function tone(frequency: number, duration: number): void {
   audio ??= new AudioContext();

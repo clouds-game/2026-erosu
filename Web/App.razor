@@ -56,9 +56,9 @@
           {
             <span class="muted">@T("sequence")</span>
             <div class="previews">
-              @foreach (var piece in game.Next)
+              @foreach (var piece in game.Forecast)
               {
-                <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+                <svg viewBox="@(piece.Shape == Shape.Single ? "-20 -10 80 100" : "-20 -10 200 100")" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
               }
             </div>
           }
@@ -69,9 +69,9 @@
           <span class="muted">@T("best", UiText.Number(best))</span>
           <span class="next-label muted">@T("next")</span>
           <div class="previews">
-            @foreach (var piece in game.Next)
+            @foreach (var piece in game.Forecast)
             {
-              <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
+              <svg viewBox="@(piece.Shape == Shape.Single ? "-20 -10 80 100" : "-20 -10 200 100")" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
             }
           </div>
           <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
@@ -131,7 +131,7 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=anchored-1");
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=anchored-2");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
     anchored_blocks = await interop.InvokeAsync<bool>("anchoredBlocksEnabled");

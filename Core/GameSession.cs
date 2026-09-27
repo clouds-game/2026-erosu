@@ -9,6 +9,9 @@ public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, ScoreAwar
 public sealed class GameSession
 {
   private readonly PieceBag? _bag;
+  private readonly Random? _obstacleRandom;
+  private int _nextObstacleId = -1;
+  private int _lastObstacleTurn;
   private readonly Queue<Piece> _next = new();
   private double _timer;
   private double _lockTimer;
@@ -20,6 +23,9 @@ public sealed class GameSession
   public PuzzleLevel? Puzzle { get; }
   public ColorProfile? Colors { get; }
   public bool AnchoredBlocks { get; }
+  public bool AnchoredSpawnPending { get; private set; }
+  public Piece? IncomingAnchor { get; private set; }
+  public IReadOnlyList<Piece> Forecast => IncomingAnchor is { } anchor ? new[] { anchor }.Concat(Next).ToArray() : Next;
   public int Remaining => _next.Count + (Active is null ? 0 : 1);
   public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;
   public GamePhase Phase { get; private set; } = GamePhase.Falling;
@@ -41,10 +47,15 @@ public sealed class GameSession
     Colors = colors ?? ColorProfile.Default;
     random ??= new Random();
     AnchoredBlocks = anchoredBlocks;
-    if (anchoredBlocks) AnchoredObstacles.Populate(Board, random, Colors);
+    if (anchoredBlocks)
+    {
+      _obstacleRandom = random;
+      AnchoredObstacles.Populate(Board, random, Colors, ref _nextObstacleId);
+    }
     _bag = new PieceBag(random, Colors);
     for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
     Spawn();
+    PlanObstacle();
   }
 
   public GameSession(PuzzleLevel puzzle)
@@ -66,10 +77,13 @@ public sealed class GameSession
     Colors = source.Colors;
     Puzzle = source.Puzzle;
     AnchoredBlocks = source.AnchoredBlocks;
+    IncomingAnchor = source.IncomingAnchor;
     Score = source.Score;
     Cleared = source.Cleared;
     BestChain = source.BestChain;
     Locked = source.Locked;
+    _lastObstacleTurn = source._lastObstacleTurn;
+    _nextObstacleId = source._nextObstacleId;
   }
 
   public GameSession? PreviewPlacement(int action)
@@ -250,6 +264,14 @@ public sealed class GameSession
     }
   }
 
+  private void PlanObstacle()
+  {
+    if (_obstacleRandom is null || IsFinished) return;
+    if (_obstacleRandom.NextDouble() < AnchoredObstacles.SpawnProbability)
+      IncomingAnchor = Piece.Create(_nextObstacleId, Shape.Single,
+        AnchoredObstacles.DrawColor(_obstacleRandom, Colors!)) with { Anchored = true };
+  }
+
   private void Lock()
   {
     Board.Add(Active!);
@@ -265,6 +287,18 @@ public sealed class GameSession
     var matches = Board.FindMatches();
     if (matches.Count == 0)
     {
+      if (AnchoredBlocks && Locked > 0 && _lastObstacleTurn != Locked)
+      {
+        _lastObstacleTurn = Locked;
+        if (IncomingAnchor is { } anchor)
+        {
+          if (_obstacleRandom is not null)
+            AnchoredObstacles.TrySpawn(Board, _obstacleRandom, anchor.Color, ref _nextObstacleId);
+          else AnchoredSpawnPending = true; // Forecast color is visible; position is hidden.
+        }
+        IncomingAnchor = null;
+        PlanObstacle();
+      }
       // Judge only after all waves and gravity have settled, including the
       // final supplied piece. An exhausted queue must not hide a victory.
       if (Puzzle?.IsComplete(this) == true) Phase = GamePhase.Won;

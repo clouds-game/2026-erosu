@@ -18,7 +18,7 @@ public partial class GameController : Control
   private int _completedLevels;
   private int _best;
   private bool _anchoredBlocks;
-  private string BestScoreKey => _anchoredBlocks ? "best_score_anchored_v1" : "best_score_rare_seven_v1";
+  private string BestScoreKey => _anchoredBlocks ? "best_score_anchored_v2" : "best_score_rare_seven_v1";
   private double _noticeTimer;
   private int _heldDirection;
   private double _repeatTimer;

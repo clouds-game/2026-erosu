@@ -68,8 +68,28 @@ class HeadlessTests(unittest.TestCase):
       rejected = self.send(invalid)
       self.assertFalse(rejected['ok'])
       self.assertEqual(initial, rejected['state'])
-    advanced = self.send({'command': 'tick', 'count': 180})['state']
-    self.assertEqual(initial['pieces'], advanced['pieces'])
+    current = initial
+    for turn in range(1, 6):
+      actions = self.send({'command': 'placements'})['actions']
+      action = max((item for item in actions if item['piece']),
+        key=lambda item: min(cell['y'] for cell in item['piece']['cells']))['action']
+      preview = self.send({'command': 'afterstates'})['actions'][action]['state']
+      self.assertEqual(current['incoming_anchor'] is not None, preview['anchored_spawn_pending'])
+      self.send({'command': 'place', 'action': action})
+      advanced = self.send({'command': 'tick', 'count': 120})['state']
+      anchors = [piece for piece in advanced['pieces'] if piece.get('anchored')]
+      generated = [piece for piece in advanced['pieces'] if piece['id'] not in {item['id'] for item in preview['pieces']}]
+      self.assertLessEqual(len(generated), 1)
+      self.assertTrue(all(piece.get('anchored') for piece in generated))
+      if generated:
+        self.assertEqual(current['incoming_anchor']['color'], generated[0]['color'])
+      current = advanced
+      self.assertTrue(all(len(piece['cells']) == 1 for piece in anchors))
+    anchors_before = anchors
+    paused = self.send({'command': 'pause', 'paused': True})
+    later = self.send({'command': 'tick', 'count': 3600})
+    self.assertEqual(paused['state'], later['state'])
+    self.assertEqual(anchors_before, [piece for piece in later['state']['pieces'] if piece.get('anchored')])
 
   def test_external_time_and_batch_equivalence(self):
     initial = self.start()

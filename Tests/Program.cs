@@ -57,7 +57,7 @@ var tests = new (string Name, Action Run)[]
       {
         var game = new GameSession(new Random(seed), colors: colors, anchoredBlocks: true);
         var repeat = new GameSession(new Random(seed), colors: colors, anchoredBlocks: true);
-        Check(game.AnchoredBlocks && game.Board.Pieces.Count == AnchoredObstacles.Count);
+        Check(game.AnchoredBlocks && game.Board.Pieces.Count == AnchoredObstacles.InitialCount);
         Check(JsonSerializer.Serialize(game.Board.Pieces) == JsonSerializer.Serialize(repeat.Board.Pieces));
         Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
         Check(game.Active is not null && game.Board.CanPlace(game.Active));
@@ -70,9 +70,72 @@ var tests = new (string Name, Action Run)[]
         Check(JsonSerializer.Serialize(plain.Active) == JsonSerializer.Serialize(disabled.Active));
       }
   }),
+  ("In-play spawn trials run once after resolution without leaking hidden randomness", () =>
+  {
+    foreach (var trial in new[] { 0.0, 0.999 })
+    {
+      var random = new TrialRandom(42, trial);
+      var game = new GameSession(random, anchoredBlocks: true);
+      Check(random.Trials == 1 && game.Board.Pieces.Count == 3);
+      for (var turn = 1; turn <= 5; turn++)
+      {
+        var action = Enumerable.Range(0, 40).Where(action => game.Placement(action) is not null)
+          .MinBy(action => game.Placement(action)!.Cells.Min(cell => cell.Y) * -1);
+        var before = JsonSerializer.Serialize(game.Board.Pieces);
+        var preview = game.PreviewPlacement(action)!;
+        Check(JsonSerializer.Serialize(game.Board.Pieces) == before && random.Trials == turn);
+        Check(preview.AnchoredSpawnPending == (trial == 0));
+        Check((game.IncomingAnchor is not null) == (trial == 0));
+        if (game.IncomingAnchor is { } incoming) Check(game.Forecast[0] == incoming && incoming.Cells.Count == 1);
+        game.Place(action);
+        for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
+        Check(game.Locked == turn && !game.AnchoredSpawnPending && random.Trials == turn + 1);
+        Check(game.Board.FindMatches().Count == 0);
+        var generated = game.Board.Pieces.Where(piece => !preview.Board.Pieces.Any(other => other.Id == piece.Id)).ToArray();
+        Check(generated.Length == (trial == 0 ? 1 : 0));
+        Check(generated.All(piece => piece.Anchored && piece.Cells.Count == 1));
+        game.SetPaused(true);
+        game.Advance(100);
+        Check(random.Trials == turn + 1);
+        game.SetPaused(false);
+      }
+    }
+  }),
+  ("Obstacle spawning skips full boards and rejects automatic matches", () =>
+  {
+    var full = new Board();
+    for (var y = Board.Height - 6; y < Board.Height; y++)
+      for (var x = 0; x < Board.Width; x++)
+        full.Add(Piece.Create(1 + y * Board.Width + x, Shape.Single, (x + y) % 7, x, y) with { Anchored = true });
+    var id = -1;
+    var before = JsonSerializer.Serialize(full.Pieces);
+    Check(!AnchoredObstacles.TrySpawn(full, new Random(42), ColorProfile.Default, ref id));
+    Check(JsonSerializer.Serialize(full.Pieces) == before && id == -1);
+    // Only one empty cell remains, surrounded by two distinct same-colored blocks.
+    foreach (var color in Enumerable.Range(0, ColorRules.Count))
+    {
+      var board = new Board();
+      for (var y = Board.Height - 6; y < Board.Height; y++)
+        for (var x = 0; x < Board.Width; x++)
+          if (x != 4 || y != 14)
+            board.Add(Piece.Create(1 + y * Board.Width + x, Shape.Single, color, x, y) with { Anchored = true });
+      for (var seed = 0; seed < 100; seed++)
+      {
+        id = -1;
+        var original = JsonSerializer.Serialize(board.Pieces);
+        if (AnchoredObstacles.TrySpawn(board, new Random(seed), ColorProfile.Default, ref id))
+        {
+          var spawned = board.Pieces.Single(piece => piece.Id < 0);
+          Check(spawned.Color != color);
+          board.Remove([spawned]);
+        }
+        Check(JsonSerializer.Serialize(board.Pieces) == original);
+      }
+    }
+  }),
   ("Placement previews preserve anchors without changing the live board", () =>
   {
-    var game = new GameSession(new Random(42), anchoredBlocks: true);
+    var game = new GameSession(new TrialRandom(42, 0.999), anchoredBlocks: true);
     var before = JsonSerializer.Serialize(game.Board.Pieces);
     var action = Enumerable.Range(0, 40).First(action => game.Placement(action) is not null);
     var preview = game.PreviewPlacement(action)!;
@@ -509,3 +572,9 @@ static GameSession Play(PuzzleLevel level, IReadOnlyList<(int X, int Rotations)>
 }
 
 sealed record ChallengeSolution(int Level, (int X, int Rotations)[] Moves, int Score, int Chain, string[] Waves);
+
+sealed class TrialRandom(int seed, double result) : Random(seed)
+{
+  public int Trials { get; private set; }
+  public override double NextDouble() { Trials++; return result; }
+}

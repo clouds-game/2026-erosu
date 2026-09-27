@@ -39,7 +39,7 @@ export function anchoredBlocksEnabled(): boolean {
   return new URLSearchParams(window.location.search).get('anchored_blocks') === 'true';
 }
 function bestKey(anchored_blocks: boolean): string {
-  return anchored_blocks ? 'chroma_best_anchored_v1' : 'chroma_best_rare_seven_v1';
+  return anchored_blocks ? 'chroma_best_anchored_v2' : 'chroma_best_rare_seven_v1';
 }
 export function loadBest(anchored_blocks = false): number {
   try { return Math.max(0, Number(localStorage.getItem(bestKey(anchored_blocks))) || 0); } catch { return 0; }

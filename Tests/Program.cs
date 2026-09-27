@@ -11,6 +11,24 @@ if (args.Contains("--analyze-challenge"))
 
 var tests = new (string Name, Action Run)[]
 {
+  ("Free Play configurations use exclusive color profiles and separate compatible score keys", () =>
+  {
+    var keys = new HashSet<string>();
+    foreach (var profile in ColorProfile.All)
+      foreach (var anchored in new[] { false, true })
+        foreach (var fill in new[] { false, true })
+        {
+          var options = new FreePlayOptions(profile.Id, anchored, fill);
+          var game = options.CreateSession(new Random(42));
+          Check(game.Puzzle is null && game.Colors == profile && game.AnchoredBlocks == anchored && game.EnclosedFill == fill);
+          Check(keys.Add(options.ScoreKey));
+        }
+    Check(keys.Count == 12);
+    Check(new FreePlayOptions().ScoreKey == "rare_seven_v1");
+    Check(new FreePlayOptions(AnchoredBlocks: true).ScoreKey == "anchored_v2");
+    Check(new FreePlayOptions(EnclosedFill: true).ScoreKey == "fill_v1");
+    Check(new FreePlayOptions(AnchoredBlocks: true, EnclosedFill: true).ScoreKey == "fill_anchored_v1");
+  }),
   ("Enclosed detection uses edge paths to the top, not diagonal openings", () =>
   {
     Check(new Board().FindEnclosedEmptyCells().Count == 0);

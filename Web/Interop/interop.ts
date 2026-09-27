@@ -6,6 +6,19 @@ let audio: AudioContext | undefined;
 export function connect(callback: DotNetCallback): void {
   detach?.();
   const keydown = (event: KeyboardEvent) => {
+    const dialog = document.querySelector<HTMLElement>('.feature-dialog');
+    if (dialog) {
+      if (event.code === 'Escape') {
+        event.preventDefault();
+        void callback.invokeMethodAsync('KeyChanged', event.code, true);
+      } else if (event.code === 'Tab') {
+        const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'));
+        const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        if (event.shiftKey && current <= 0) { event.preventDefault(); buttons.at(-1)?.focus(); }
+        else if (!event.shiftKey && current === buttons.length - 1) { event.preventDefault(); buttons[0]?.focus(); }
+      }
+      return;
+    }
     if (event.target instanceof HTMLSelectElement || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
     if (!game_keys.has(event.code) || event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target instanceof HTMLButtonElement && ['Enter', 'Space'].includes(event.code)) return;
@@ -41,15 +54,21 @@ export function anchoredBlocksEnabled(): boolean {
 export function enclosedFillEnabled(): boolean {
   return new URLSearchParams(window.location.search).get('enclosed_fill') === 'true';
 }
-function bestKey(anchored_blocks: boolean, enclosed_fill: boolean): string {
-  if (enclosed_fill) return anchored_blocks ? 'chroma_best_fill_anchored_v1' : 'chroma_best_fill_v1';
-  return anchored_blocks ? 'chroma_best_anchored_v2' : 'chroma_best_rare_seven_v1';
+export function colorProfile(): string {
+  const profile = new URLSearchParams(window.location.search).get('color_profile') ?? 'rare_seven';
+  return ['classic', 'rare_six', 'rare_seven'].includes(profile) ? profile : 'rare_seven';
 }
-export function loadBest(anchored_blocks = false, enclosed_fill = false): number {
-  try { return Math.max(0, Number(localStorage.getItem(bestKey(anchored_blocks, enclosed_fill))) || 0); } catch { return 0; }
+export function freePlayRequested(): boolean {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('mode') === 'free' || anchoredBlocksEnabled() || enclosedFillEnabled() || params.has('color_profile');
 }
-export function saveBest(score: number, anchored_blocks = false, enclosed_fill = false): void {
-  try { localStorage.setItem(bestKey(anchored_blocks, enclosed_fill), String(score)); } catch { /* Saving is optional. */ }
+export function focusFeatures(): void { document.querySelector<HTMLButtonElement>('.feature-dialog button[aria-pressed="true"]')?.focus(); }
+export function focusGameControl(): void { document.querySelector<HTMLButtonElement>('.actions button')?.focus(); }
+export function loadBest(score_key = 'rare_seven_v1'): number {
+  try { return Math.max(0, Number(localStorage.getItem('chroma_best_' + score_key)) || 0); } catch { return 0; }
+}
+export function saveBest(score: number, score_key = 'rare_seven_v1'): void {
+  try { localStorage.setItem('chroma_best_' + score_key, String(score)); } catch { /* Saving is optional. */ }
 }
 export function tone(frequency: number, duration: number): void {
   audio ??= new AudioContext();

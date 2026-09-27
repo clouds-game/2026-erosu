@@ -17,15 +17,9 @@ public partial class GameController : Control
   private int _selectedLevel = 1;
   private int _completedLevels;
   private int _best;
-  private bool _anchoredBlocks;
-  private bool _enclosedFill;
-  private string BestScoreKey => (_anchoredBlocks, _enclosedFill) switch
-  {
-    (true, true) => "best_score_fill_anchored_v1",
-    (false, true) => "best_score_fill_v1",
-    (true, false) => "best_score_anchored_v2",
-    _ => "best_score_rare_seven_v1"
-  };
+  private FreePlayOptions _freeOptions = new();
+  private bool _demoGame;
+  private string BestScoreKey => "best_score_" + _freeOptions.ScoreKey;
   private double _noticeTimer;
   private int _heldDirection;
   private double _repeatTimer;
@@ -45,8 +39,11 @@ public partial class GameController : Control
     _audio = new GameAudio();
     AddChild(_audio);
     _texts.SetLanguage(OS.GetLocale());
-    _anchoredBlocks = OS.GetCmdlineUserArgs().Contains("--anchored-blocks");
-    _enclosedFill = OS.GetCmdlineUserArgs().Contains("--enclosed-fill");
+    var launchArgs = OS.GetCmdlineUserArgs();
+    var profileArg = launchArgs.FirstOrDefault(arg => arg.StartsWith("--color-profile="));
+    var profileId = profileArg?["--color-profile=".Length..] ?? "rare_seven";
+    if (!ColorProfile.All.Any(profile => profile.Id == profileId)) profileId = "rare_seven";
+    _freeOptions = new(profileId, launchArgs.Contains("--anchored-blocks"), launchArgs.Contains("--enclosed-fill"));
     var save = new ConfigFile();
     if (save.Load(SavePath) == Error.Ok)
     {
@@ -68,6 +65,7 @@ public partial class GameController : Control
       overlay.LevelRequested += number =>
       {
         if (number < 0) OpenModes();
+        else if (number == 0) OpenFreeOptions();
         else { _selectedLevel = number; Start(); }
       };
       overlay.CloseRequested += CloseOverlay;
@@ -77,14 +75,23 @@ public partial class GameController : Control
       overlay.LanguageRequested += ChangeLanguage;
       overlay.HintRequested += ShowHintOrDemo;
     }
+    _modes.FreePlayRequested += options =>
+    {
+      _freeOptions = options;
+      var progress = new ConfigFile();
+      _best = progress.Load(SavePath) == Error.Ok ? Math.Max(0, progress.GetValue("progress", BestScoreKey, 0).AsInt32()) : 0;
+      _selectedLevel = 0;
+      Start();
+    };
     _hud.LevelsRequested += OpenModes;
     _hud.PauseRequested += TogglePause;
     var args = OS.GetCmdlineUserArgs();
     var levelArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-level="));
     if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
       && captureLevel >= 0 && captureLevel <= PuzzleLevels.All.Count) _selectedLevel = captureLevel;
-    if (_anchoredBlocks || _enclosedFill) _selectedLevel = 0;
+    if (_freeOptions.AnchoredBlocks || _freeOptions.EnclosedFill || profileArg is not null || args.Contains("--free-play")) _selectedLevel = 0;
     Start(args.Contains("--demo"));
+    if ((_selectedLevel == 0 && !args.Contains("--demo")) || args.Contains("--capture-features")) OpenFreeOptions();
     if (args.Contains("--capture-modes")) OpenModes();
     if (args.Contains("--capture-pause")) OpenPause();
     if (args.Contains("--capture-result"))
@@ -191,8 +198,9 @@ public partial class GameController : Control
 
   private void Start(bool demo = false)
   {
+    _demoGame = demo;
     if (demo) _selectedLevel = 0;
-    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession(anchoredBlocks: _anchoredBlocks, enclosedFill: _enclosedFill) : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
+    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? _freeOptions.CreateSession() : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
     _board.Session = _game;
     _hud.ClearFeedback();
     _modes.Visible = _pauseMenu.Visible = _result.Visible = false;
@@ -203,7 +211,7 @@ public partial class GameController : Control
       _hud.ShowFeedback("+" + UiText.Number(wave.Points) + "  ×" + wave.Chain);
       _noticeTimer = 2.5;
       _audio.Match(wave.Chain);
-      if (_game.Puzzle is not null || _game.Score <= _best) return;
+      if (_demoGame || _game.Puzzle is not null || _game.Score <= _best) return;
       _best = _game.Score;
       SaveProgress();
     };
@@ -244,8 +252,20 @@ public partial class GameController : Control
   {
     _game.SetPaused(true);
     _pauseMenu.Visible = _result.Visible = false;
+    _modes.ShowModes();
     _modes.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
     _modes.Visible = true;
+    ResetRepeat();
+  }
+
+  private void OpenFreeOptions()
+  {
+    _game.SetPaused(true);
+    _pauseMenu.Visible = _result.Visible = false;
+    _modes.ConfigureFreePlay(_freeOptions);
+    _modes.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _modes.Visible = true;
+    _modes.FocusFreeOptions();
     ResetRepeat();
   }
 

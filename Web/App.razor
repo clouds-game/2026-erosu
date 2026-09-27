@@ -35,7 +35,7 @@
     </section>
     <aside>
       <div class="overview">
-        <select class="mode" aria-label="@T("mode")" value="@selected_level" @onchange="SelectLevel" @onfocus="PauseForFocus">
+        <select @key="selecting_features" class="mode" aria-label="@T("mode")" value="@selected_level" @onchange="SelectLevel" @onfocus="PauseForFocus">
           <option value="0">@T("free_play")</option>
           @foreach (var tutorial in new[] { false, true })
           {
@@ -81,6 +81,7 @@
         <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
         <button @onclick="TogglePause" disabled="@game.IsFinished">@T(game.Paused ? "resume" : "pause") [P]</button>
         <button @onclick="() => Start()">@T("restart") [R]</button>
+        @if (game.Puzzle is null) { <button @onclick="OpenFreeOptions">@T("features")</button> }
         <button @onclick="ShowHintOrDemo" disabled="@(game.Puzzle is not null && game.IsFinished)">@T(game.Puzzle is null ? "demo" : "hint") [F2]</button>
         <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
         <label class="language"><span>@T("language")</span>
@@ -102,6 +103,33 @@
       <button @onclick="game.HardDrop">@T("drop")</button>
     </nav>
   </main>
+  @if (selecting_features)
+  {
+    <div class="feature-shade">
+      <section class="feature-dialog" role="dialog" aria-modal="true" aria-label="@T("free_play")">
+        <h1>@T("free_play")</h1>
+        <h2>@T("color_profile")</h2>
+        <div class="feature-grid colors" role="group" aria-label="@T("color_profile")">
+          @foreach (var profile in ColorProfile.All)
+          {
+            <button class="feature-tile" aria-pressed="@(free_draft.ColorProfileId == profile.Id ? "true" : "false")"
+              @onclick="() => free_draft = free_draft with { ColorProfileId = profile.Id }">@T("profile_" + profile.Id)</button>
+          }
+        </div>
+        <h2>@T("features")</h2>
+        <div class="feature-grid rules" role="group" aria-label="@T("features")">
+          <button class="feature-tile" aria-pressed="@(free_draft.AnchoredBlocks ? "true" : "false")"
+            @onclick="() => free_draft = free_draft with { AnchoredBlocks = !free_draft.AnchoredBlocks }">@T("feature_anchored")</button>
+          <button class="feature-tile" aria-pressed="@(free_draft.EnclosedFill ? "true" : "false")"
+            @onclick="() => free_draft = free_draft with { EnclosedFill = !free_draft.EnclosedFill }">@T("feature_enclosed")</button>
+        </div>
+        <div class="feature-actions">
+          <button @onclick="CancelFeatures" disabled="@starting_free">@T("cancel")</button>
+          <button class="start-game" @onclick="StartFreePlay" disabled="@starting_free">@T("start_game")</button>
+        </div>
+      </section>
+    </div>
+  }
 }
 
 @code {
@@ -114,8 +142,13 @@
   private int selected_level = PuzzleLevels.DefaultLevel;
   private int completed_levels;
   private bool ready;
-  private bool anchored_blocks;
-  private bool enclosed_fill;
+  private FreePlayOptions free_options = new();
+  private FreePlayOptions free_draft = new();
+  private bool selecting_features;
+  private bool feature_focus_pending;
+  private bool selection_was_paused;
+  private bool starting_free;
+  private bool demo_game;
   private int best;
   private bool sound_enabled;
   private readonly UiText texts = new();
@@ -131,14 +164,22 @@
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=fill-1");
+    if (!firstRender)
+    {
+      if (feature_focus_pending && interop is not null)
+      {
+        feature_focus_pending = false;
+        await interop.InvokeVoidAsync("focusFeatures");
+      }
+      return;
+    }
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=features-1");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
-    anchored_blocks = await interop.InvokeAsync<bool>("anchoredBlocksEnabled");
-    enclosed_fill = await interop.InvokeAsync<bool>("enclosedFillEnabled");
-    if (anchored_blocks || enclosed_fill) { selected_level = 0; Start(); }
-    best = await interop.InvokeAsync<int>("loadBest", anchored_blocks, enclosed_fill);
+    free_options = new(await interop.InvokeAsync<string>("colorProfile"),
+      await interop.InvokeAsync<bool>("anchoredBlocksEnabled"), await interop.InvokeAsync<bool>("enclosedFillEnabled"));
+    best = await interop.InvokeAsync<int>("loadBest", free_options.ScoreKey);
+    if (await interop.InvokeAsync<bool>("freePlayRequested")) OpenFreeOptions();
     completed_levels = (await interop.InvokeAsync<int>("loadCompleted")) & PuzzleLevels.ProgressMask;
     callback = DotNetObjectReference.Create(this);
     await interop.InvokeVoidAsync("connect", callback);
@@ -194,10 +235,10 @@
           completed_levels |= 1 << (selected_level - 1);
           if (interop is not null) await interop.InvokeVoidAsync("saveCompleted", completed_levels);
         }
-        if (game.Puzzle is null && game.Score > best)
+        if (!selecting_features && !demo_game && game.Puzzle is null && game.Score > best)
         {
           best = game.Score;
-          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best, anchored_blocks, enclosed_fill);
+          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best, free_options.ScoreKey);
         }
         await InvokeAsync(StateHasChanged);
       }
@@ -207,8 +248,10 @@
 
   private void Start(bool demo = false)
   {
+    selecting_features = false;
+    demo_game = demo;
     if (demo) selected_level = 0;
-    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? new GameSession(anchoredBlocks: anchored_blocks, enclosedFill: enclosed_fill) : new GameSession(PuzzleLevels.All[selected_level - 1]);
+    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? free_options.CreateSession() : new GameSession(PuzzleLevels.All[selected_level - 1]);
     held.Clear();
     held_direction = 0;
     notice_key = game.Puzzle is { IsTutorial: false } ? "challenge_intro" : game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";
@@ -228,6 +271,11 @@
   public void KeyChanged(string key, bool pressed)
   {
     if (!pressed) { held.Remove(key); return; }
+    if (selecting_features)
+    {
+      if (key == "Escape") CancelFeatures();
+      return;
+    }
     held.Add(key);
     switch (key)
     {
@@ -260,9 +308,46 @@
   private void SelectLevel(ChangeEventArgs args)
   {
     if (!int.TryParse(args.Value?.ToString(), out var number) || number < 0 || number > PuzzleLevels.All.Count) return;
+    if (number == 0) { OpenFreeOptions(); return; }
     selected_level = number;
     Start();
   }
+
+  private void OpenFreeOptions()
+  {
+    free_draft = free_options;
+    selection_was_paused = game.Paused;
+    game.SetPaused(true);
+    held.Clear();
+    selecting_features = true;
+    feature_focus_pending = true;
+  }
+
+  private void CancelFeatures()
+  {
+    if (starting_free) return;
+    selecting_features = false;
+    feature_focus_pending = false;
+    game.SetPaused(selection_was_paused);
+    held.Clear();
+    if (interop is not null) _ = interop.InvokeVoidAsync("focusGameControl");
+  }
+
+  private async Task StartFreePlay()
+  {
+    if (starting_free) return;
+    starting_free = true;
+    try
+    {
+      var options = free_draft;
+      best = interop is not null ? await interop.InvokeAsync<int>("loadBest", options.ScoreKey) : 0;
+      free_options = options;
+      selected_level = 0;
+      Start();
+    }
+    finally { starting_free = false; }
+  }
+
   private void ShowHintOrDemo()
   {
     if (game.Puzzle is null) { Start(true); return; }

@@ -98,7 +98,7 @@ def clone(args):
   best = float('inf')
   for epoch in range(args.epochs):
     model.train()
-    for indices in torch.randperm(len(board)).split(128):
+    for indices in torch.randperm(len(board)).split(getattr(args, 'batch_size', 128)):
       dist, _ = model(board[indices].float(), meta[indices], mask[indices])
       loss = -(target[indices] * dist.logits).sum(-1).mean()
       optimizer.zero_grad()
@@ -116,6 +116,7 @@ def clone(args):
         'training_seed': args.seed, 'training_seeds': config['seeds'],
         'validation_seeds': validation_config['seeds'], 'steps': 0, 'algorithm': 'behavior_cloning',
         'demonstration_steps': len(board), 'epoch': epoch + 1,
+        'batch_size': getattr(args, 'batch_size', 128),
         'dataset_sha256': hashlib.sha256(args.dataset.read_bytes()).hexdigest(),
         'validation_sha256': hashlib.sha256(args.validation.read_bytes()).hexdigest(),
         'source_sha256': source_hash(), 'engine_sha256': config['engine_sha256'],
@@ -138,8 +139,9 @@ def main():
   parser.add_argument('--color-profile', choices=['classic', 'rare_six', 'rare_seven'], default='rare_seven')
   parser.add_argument('--epochs', type=int, default=15)
   parser.add_argument('--threads', type=int, default=2)
+  parser.add_argument('--batch-size', type=int, default=128)
   args = parser.parse_args()
-  if min(args.steps, args.max_pieces, args.epochs, args.threads) < 1 or not 0 <= args.seed <= 2**31 - args.steps:
+  if min(args.steps, args.max_pieces, args.epochs, args.threads, args.batch_size) < 1 or not 0 <= args.seed <= 2**31 - args.steps:
     parser.error('Require positive budgets and nonnegative Int32 seeds')
   torch.set_num_threads(args.threads)
   if args.mode == 'collect':

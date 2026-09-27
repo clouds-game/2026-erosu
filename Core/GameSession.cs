@@ -52,6 +52,34 @@ public sealed class GameSession
     Spawn();
   }
 
+  // Copy only visible state: the preview branch has no bag or random source.
+  private GameSession(GameSession source)
+  {
+    Board = new Board();
+    foreach (var piece in source.Board.Pieces) Board.Add(piece);
+    foreach (var piece in source.Next) _next.Enqueue(piece);
+    Active = source.Active;
+    Colors = source.Colors;
+    Puzzle = source.Puzzle;
+    Score = source.Score;
+    Cleared = source.Cleared;
+    BestChain = source.BestChain;
+    Locked = source.Locked;
+  }
+
+  public GameSession? PreviewPlacement(int action)
+  {
+    if (Placement(action) is null) return null;
+    var preview = new GameSession(this);
+    preview.Place(action);
+    for (var tick = 0; tick < 3600; tick++)
+    {
+      if (preview.Phase is not (GamePhase.Clearing or GamePhase.Settling)) return preview;
+      preview.Advance(1.0 / 60);
+    }
+    throw new InvalidOperationException("Placement preview exceeded resolution budget.");
+  }
+
   public static GameSession CreateDemo()
   {
     var game = new GameSession();

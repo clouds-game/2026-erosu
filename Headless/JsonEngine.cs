@@ -33,7 +33,7 @@ public sealed class JsonEngine
         "move" => new[] { "direction" },
         "place" => new[] { "action" },
         "pause" => new[] { "paused" },
-        "placements" or "state" or "rotate" or "hard_drop" or "levels" => Array.Empty<string>(),
+        "afterstates" or "placements" or "state" or "rotate" or "hard_drop" or "levels" => Array.Empty<string>(),
         _ => throw new ArgumentException("Unknown command.")
       };
       var seen = new HashSet<string>();
@@ -72,6 +72,9 @@ public sealed class JsonEngine
         var game = _game!;
         switch (command)
         {
+          case "afterstates":
+            return Reply(id, true, null, null, events, actions: Enumerable.Range(0, 40)
+              .Select(action => new { Action = action, State = Snapshot(game.PreviewPlacement(action)) }).ToArray());
           case "placements":
             return Reply(id, true, null, null, events, actions: Enumerable.Range(0, 40)
               .Select(action => new { Action = action, Piece = game.Placement(action) }).ToArray());
@@ -130,7 +133,9 @@ public sealed class JsonEngine
       TickRate, Ticks = _ticks, State = Snapshot(), Events = events, Levels = levels, Actions = actions
     }, Json);
 
-  private object? Snapshot() => _game is not { } game ? null : new
+  private object? Snapshot() => Snapshot(_game);
+
+  private static object? Snapshot(GameSession? game) => game is null ? null : new
   {
     Width = Board.Width, Height = Board.Height,
     ColorProfile = game.Colors?.Id, ColorWeights = game.Colors?.Weights, Colors = ColorRules.All,

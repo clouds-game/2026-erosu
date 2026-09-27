@@ -91,7 +91,16 @@
     "free_mode_description": "Endless falling blocks",
     "settings": "SETTINGS",
     "controls_line_1": "← → / A D  Move     ↑ / W  Rotate",
-    "controls_line_2": "↓ / S  Faster     Space  Drop     Esc  Pause"
+    "controls_line_2": "↓ / S  Faster     Space  Drop     Esc  Pause",
+    "features": "Features",
+    "color_profile": "Colors",
+    "profile_classic": "Five colors",
+    "profile_rare_six": "Six colors · gold",
+    "profile_rare_seven": "Seven colors · gold",
+    "feature_anchored": "Random fixed squares",
+    "feature_enclosed": "Fill enclosed spaces",
+    "start_game": "Start",
+    "cancel": "Cancel"
   },
   "zh-CN": {
     "menu": "选项",
@@ -185,7 +194,16 @@
     "free_mode_description": "持续下落的无尽模式",
     "settings": "设置",
     "controls_line_1": "← → / A D  移动     ↑ / W  旋转",
-    "controls_line_2": "↓ / S  加速     空格  落下     Esc  暂停"
+    "controls_line_2": "↓ / S  加速     空格  落下     Esc  暂停",
+    "features": "玩法选项",
+    "color_profile": "颜色",
+    "profile_classic": "五色",
+    "profile_rare_six": "六色 · 含金色",
+    "profile_rare_seven": "七色 · 含金色",
+    "feature_anchored": "随机固定色块",
+    "feature_enclosed": "填充闭合空白",
+    "start_game": "开始",
+    "cancel": "取消"
   },
   "ja": {
     "menu": "オプション",
@@ -279,6 +297,15 @@
     "free_mode_description": "落ち続けるエンドレスモード",
     "settings": "設定",
     "controls_line_1": "← → / A D  移動     ↑ / W  回転",
-    "controls_line_2": "↓ / S  加速     Space  落下     Esc  一時停止"
+    "controls_line_2": "↓ / S  加速     Space  落下     Esc  一時停止",
+    "features": "ルール",
+    "color_profile": "色",
+    "profile_classic": "5色",
+    "profile_rare_six": "6色・金色あり",
+    "profile_rare_seven": "7色・金色あり",
+    "feature_anchored": "ランダム固定ブロック",
+    "feature_enclosed": "閉じた空白を埋める",
+    "start_game": "開始",
+    "cancel": "キャンセル"
   }
 }

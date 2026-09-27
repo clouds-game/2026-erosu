@@ -75,3 +75,28 @@ aside button { font-size: 13px; padding: 7px 4px; }
   .mode, .puzzle-goal { font-size: 11px; }
   .mode { padding: 4px 2px; }
 }
+
+.feature-shade { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: #101319ed; padding: 16px; }
+.feature-dialog { width: min(100%, 680px); max-height: calc(100dvh - 32px); overflow: auto; background: #1b212c; border: 1px solid #394452; padding: 24px; }
+.feature-dialog h1 { margin: 0 0 24px; font-size: 26px; font-weight: 500; }
+.feature-dialog h2 { margin: 20px 0 10px; font-size: 14px; font-weight: 500; color: #a6b4c5; }
+.feature-grid { display: grid; gap: 12px; }
+.feature-grid.colors { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.feature-grid.rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.feature-tile { min-height: 100px; border: 3px solid #344052; border-radius: 0; padding: 14px 10px; font-size: 15px; }
+.feature-tile[aria-pressed="true"] { border-color: #8ee2c4; box-shadow: inset 0 0 0 1px #8ee2c4; }
+.feature-tile:focus-visible { outline: 2px dashed #f6ce71; outline-offset: 4px; }
+.feature-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.start-game { min-width: 140px; border-color: #8ee2c4; }
+@media (max-width: 580px) {
+  .feature-dialog { padding: 16px; }
+  .feature-grid { gap: 8px; }
+  .feature-tile { min-height: 82px; padding: 10px 6px; font-size: 12px; }
+}
+@media (max-height: 520px) {
+  .feature-dialog { padding: 14px; }
+  .feature-dialog h1 { margin-bottom: 12px; font-size: 22px; }
+  .feature-dialog h2 { margin-top: 12px; }
+  .feature-tile { min-height: 65px; }
+  .feature-actions { margin-top: 16px; }
+}

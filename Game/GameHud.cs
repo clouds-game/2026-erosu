@@ -120,7 +120,7 @@ public partial class GameHud : HBoxContainer
     _feedback.Text = _feedbackText;
     _feedback.Visible = _feedbackText.Length > 0;
     _nextPanel.Visible = !tutorial && game.Next.Count > 0;
-    _next.CustomMinimumSize = new Vector2(104, puzzle is null ? game.Forecast.Count * 90 : 420);
+    _next.CustomMinimumSize = new Vector2(104, puzzle is null ? Math.Min(game.Forecast.Count, 4) * 90 : 420);
     _next.Pieces = game.Forecast;
     _next.QueueRedraw();
   }

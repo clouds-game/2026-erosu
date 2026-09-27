@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ChromaDrop.Core;
 
-public enum Shape { I, O, T, L, J, S, Z, Single }
+public enum Shape { I, O, T, L, J, S, Z, Single, Cluster }
 
 public readonly record struct Cell(int X, int Y)
 {

@@ -51,7 +51,7 @@ var tests = new (string Name, Action Run)[]
     Check(roof.FindEnclosedEmptyCells().Count == 70);
     Check(roof.FindEnclosedEmptyCells().All(cell => cell.Y > 10));
   }),
-  ("Enclosed fill is seeded, preserves existing pieces, and uses one identity per square", () =>
+  ("Enclosed fill is seeded and merges new same-color cells into whole blocks", () =>
   {
     foreach (var profile in ColorProfile.All)
       for (var seed = 0; seed < 30; seed++)
@@ -71,9 +71,61 @@ var tests = new (string Name, Action Run)[]
         Check(JsonSerializer.Serialize(board.Pieces) == JsonSerializer.Serialize(repeat.Pieces));
         Check(original.All(piece => board.Pieces.Contains(piece)) && board.FindEnclosedEmptyCells().Count == 0);
         Check(board.Pieces.Where(piece => piece.Id < 0).All(piece => !piece.Anchored &&
-          piece.Shape == Shape.Single && piece.Cells.Count == 1 && profile.Weights[piece.Color] > 0));
-        Check(board.Pieces.Select(piece => piece.Id).Distinct().Count() == 80 && id == -71);
+          piece.Shape == (piece.Cells.Count == 1 ? Shape.Single : Shape.Cluster) && profile.Weights[piece.Color] > 0));
+        var filled = board.Pieces.Where(piece => piece.Id < 0).ToArray();
+        Check(filled.Sum(piece => piece.Cells.Count) == 70 && id == -1 - filled.Length);
+        Check(board.Pieces.Select(piece => piece.Id).Distinct().Count() == board.Pieces.Count);
       }
+  }),
+  ("Fill merges edge-connected colors only within the current event", () =>
+  {
+    var board = BoardOf(Piece.Create(1, Shape.Single, 0, 1, 17));
+    Cell[] cells = [new(0, 16), new(1, 16), new(0, 17), new(3, 16), new(4, 17)];
+    var id = -1;
+    Check(EnclosedRegions.Fill(board, new ConstantColorRandom(), ColorProfile.Default, ref id, cells) == 5);
+    var cluster = board.Pieces.Single(piece => piece.Shape == Shape.Cluster);
+    Check(cluster.Cells.Count == 3 && !cluster.Anchored);
+    Check(board.Pieces.Count == 4 && board.Pieces.Count(piece => piece.Shape == Shape.Single) == 3);
+    Check(board.FindMatches().Count == 0); // Three filled red cells form one block, not three.
+    board.Remove([board.Pieces.Single(piece => piece.Id == 1)]);
+    Settle(board);
+    Check(board.Pieces.Single(piece => piece.Id == cluster.Id).Cells.ToHashSet()
+      .SetEquals(cluster.Cells)); // Its lowest cell supports the whole rigid cluster.
+  }),
+  ("Only newly enclosed cells fill, and a reopened pocket can fill again", () =>
+  {
+    var board = BoardOf(
+      Piece.Create(100, Shape.Single, 0, 0, 15) with { Anchored = true },
+      Piece.Create(101, Shape.Single, 1, 1, 16) with { Anchored = true },
+      Piece.Create(102, Shape.Single, 2, 0, 17) with { Anchored = true });
+    var game = new GameSession(new Random(42), board, enclosedFill: true);
+    void Turn()
+    {
+      Check(game.Place(5));
+      for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
+    }
+    Check(!game.PreviewPlacement(5)!.EnclosedFillPending);
+    Turn();
+    Check(board.Pieces.All(piece => !piece.Cells.Contains(new Cell(0, 16))));
+    board.Add(Piece.Create(103, Shape.Single, 3, 9, 15) with { Anchored = true });
+    board.Add(Piece.Create(104, Shape.Single, 4, 8, 16) with { Anchored = true });
+    board.Add(Piece.Create(105, Shape.Single, 5, 9, 17) with { Anchored = true });
+    Check(game.PreviewPlacement(5)!.EnclosedFillPending);
+    Turn();
+    var fill = board.Pieces.Single(piece => piece.Cells.Contains(new Cell(9, 16)));
+    Check(fill.Id < 0 && !fill.Anchored);
+    board.Remove([fill]);
+    Check(!game.PreviewPlacement(5)!.EnclosedFillPending);
+    Turn();
+    Check(board.Pieces.All(piece => !piece.Cells.Contains(new Cell(9, 16))));
+    var side = board.Pieces.Single(piece => piece.Id == 104);
+    board.Remove([side]);
+    Turn(); // The pocket is open for a completed turn.
+    board.Add(side);
+    Check(game.PreviewPlacement(5)!.EnclosedFillPending);
+    Turn();
+    Check(board.Pieces.Any(piece => piece.Id < 0 && piece.Cells.Contains(new Cell(9, 16))));
+    Check(board.Pieces.All(piece => !piece.Cells.Contains(new Cell(0, 16))));
   }),
   ("Enclosed fill squares fall when their supporting boundary is removed", () =>
   {
@@ -91,8 +143,8 @@ var tests = new (string Name, Action Run)[]
   ("Enclosed fill resolves matches once per turn and previews stop before random colors", () =>
   {
     var roof = new Board();
-    for (var x = 0; x < Board.Width; x++) roof.Add(Piece.Create(x + 100, Shape.Single, x % 7, x, 10) with { Anchored = true });
     var game = new GameSession(new Random(42), roof, enclosedFill: true);
+    for (var x = 0; x < Board.Width; x++) roof.Add(Piece.Create(x + 100, Shape.Single, x % 7, x, 10) with { Anchored = true });
     Check(game.EnclosedFill && roof.Pieces.Count == 10);
     var waves = new List<ClearWave>();
     game.Matched += waves.Add;
@@ -107,9 +159,8 @@ var tests = new (string Name, Action Run)[]
     for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
     Check(game.Phase == GamePhase.Falling && game.Locked == 1 && !game.EnclosedFillPending);
     var generated = game.Board.Pieces.Concat(waves.SelectMany(wave => wave.Pieces))
-      .Where(piece => piece.Id < 0).Select(piece => piece.Id).Distinct().Count();
+      .Where(piece => piece.Id < 0).DistinctBy(piece => piece.Id).Sum(piece => piece.Cells.Count);
     Check(generated == expectedFill, $"Generated {generated} squares instead of one pass of {expectedFill}.");
-    Check(waves.Count > 0 && game.Cleared > 0 && game.Score > 0);
     Check(game.Board.FindMatches().Count == 0);
   }),
   ("Enclosed fill defaults off and enabled open boards consume no additional random colors", () =>
@@ -228,9 +279,9 @@ var tests = new (string Name, Action Run)[]
   ("Queued fixed squares reserve identities independently of enclosed fill", () =>
   {
     var board = new Board();
+    var game = new GameSession(new TrialRandom(42, 0), board, anchoredBlocks: true, enclosedFill: true);
     for (var x = 0; x < Board.Width; x++)
       board.Add(Piece.Create(x + 100, Shape.Single, x % 7, x, 10) with { Anchored = true });
-    var game = new GameSession(new TrialRandom(42, 0), board, anchoredBlocks: true, enclosedFill: true);
     var incoming = game.IncomingAnchor!;
     game.Place(0);
     for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
@@ -716,4 +767,9 @@ sealed class TrialRandom(int seed, double result) : Random(seed)
 {
   public int Trials { get; private set; }
   public override double NextDouble() { Trials++; return result; }
+}
+
+sealed class ConstantColorRandom : Random
+{
+  public override int Next(int maxValue) => 0;
 }

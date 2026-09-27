@@ -15,7 +15,7 @@ var tests = new (string Name, Action Run)[]
   {
     foreach (var reverse in new[] { false, true })
     {
-      var anchor = Piece.Create(-1, Shape.O, 0, 0, 12) with { Anchored = true };
+      var anchor = Piece.Create(-1, Shape.Single, 0, 0, 12) with { Anchored = true };
       var pieces = new[] { anchor, Piece.Create(1, Shape.O, 1, 0, 10),
         Piece.Create(2, Shape.O, 2, 0, 8), Piece.Create(3, Shape.O, 3, 4, 8) };
       var board = BoardOf(reverse ? pieces.Reverse().ToArray() : pieces);
@@ -28,16 +28,27 @@ var tests = new (string Name, Action Run)[]
   }),
   ("Anchors count as whole pieces and matching releases their supported stack", () =>
   {
-    var anchor = Piece.Create(-1, Shape.O, 0, 0, 12) with { Anchored = true };
-    var board = BoardOf(anchor, Piece.Create(1, Shape.O, 0, 2, 12),
+    var anchor = Piece.Create(-1, Shape.Single, 0, 0, 12) with { Anchored = true };
+    var board = BoardOf(anchor, Piece.Create(1, Shape.O, 0, 1, 12),
       Piece.Create(2, Shape.O, 1, 0, 10));
     Check(board.FindMatches().Count == 0);
-    board.Add(Piece.Create(3, Shape.O, 0, 4, 12));
+    board.Add(Piece.Create(3, Shape.O, 0, 3, 12));
     var matches = board.FindMatches();
     Check(matches.Count == 3 && matches.Contains(anchor));
     board.Remove(matches);
     Settle(board);
     Check(board.Pieces.Count == 1 && board.Pieces[0].Cells.Min(cell => cell.Y) == 16);
+  }),
+  ("Three single-cell anchors match but two never count as three", () =>
+  {
+    var board = BoardOf(
+      Piece.Create(-1, Shape.Single, 2, 1, 14) with { Anchored = true },
+      Piece.Create(-2, Shape.Single, 2, 2, 14) with { Anchored = true });
+    Check(board.FindMatches().Count == 0);
+    board.Add(Piece.Create(-3, Shape.Single, 2, 2, 15) with { Anchored = true });
+    Check(board.FindMatches().Count == 3);
+    board.Remove(board.FindMatches());
+    Check(board.Pieces.Count == 0);
   }),
   ("Anchored starts are deterministic, valid, and opt-in across color profiles", () =>
   {
@@ -51,7 +62,7 @@ var tests = new (string Name, Action Run)[]
         Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
         Check(game.Active is not null && game.Board.CanPlace(game.Active));
         Check(game.Board.Pieces.All(piece => piece.Anchored && piece.Id < 0 &&
-          piece.Cells.Count == 4 && piece.Cells.All(cell => cell.Y >= Board.Height - 6) && colors.Weights[piece.Color] > 0));
+          piece.Shape == Shape.Single && piece.Cells.Count == 1 && piece.Cells.All(cell => cell.Y >= Board.Height - 6) && colors.Weights[piece.Color] > 0));
         var plain = new GameSession(new Random(seed), colors: colors);
         var disabled = new GameSession(new Random(seed), colors: colors, anchoredBlocks: false);
         Check(!plain.AnchoredBlocks && plain.Board.Pieces.Count == 0);
@@ -382,6 +393,7 @@ var tests = new (string Name, Action Run)[]
     Check(first.Select(piece => piece.Shape).Distinct().Count() == 7);
     Check(second.Select(piece => piece.Shape).Distinct().Count() == 7);
     Check(first.Concat(second).Select(piece => piece.Id).Distinct().Count() == 14);
+    Check(first.Concat(second).All(piece => piece.Cells.Count == 4 && piece.Shape != Shape.Single));
     Check(first.Concat(second).All(piece => piece.Color is >= 0 and < PieceBag.ColorCount));
   }),
   ("Color profiles preserve quotas and deterministic bags across refills", () =>

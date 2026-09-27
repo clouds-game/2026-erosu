@@ -35,7 +35,7 @@ class TrajectoryTests(unittest.TestCase):
   def test_anchored_game_roundtrip(self):
     with self.path.open('w') as stream, Engine(stream) as engine:
       initial = engine.command('start', mode='endless', seed=42, anchored_blocks=True)
-      self.assertTrue(all(piece['anchored'] for piece in initial['state']['pieces']))
+      self.assertTrue(all(piece['anchored'] and len(piece['cells']) == 1 for piece in initial['state']['pieces']))
       action = next(item['action'] for item in engine.command('placements')['actions'] if item['piece'])
       engine.command('place', action=action)
       expected = engine.command('tick', count=120)

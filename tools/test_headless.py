@@ -57,7 +57,7 @@ class HeadlessTests(unittest.TestCase):
     request = {'command': 'start', 'mode': 'endless', 'seed': 42, 'anchored_blocks': True}
     initial = self.send(request)['state']
     self.assertEqual(3, len(initial['pieces']))
-    self.assertTrue(all(piece['anchored'] for piece in initial['pieces']))
+    self.assertTrue(all(piece['anchored'] and piece['shape'] == 'single' and len(piece['cells']) == 1 for piece in initial['pieces']))
     self.assertEqual(initial, self.send(request)['state'])
     for command in ['placements', 'afterstates', 'state']:
       self.assertEqual(initial, self.send({'command': command})['state'])

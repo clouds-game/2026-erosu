@@ -110,7 +110,7 @@ public sealed class GameSession
 
   public bool Rotate()
   {
-    if (!AcceptsInput || Active is null || Active.Shape == Shape.O) return false;
+    if (!AcceptsInput || Active is null || Active.Shape is Shape.O or Shape.Single) return false;
     var rotated = Rotated(Active);
     if (rotated is null) return false;
     Active = rotated;
@@ -119,7 +119,7 @@ public sealed class GameSession
 
   private Piece? Rotated(Piece piece)
   {
-    if (piece.Shape == Shape.O) return null;
+    if (piece.Shape is Shape.O or Shape.Single) return null;
     var left = piece.Cells.Min(cell => cell.X);
     var top = piece.Cells.Min(cell => cell.Y);
     var height = piece.Cells.Max(cell => cell.Y) - top + 1;

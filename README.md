@@ -90,3 +90,5 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 界面支持 English / 简体中文 / 日本語，可在游戏侧栏切换并记住偏好。详见 [界面国际化](docs/界面国际化.md)。
 
 颜色与奖励调参、固定 AI 生存分布：[颜色压力实验](docs/颜色压力实验.md)。
+
+棋盘状态神经网络与独立生存/得分训练：[CNN 与 PPO](docs/CNN与PPO训练.md)。

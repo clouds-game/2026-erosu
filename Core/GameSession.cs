@@ -78,23 +78,60 @@ public sealed class GameSession
   public bool Rotate()
   {
     if (!AcceptsInput || Active is null || Active.Shape == Shape.O) return false;
-    var left = Active.Cells.Min(cell => cell.X);
-    var top = Active.Cells.Min(cell => cell.Y);
-    var height = Active.Cells.Max(cell => cell.Y) - top + 1;
-    var rotated = Active with
+    var rotated = Rotated(Active);
+    if (rotated is null) return false;
+    Active = rotated;
+    return true;
+  }
+
+  private Piece? Rotated(Piece piece)
+  {
+    if (piece.Shape == Shape.O) return null;
+    var left = piece.Cells.Min(cell => cell.X);
+    var top = piece.Cells.Min(cell => cell.Y);
+    var height = piece.Cells.Max(cell => cell.Y) - top + 1;
+    var rotated = piece with
     {
-      Cells = Active.Cells.Select(cell =>
+      Cells = piece.Cells.Select(cell =>
         new Cell(left + height - 1 - (cell.Y - top), top + cell.X - left)).ToArray()
     };
     Cell[] kicks = [new(0, 0), new(-1, 0), new(1, 0), new(-2, 0), new(2, 0), new(0, -1), new(0, -2)];
     foreach (var kick in kicks)
     {
       var candidate = rotated.Offset(kick.X, kick.Y);
-      if (!Board.CanPlace(candidate)) continue;
-      Active = candidate;
-      return true;
+      if (Board.CanPlace(candidate)) return candidate;
     }
-    return false;
+    return null;
+  }
+
+  // Rotation first, then horizontal movement, then hard drop. No timing or RNG is consumed.
+  public Piece? Placement(int action)
+  {
+    if (action is < 0 or >= 40 || !AcceptsInput || Active is null) return null;
+    var candidate = Active;
+    for (var turn = 0; turn < action / Board.Width; turn++)
+    {
+      candidate = Rotated(candidate);
+      if (candidate is null) return null;
+    }
+    var target = action % Board.Width;
+    while (candidate.Cells.Min(cell => cell.X) != target)
+    {
+      var moved = candidate.Offset(Math.Sign(target - candidate.Cells.Min(cell => cell.X)), 0);
+      if (!Board.CanPlace(moved)) return null;
+      candidate = moved;
+    }
+    while (Board.CanPlace(candidate.Offset(0, 1))) candidate = candidate.Offset(0, 1);
+    return candidate;
+  }
+
+  public bool Place(int action)
+  {
+    var candidate = Placement(action);
+    if (candidate is null) return false;
+    Active = candidate;
+    Lock();
+    return true;
   }
 
   public Piece? Ghost()

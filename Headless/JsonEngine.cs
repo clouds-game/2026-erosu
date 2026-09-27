@@ -31,8 +31,9 @@ public sealed class JsonEngine
         "start" => new[] { "mode", "seed", "level", "color_profile" },
         "tick" => new[] { "count", "soft_drop" },
         "move" => new[] { "direction" },
+        "place" => new[] { "action" },
         "pause" => new[] { "paused" },
-        "state" or "rotate" or "hard_drop" or "levels" => Array.Empty<string>(),
+        "placements" or "state" or "rotate" or "hard_drop" or "levels" => Array.Empty<string>(),
         _ => throw new ArgumentException("Unknown command.")
       };
       var seen = new HashSet<string>();
@@ -71,6 +72,16 @@ public sealed class JsonEngine
         var game = _game!;
         switch (command)
         {
+          case "placements":
+            return Reply(id, true, null, null, events, actions: Enumerable.Range(0, 40)
+              .Select(action => new { Action = action, Piece = game.Placement(action) }).ToArray());
+          case "place":
+            var action = request.GetProperty("action").GetInt32();
+            Require(action is >= 0 and < 40, "action must be between 0 and 39.");
+            game.Matched += events.Add;
+            try { applied = game.Place(action); }
+            finally { game.Matched -= events.Add; }
+            break;
           case "tick":
             var count = request.GetProperty("count").GetInt32();
             Require(count is >= 0 and <= 3600, "count must be between 0 and 3600.");
@@ -113,10 +124,10 @@ public sealed class JsonEngine
   }
 
   private string Reply(JsonElement? id, bool ok, bool? applied, string? error,
-    List<ClearWave> events, object? levels = null) => JsonSerializer.Serialize(new
+    List<ClearWave> events, object? levels = null, object? actions = null) => JsonSerializer.Serialize(new
     {
       ProtocolVersion = 1, Id = id, Ok = ok, Applied = applied, Error = error,
-      TickRate, Ticks = _ticks, State = Snapshot(), Events = events, Levels = levels
+      TickRate, Ticks = _ticks, State = Snapshot(), Events = events, Levels = levels, Actions = actions
     }, Json);
 
   private object? Snapshot() => _game is not { } game ? null : new

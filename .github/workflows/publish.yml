@@ -30,6 +30,23 @@ jobs:
       - run: dotnet build Headless/ChromaDrop.Headless.csproj -c Release --nologo
       - run: python3 -m unittest discover -s tools -p 'test_*.py'
 
+  neural:
+    name: CNN PPO tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+      - run: pip install -r AI/requirements-rl.txt
+      - run: dotnet build Headless/ChromaDrop.Headless.csproj -c Release --nologo
+      - run: python -m unittest discover -s tools -p 'test_neural.py'
+
   desktop:
     name: Desktop (${{ matrix.target }})
     needs: test

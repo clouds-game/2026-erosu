@@ -283,6 +283,17 @@ var tests = new (string Name, Action Run)[]
     game.HardDrop();
     Check(game.Locked == 1 && game.Score == 2100);
   }),
+  ("Placement validation rejects blocked paths without moving the active piece", () =>
+  {
+    var seed = Enumerable.Range(0, 100).First(seed => new GameSession(new Random(seed)).Active!.Shape == Shape.O);
+    var board = BoardOf(Piece.Create(-1, Shape.O, 1, 2, 0));
+    var game = new GameSession(new Random(seed), board);
+    var original = game.Active;
+    Check(game.Placement(0) is null && !game.Place(0));
+    Check(game.Active == original && game.Locked == 0 && board.Pieces.Count == 1);
+    Check(game.Placement(4) is not null);
+    Check(game.Place(4) && game.Locked == 1);
+  }),
   ("Ghost and movement respect the floor and walls", () =>
   {
     var game = new GameSession(new Random(7));

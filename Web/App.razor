@@ -115,6 +115,7 @@
   private int completed_levels;
   private bool ready;
   private bool anchored_blocks;
+  private bool enclosed_fill;
   private int best;
   private bool sound_enabled;
   private readonly UiText texts = new();
@@ -131,12 +132,13 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=anchored-2");
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=fill-1");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
     anchored_blocks = await interop.InvokeAsync<bool>("anchoredBlocksEnabled");
-    if (anchored_blocks) { selected_level = 0; Start(); }
-    best = await interop.InvokeAsync<int>("loadBest", anchored_blocks);
+    enclosed_fill = await interop.InvokeAsync<bool>("enclosedFillEnabled");
+    if (anchored_blocks || enclosed_fill) { selected_level = 0; Start(); }
+    best = await interop.InvokeAsync<int>("loadBest", anchored_blocks, enclosed_fill);
     completed_levels = (await interop.InvokeAsync<int>("loadCompleted")) & PuzzleLevels.ProgressMask;
     callback = DotNetObjectReference.Create(this);
     await interop.InvokeVoidAsync("connect", callback);
@@ -195,7 +197,7 @@
         if (game.Puzzle is null && game.Score > best)
         {
           best = game.Score;
-          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best, anchored_blocks);
+          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best, anchored_blocks, enclosed_fill);
         }
         await InvokeAsync(StateHasChanged);
       }
@@ -206,7 +208,7 @@
   private void Start(bool demo = false)
   {
     if (demo) selected_level = 0;
-    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? new GameSession(anchoredBlocks: anchored_blocks) : new GameSession(PuzzleLevels.All[selected_level - 1]);
+    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? new GameSession(anchoredBlocks: anchored_blocks, enclosedFill: enclosed_fill) : new GameSession(PuzzleLevels.All[selected_level - 1]);
     held.Clear();
     held_direction = 0;
     notice_key = game.Puzzle is { IsTutorial: false } ? "challenge_intro" : game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";

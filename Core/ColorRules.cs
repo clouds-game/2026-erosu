@@ -36,6 +36,14 @@ public sealed class ColorProfile
   public static ColorProfile Default => RareSeven;
   public static IReadOnlyList<ColorProfile> All { get; } = Array.AsReadOnly([Classic, RareSix, RareSeven]);
 
+  public int SampleColor(Random random)
+  {
+    var ticket = random.Next(BagSize);
+    var color = 0;
+    while (ticket >= Weights[color]) ticket -= Weights[color++];
+    return color;
+  }
+
   public static ColorProfile Find(string id) => All.FirstOrDefault(profile => profile.Id == id)
     ?? throw new ArgumentException($"Unknown color profile: {id}", nameof(id));
 }

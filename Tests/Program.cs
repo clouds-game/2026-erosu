@@ -11,6 +11,91 @@ if (args.Contains("--analyze-challenge"))
 
 var tests = new (string Name, Action Run)[]
 {
+  ("Enclosed detection uses edge paths to the top, not diagonal openings", () =>
+  {
+    Check(new Board().FindEnclosedEmptyCells().Count == 0);
+    var board = BoardOf(
+      Piece.Create(1, Shape.Single, 0, 4, 12), Piece.Create(2, Shape.Single, 1, 3, 13),
+      Piece.Create(3, Shape.Single, 2, 5, 13), Piece.Create(4, Shape.Single, 3, 4, 14));
+    Check(board.FindEnclosedEmptyCells().SequenceEqual(new[] { new Cell(4, 13) }));
+    board.Remove([board.Pieces.Single(piece => piece.Id == 2)]);
+    Check(board.FindEnclosedEmptyCells().Count == 0);
+  }),
+  ("Walls and floor close pockets and disconnected regions are detected together", () =>
+  {
+    var board = BoardOf(
+      Piece.Create(1, Shape.Single, 0, 0, 12), Piece.Create(2, Shape.Single, 1, 0, 14),
+      Piece.Create(3, Shape.Single, 2, 1, 13), Piece.Create(4, Shape.Single, 3, 4, 16),
+      Piece.Create(5, Shape.Single, 4, 3, 17), Piece.Create(6, Shape.Single, 5, 5, 17));
+    Check(board.FindEnclosedEmptyCells().SequenceEqual(new[] { new Cell(0, 13), new Cell(4, 17) }));
+    var roof = new Board();
+    for (var x = 0; x < Board.Width; x++) roof.Add(Piece.Create(x + 1, Shape.Single, x % 7, x, 10));
+    Check(roof.FindEnclosedEmptyCells().Count == 70);
+    Check(roof.FindEnclosedEmptyCells().All(cell => cell.Y > 10));
+  }),
+  ("Enclosed fill is seeded, preserves existing pieces, and uses one identity per square", () =>
+  {
+    foreach (var profile in ColorProfile.All)
+      for (var seed = 0; seed < 30; seed++)
+      {
+        var board = new Board();
+        var repeat = new Board();
+        for (var x = 0; x < Board.Width; x++)
+        {
+          var piece = Piece.Create(x + 1, Shape.Single, x % 7, x, 10) with { Anchored = true };
+          board.Add(piece); repeat.Add(piece);
+        }
+        var original = board.Pieces.ToArray();
+        var id = -1;
+        var repeatId = -1;
+        Check(EnclosedRegions.Fill(board, new Random(seed), profile, ref id) == 70);
+        Check(EnclosedRegions.Fill(repeat, new Random(seed), profile, ref repeatId) == 70);
+        Check(JsonSerializer.Serialize(board.Pieces) == JsonSerializer.Serialize(repeat.Pieces));
+        Check(original.All(piece => board.Pieces.Contains(piece)) && board.FindEnclosedEmptyCells().Count == 0);
+        Check(board.Pieces.Where(piece => piece.Id < 0).All(piece => piece.Anchored &&
+          piece.Shape == Shape.Single && piece.Cells.Count == 1 && profile.Weights[piece.Color] > 0));
+        Check(board.Pieces.Select(piece => piece.Id).Distinct().Count() == 80 && id == -71);
+      }
+  }),
+  ("Enclosed fill resolves matches once per turn and previews stop before random colors", () =>
+  {
+    var roof = new Board();
+    for (var x = 0; x < Board.Width; x++) roof.Add(Piece.Create(x + 100, Shape.Single, x % 7, x, 10) with { Anchored = true });
+    var game = new GameSession(new Random(42), roof, enclosedFill: true);
+    Check(game.EnclosedFill && roof.Pieces.Count == 10);
+    var waves = new List<ClearWave>();
+    game.Matched += waves.Add;
+    var action = Enumerable.Range(0, 40).First(action => game.Placement(action) is not null);
+    var before = JsonSerializer.Serialize(roof.Pieces);
+    var preview = game.PreviewPlacement(action)!;
+    Check(preview.EnclosedFill && preview.EnclosedFillPending && !preview.AnchoredSpawnPending);
+    Check(JsonSerializer.Serialize(roof.Pieces) == before && !game.EnclosedFillPending);
+    var expectedFill = preview.Board.FindEnclosedEmptyCells().Count;
+    Check(expectedFill >= 70); // The landing can also close a pocket above the roof.
+    game.Place(action);
+    for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
+    Check(game.Phase == GamePhase.Falling && game.Locked == 1 && !game.EnclosedFillPending);
+    var generated = game.Board.Pieces.Concat(waves.SelectMany(wave => wave.Pieces))
+      .Where(piece => piece.Id < 0).Select(piece => piece.Id).Distinct().Count();
+    Check(generated == expectedFill, $"Generated {generated} squares instead of one pass of {expectedFill}.");
+    Check(waves.Count > 0 && game.Cleared > 0 && game.Score > 0);
+    Check(game.Board.FindMatches().Count == 0);
+  }),
+  ("Enclosed fill defaults off and enabled open boards consume no additional random colors", () =>
+  {
+    var plain = new GameSession(new Random(42));
+    var disabled = new GameSession(new Random(42), enclosedFill: false);
+    var enabled = new GameSession(new Random(42), enclosedFill: true);
+    Check(!plain.EnclosedFill && !disabled.EnclosedFill);
+    foreach (var game in new[] { plain, disabled, enabled })
+    {
+      game.Place(0);
+      for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
+    }
+    Check(JsonSerializer.Serialize(plain.Board.Pieces) == JsonSerializer.Serialize(disabled.Board.Pieces));
+    Check(JsonSerializer.Serialize(plain.Next) == JsonSerializer.Serialize(disabled.Next));
+    Check(JsonSerializer.Serialize(plain.Next) == JsonSerializer.Serialize(enabled.Next));
+  }),
   ("Anchored pieces support stacks independently of insertion order", () =>
   {
     foreach (var reverse in new[] { false, true })

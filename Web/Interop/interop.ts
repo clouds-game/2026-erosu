@@ -38,14 +38,18 @@ export function disconnect(): void { detach?.(); detach = undefined; }
 export function anchoredBlocksEnabled(): boolean {
   return new URLSearchParams(window.location.search).get('anchored_blocks') === 'true';
 }
-function bestKey(anchored_blocks: boolean): string {
+export function enclosedFillEnabled(): boolean {
+  return new URLSearchParams(window.location.search).get('enclosed_fill') === 'true';
+}
+function bestKey(anchored_blocks: boolean, enclosed_fill: boolean): string {
+  if (enclosed_fill) return anchored_blocks ? 'chroma_best_fill_anchored_v1' : 'chroma_best_fill_v1';
   return anchored_blocks ? 'chroma_best_anchored_v2' : 'chroma_best_rare_seven_v1';
 }
-export function loadBest(anchored_blocks = false): number {
-  try { return Math.max(0, Number(localStorage.getItem(bestKey(anchored_blocks))) || 0); } catch { return 0; }
+export function loadBest(anchored_blocks = false, enclosed_fill = false): number {
+  try { return Math.max(0, Number(localStorage.getItem(bestKey(anchored_blocks, enclosed_fill))) || 0); } catch { return 0; }
 }
-export function saveBest(score: number, anchored_blocks = false): void {
-  try { localStorage.setItem(bestKey(anchored_blocks), String(score)); } catch { /* Saving is optional. */ }
+export function saveBest(score: number, anchored_blocks = false, enclosed_fill = false): void {
+  try { localStorage.setItem(bestKey(anchored_blocks, enclosed_fill), String(score)); } catch { /* Saving is optional. */ }
 }
 export function tone(frequency: number, duration: number): void {
   audio ??= new AudioContext();

@@ -47,6 +47,21 @@ class TrajectoryTests(unittest.TestCase):
     self.assertEqual(expected['state'], result['state'])
     self.assertTrue(result['state']['anchored_blocks'])
 
+  def test_enclosed_fill_roundtrip(self):
+    with self.path.open('w') as stream, Engine(stream) as engine:
+      engine.command('start', mode='endless', seed=42, enclosed_fill=True, anchored_blocks=True)
+      for turn in range(10):
+        actions = [item for item in engine.command('placements')['actions'] if item['piece']]
+        if not actions:
+          break
+        action = max(actions, key=lambda item: min(cell['y'] for cell in item['piece']['cells']))['action']
+        engine.command('place', action=action)
+        expected = engine.command('tick', count=120)
+    result = replay(self.path)
+    self.assertTrue(result['verified'])
+    self.assertTrue(result['state']['enclosed_fill'])
+    self.assertEqual(expected['state'], result['state'])
+
   def test_truncation_and_corruption_are_rejected(self):
     self.record()
     original = self.path.read_text().splitlines()

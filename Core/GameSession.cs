@@ -10,7 +10,9 @@ public sealed class GameSession
 {
   private readonly PieceBag? _bag;
   private readonly Random? _obstacleRandom;
-  private int _nextObstacleId = -1;
+  private readonly Random? _fillRandom;
+  private int _lastFillTurn;
+  private int _nextGeneratedId = -1;
   private int _lastObstacleTurn;
   private readonly Queue<Piece> _next = new();
   private double _timer;
@@ -23,6 +25,8 @@ public sealed class GameSession
   public PuzzleLevel? Puzzle { get; }
   public ColorProfile? Colors { get; }
   public bool AnchoredBlocks { get; }
+  public bool EnclosedFill { get; }
+  public bool EnclosedFillPending { get; private set; }
   public bool AnchoredSpawnPending { get; private set; }
   public Piece? IncomingAnchor { get; private set; }
   public IReadOnlyList<Piece> Forecast => IncomingAnchor is { } anchor ? new[] { anchor }.Concat(Next).ToArray() : Next;
@@ -41,16 +45,18 @@ public sealed class GameSession
   public event Action<ClearWave>? Matched;
   public event Action? PieceLocked;
 
-  public GameSession(Random? random = null, Board? board = null, ColorProfile? colors = null, bool anchoredBlocks = false)
+  public GameSession(Random? random = null, Board? board = null, ColorProfile? colors = null, bool anchoredBlocks = false, bool enclosedFill = false)
   {
     Board = board ?? new Board();
     Colors = colors ?? ColorProfile.Default;
     random ??= new Random();
     AnchoredBlocks = anchoredBlocks;
+    EnclosedFill = enclosedFill;
+    if (enclosedFill) _fillRandom = random;
     if (anchoredBlocks)
     {
       _obstacleRandom = random;
-      AnchoredObstacles.Populate(Board, random, Colors, ref _nextObstacleId);
+      AnchoredObstacles.Populate(Board, random, Colors, ref _nextGeneratedId);
     }
     _bag = new PieceBag(random, Colors);
     for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
@@ -77,13 +83,15 @@ public sealed class GameSession
     Colors = source.Colors;
     Puzzle = source.Puzzle;
     AnchoredBlocks = source.AnchoredBlocks;
+    EnclosedFill = source.EnclosedFill;
+    _lastFillTurn = source._lastFillTurn;
     IncomingAnchor = source.IncomingAnchor;
     Score = source.Score;
     Cleared = source.Cleared;
     BestChain = source.BestChain;
     Locked = source.Locked;
     _lastObstacleTurn = source._lastObstacleTurn;
-    _nextObstacleId = source._nextObstacleId;
+    _nextGeneratedId = source._nextGeneratedId;
   }
 
   public GameSession? PreviewPlacement(int action)
@@ -268,8 +276,8 @@ public sealed class GameSession
   {
     if (_obstacleRandom is null || IsFinished) return;
     if (_obstacleRandom.NextDouble() < AnchoredObstacles.SpawnProbability)
-      IncomingAnchor = Piece.Create(_nextObstacleId, Shape.Single,
-        AnchoredObstacles.DrawColor(_obstacleRandom, Colors!)) with { Anchored = true };
+      IncomingAnchor = Piece.Create(_nextGeneratedId, Shape.Single,
+        Colors!.SampleColor(_obstacleRandom)) with { Anchored = true };
   }
 
   private void Lock()
@@ -293,11 +301,22 @@ public sealed class GameSession
         if (IncomingAnchor is { } anchor)
         {
           if (_obstacleRandom is not null)
-            AnchoredObstacles.TrySpawn(Board, _obstacleRandom, anchor.Color, ref _nextObstacleId);
+            AnchoredObstacles.TrySpawn(Board, _obstacleRandom, anchor.Color, ref _nextGeneratedId);
           else AnchoredSpawnPending = true; // Forecast color is visible; position is hidden.
         }
         IncomingAnchor = null;
         PlanObstacle();
+      }
+      if (EnclosedFill && Locked > 0 && _lastFillTurn != Locked)
+      {
+        _lastFillTurn = Locked;
+        if (_fillRandom is null)
+          EnclosedFillPending = AnchoredSpawnPending || Board.FindEnclosedEmptyCells().Count > 0;
+        else if (EnclosedRegions.Fill(Board, _fillRandom, Colors!, ref _nextGeneratedId) > 0)
+        {
+          CheckMatches(); // Resolve fill matches, but never refill twice in this turn.
+          return;
+        }
       }
       // Judge only after all waves and gravity have settled, including the
       // final supplied piece. An exhausted queue must not hide a victory.

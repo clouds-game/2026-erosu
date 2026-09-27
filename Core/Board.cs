@@ -22,6 +22,34 @@ public sealed class Board
     _pieces.Add(piece);
   }
 
+  // Empty space is open only when a four-neighbor path reaches the top edge.
+  public IReadOnlyList<Cell> FindEnclosedEmptyCells()
+  {
+    var occupied = _pieces.SelectMany(piece => piece.Cells).ToHashSet();
+    var reachable = new HashSet<Cell>();
+    var queue = new Queue<Cell>();
+    for (var x = 0; x < Width; x++)
+    {
+      var cell = new Cell(x, 0);
+      if (!occupied.Contains(cell)) { reachable.Add(cell); queue.Enqueue(cell); }
+    }
+    while (queue.TryDequeue(out var cell))
+      foreach (var direction in Neighbors)
+      {
+        var neighbor = cell.Offset(direction.X, direction.Y);
+        if (neighbor.X is >= 0 and < Width && neighbor.Y is >= 0 and < Height &&
+          !occupied.Contains(neighbor) && reachable.Add(neighbor)) queue.Enqueue(neighbor);
+      }
+    var enclosed = new List<Cell>();
+    for (var y = 0; y < Height; y++)
+      for (var x = 0; x < Width; x++)
+      {
+        var cell = new Cell(x, y);
+        if (!occupied.Contains(cell) && !reachable.Contains(cell)) enclosed.Add(cell);
+      }
+    return enclosed;
+  }
+
   public IReadOnlyList<Piece> FindMatches()
   {
     var occupied = new Dictionary<Cell, Piece>();

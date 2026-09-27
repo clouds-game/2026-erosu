@@ -1,9 +1,9 @@
 namespace ChromaDrop.Core;
 
-public sealed class PieceBag(Random random)
+public sealed class PieceBag(Random random, ColorProfile? profile = null)
 {
-  public const int ColorCount = 5;
-  private static readonly int[] ColorWeights = [10, 9, 8, 7, 6];
+  public const int ColorCount = ColorRules.Count;
+  private readonly ColorProfile _profile = profile ?? ColorProfile.Default;
   private readonly Stack<Shape> _shapes = new();
   private readonly Stack<int> _colors = new();
   private int _nextId = 1;
@@ -18,7 +18,7 @@ public sealed class PieceBag(Random random)
     }
     if (_colors.Count == 0)
     {
-      var colors = ColorWeights
+      var colors = _profile.Weights
         .SelectMany((count, color) => Enumerable.Repeat(color, count))
         .ToArray();
       random.Shuffle(colors);

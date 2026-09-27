@@ -13,10 +13,24 @@ from .engine import Engine, ROOT
 from .policy import BASELINE, FEATURES, choose
 
 
-def episode(engine, seed, weights, max_pieces):
-  state = engine.command("start", mode="endless", seed=seed)["state"]
+def episode(engine, seed, weights, max_pieces, color_profile=None):
+  options = {"color_profile": color_profile} if color_profile else {}
+  state = engine.command("start", mode="endless", seed=seed, **options)["state"]
   rng = random.Random(seed)
   rejected = 0
+  placed_by_color = [0] * len(state["colors"])
+  cleared_by_color = [0] * len(state["colors"])
+  rarity_points = 0
+
+  def resolve(command, **fields):
+    nonlocal rarity_points
+    response = engine.command(command, **fields)
+    for wave in response["events"]:
+      rarity_points += wave["award"]["rarity"]
+      for piece in wave["pieces"]:
+        cleared_by_color[piece["color"]] += 1
+    return response["state"]
+
   while not state["is_finished"] and state["locked"] < max_pieces:
     rotation, left = choose(state, weights, rng)
     for _ in range(rotation):
@@ -30,21 +44,24 @@ def episode(engine, seed, weights, max_pieces):
       if not response["applied"]:
         rejected += 1
         break
-    state = engine.command("hard_drop")["state"]
+    placed_by_color[state["active"]["color"]] += 1
+    state = resolve("hard_drop")
     # Stop exactly at the next decision point, never tick the next falling piece accidentally.
     for _ in range(3600):
       if state["phase"] not in ("clearing", "settling"):
         break
-      state = engine.command("tick", count=1)["state"]
+      state = resolve("tick", count=1)
     else:
       raise RuntimeError("Resolution exceeded 3600 ticks")
   return {"seed": seed, "score": state["score"], "locked": state["locked"],
     "cleared": state["cleared"], "best_chain": state["best_chain"],
-    "truncated": not state["is_finished"], "rejected_actions": rejected}
+    "truncated": not state["is_finished"], "rejected_actions": rejected,
+    "color_profile": state["color_profile"], "placed_by_color": placed_by_color,
+    "cleared_by_color": cleared_by_color, "rarity_points": rarity_points}
 
 
-def evaluate(engine, seeds, weights, max_pieces):
-  runs = [episode(engine, seed, weights, max_pieces) for seed in seeds]
+def evaluate(engine, seeds, weights, max_pieces, color_profile=None):
+  runs = [episode(engine, seed, weights, max_pieces, color_profile) for seed in seeds]
   return {"mean_score": statistics.mean(run["score"] for run in runs),
     "mean_locked": statistics.mean(run["locked"] for run in runs),
     "runs": runs}
@@ -75,6 +92,7 @@ def source_hash():
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument("mode", choices=["train", "evaluate", "play"])
+  parser.add_argument("--color-profile", choices=["classic", "rare_six", "rare_seven"], default="rare_seven")
   parser.add_argument("--model", type=Path, default=Path("build/ai/model.json"))
   parser.add_argument("--report", type=Path, default=Path("build/ai/evaluation.json"))
   parser.add_argument("--trace", type=Path, default=Path("build/ai/game.jsonl"))
@@ -91,7 +109,7 @@ def main():
   if args.mode == "play":
     args.trace.parent.mkdir(parents=True, exist_ok=True)
     with args.trace.open("w", encoding="utf-8") as trace, Engine(trace) as engine:
-      print(json.dumps(episode(engine, args.seed, load(args.model), args.max_pieces)))
+      print(json.dumps(episode(engine, args.seed, load(args.model), args.max_pieces, args.color_profile)))
     return
   with Engine() as engine:
     if args.mode == "train":
@@ -106,7 +124,7 @@ def main():
           for _ in range(args.population - 1)]
         ranked = []
         for weights in population:
-          result = evaluate(engine, seeds, weights, args.max_pieces)
+          result = evaluate(engine, seeds, weights, args.max_pieces, args.color_profile)
           fitness = result["mean_score"] / 1000 + result["mean_locked"] * 0.1
           ranked.append((fitness, weights))
         ranked.sort(key=lambda item: item[0], reverse=True)
@@ -117,6 +135,7 @@ def main():
         sigma = [max(0.15, statistics.pstdev(values)) for values in zip(*elite)]
         history.append({"generation": generation + 1, "best_fitness": best_score})
         save(args.model, {"version": 1, "features": FEATURES, "weights": best,
+          "color_profile": args.color_profile,
           "algorithm": "cross_entropy", "training_seeds": seeds,
           "training_seed": args.seed, "max_pieces": args.max_pieces,
           "population": args.population, "history": history,
@@ -129,9 +148,9 @@ def main():
       if set(seeds) & set(model["training_seeds"]):
         parser.error("Evaluation seeds overlap training seeds")
       weights = load(args.model)
-      report = {"model": str(args.model), "seeds": seeds, "max_pieces": args.max_pieces}
+      report = {"color_profile": args.color_profile, "model": str(args.model), "seeds": seeds, "max_pieces": args.max_pieces}
       for name, policy in [("random", None), ("baseline", BASELINE), ("trained", weights)]:
-        report[name] = evaluate(engine, seeds, policy, args.max_pieces)
+        report[name] = evaluate(engine, seeds, policy, args.max_pieces, args.color_profile)
         print(json.dumps({"policy": name, "mean_score": report[name]["mean_score"],
           "mean_locked": report[name]["mean_locked"]}), flush=True)
       save(args.report, report)

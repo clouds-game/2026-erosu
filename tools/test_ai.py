@@ -19,6 +19,9 @@ class AiTests(unittest.TestCase):
     self.assertEqual(first, second)
     self.assertEqual(20, first["locked"])
     self.assertTrue(first["truncated"])
+    self.assertEqual(first["locked"], sum(first["placed_by_color"]))
+    self.assertEqual(first["cleared"], sum(first["cleared_by_color"]))
+    self.assertEqual(first["rarity_points"], 500 * first["cleared_by_color"][5] + 3000 * first["cleared_by_color"][6])
 
   def test_candidates_match_shared_engine_landings_on_empty_board(self):
     with Engine() as engine:

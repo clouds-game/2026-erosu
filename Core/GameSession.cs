@@ -18,6 +18,7 @@ public sealed class GameSession
   public Piece? Active { get; private set; }
   public IReadOnlyList<Piece> Next => _next.Take(Puzzle is null ? 3 : _next.Count).ToArray();
   public PuzzleLevel? Puzzle { get; }
+  public ColorProfile? Colors { get; }
   public int Remaining => _next.Count + (Active is null ? 0 : 1);
   public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;
   public GamePhase Phase { get; private set; } = GamePhase.Falling;
@@ -33,10 +34,11 @@ public sealed class GameSession
   public event Action<ClearWave>? Matched;
   public event Action? PieceLocked;
 
-  public GameSession(Random? random = null, Board? board = null)
+  public GameSession(Random? random = null, Board? board = null, ColorProfile? colors = null)
   {
     Board = board ?? new Board();
-    _bag = new PieceBag(random ?? new Random());
+    Colors = colors ?? ColorProfile.Default;
+    _bag = new PieceBag(random ?? new Random(), Colors);
     for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
     Spawn();
   }

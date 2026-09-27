@@ -313,13 +313,38 @@ var tests = new (string Name, Action Run)[]
     Check(first.Concat(second).Select(piece => piece.Id).Distinct().Count() == 14);
     Check(first.Concat(second).All(piece => piece.Color is >= 0 and < PieceBag.ColorCount));
   }),
-  ("Weighted color deck has five bounded frequencies", () =>
+  ("Color profiles preserve quotas and deterministic bags across refills", () =>
   {
-    var bag = new PieceBag(new Random(5));
-    var colors = Enumerable.Range(0, 40).Select(_ => bag.Take().Color).ToArray();
-    var counts = colors.GroupBy(color => color).ToDictionary(group => group.Key, group => group.Count());
-    Check(counts.Count == PieceBag.ColorCount);
-    Check(Enumerable.Range(0, PieceBag.ColorCount).Select(color => counts[color]).SequenceEqual([10, 9, 8, 7, 6]));
+    foreach (var profile in ColorProfile.All)
+    {
+      var bag = new PieceBag(new Random(5), profile);
+      var twin = new PieceBag(new Random(5), profile);
+      for (var cycle = 0; cycle < 3; cycle++)
+      {
+        var colors = Enumerable.Range(0, profile.BagSize).Select(_ => bag.Take().Color).ToArray();
+        Check(colors.SequenceEqual(Enumerable.Range(0, profile.BagSize).Select(_ => twin.Take().Color)));
+        Check(Enumerable.Range(0, ColorRules.Count).Select(color => colors.Count(item => item == color)).SequenceEqual(profile.Weights));
+      }
+    }
+  }),
+  ("Rarity rewards count whole cleared pieces without multiplying other colors or combo", () =>
+  {
+    var normal = Enumerable.Range(0, 3).Select(i => Piece.Create(i, Shape.O, 0, i * 2, 16)).ToArray();
+    var gold = normal.Select(piece => piece with { Color = 6 }).ToArray();
+    var cyan = normal.Select(piece => piece with { Color = 5 }).ToArray();
+    Check(ScoreRules.Calculate(gold, 1).Total == 11100);
+    Check(ScoreRules.Calculate(cyan, 1).Total == 3600);
+    var mixed = normal.Concat(gold.Select(piece => piece.Offset(0, -2))).ToArray();
+    var award = ScoreRules.Calculate(mixed, 2);
+    Check(award.Rarity == 9000 && award.Combo == 5000 && award.Total == 23800);
+    var board = BoardOf(gold.Select(piece => piece with { Id = -1 - piece.Id }).ToArray());
+    var game = new GameSession(new Random(5), board);
+    ClearWave? wave = null;
+    game.Matched += item => wave = item;
+    while (game.Move(1, 0)) { }
+    game.HardDrop();
+    Check(wave is not null && wave.Award.Rarity == 9000 && game.Score == wave.Points);
+    Check(game.Cleared == 3);
   }),
   ("Seeded games keep four-cell shapes valid throughout play", () =>
   {

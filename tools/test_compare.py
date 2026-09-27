@@ -15,6 +15,8 @@ class ComparisonTests(unittest.TestCase):
       path = Path(folder)
       summary = compare(ROOT / 'AI/models/starter.json', 3000100, 15, path)
       self.assertEqual(2, len(summary['policies']))
+      self.assertEqual(7, len(summary['colors']))
+      self.assertEqual('gold', summary['colors'][6]['key'])
       for filename in ['before.jsonl', 'after.jsonl']:
         _, steps = read(path / filename)
         groups = frames(steps)

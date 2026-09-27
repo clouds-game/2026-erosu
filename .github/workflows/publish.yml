@@ -49,6 +49,7 @@ jobs:
       - run: python -m unittest discover -s tools -p 'test_imitation.py'
       - run: python -m unittest discover -s tools -p 'test_afterstate.py'
       - run: python -m unittest discover -s tools -p 'test_dagger.py'
+      - run: python -m unittest discover -s tools -p 'test_neural_compare.py'
 
   desktop:
     name: Desktop (${{ matrix.target }})
@@ -99,6 +100,8 @@ jobs:
           cache-dependency-path: Web/package-lock.json
       - run: npm ci --prefix Web --ignore-scripts
       - run: npm run build --prefix Web
+      - run: node Web/node_modules/typescript/bin/tsc -p AI/tsconfig.json
+      - run: git diff --exit-code -- AI/replay_compare.js
       - run: dotnet publish Web/ChromaDrop.Web.csproj -c Release -o build/web
       - name: Set Pages base path
         env:

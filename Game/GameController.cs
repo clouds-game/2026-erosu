@@ -18,7 +18,14 @@ public partial class GameController : Control
   private int _completedLevels;
   private int _best;
   private bool _anchoredBlocks;
-  private string BestScoreKey => _anchoredBlocks ? "best_score_anchored_v2" : "best_score_rare_seven_v1";
+  private bool _enclosedFill;
+  private string BestScoreKey => (_anchoredBlocks, _enclosedFill) switch
+  {
+    (true, true) => "best_score_fill_anchored_v1",
+    (false, true) => "best_score_fill_v1",
+    (true, false) => "best_score_anchored_v2",
+    _ => "best_score_rare_seven_v1"
+  };
   private double _noticeTimer;
   private int _heldDirection;
   private double _repeatTimer;
@@ -39,6 +46,7 @@ public partial class GameController : Control
     AddChild(_audio);
     _texts.SetLanguage(OS.GetLocale());
     _anchoredBlocks = OS.GetCmdlineUserArgs().Contains("--anchored-blocks");
+    _enclosedFill = OS.GetCmdlineUserArgs().Contains("--enclosed-fill");
     var save = new ConfigFile();
     if (save.Load(SavePath) == Error.Ok)
     {
@@ -75,7 +83,7 @@ public partial class GameController : Control
     var levelArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-level="));
     if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
       && captureLevel >= 0 && captureLevel <= PuzzleLevels.All.Count) _selectedLevel = captureLevel;
-    if (_anchoredBlocks) _selectedLevel = 0;
+    if (_anchoredBlocks || _enclosedFill) _selectedLevel = 0;
     Start(args.Contains("--demo"));
     if (args.Contains("--capture-modes")) OpenModes();
     if (args.Contains("--capture-pause")) OpenPause();
@@ -184,7 +192,7 @@ public partial class GameController : Control
   private void Start(bool demo = false)
   {
     if (demo) _selectedLevel = 0;
-    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession(anchoredBlocks: _anchoredBlocks) : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
+    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession(anchoredBlocks: _anchoredBlocks, enclosedFill: _enclosedFill) : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
     _board.Session = _game;
     _hud.ClearFeedback();
     _modes.Visible = _pauseMenu.Visible = _result.Visible = false;

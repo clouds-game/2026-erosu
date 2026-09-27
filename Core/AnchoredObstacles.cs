@@ -13,16 +13,8 @@ public static class AnchoredObstacles
         throw new InvalidOperationException("Not enough room for initial anchored obstacles.");
   }
 
-  public static int DrawColor(Random random, ColorProfile colors)
-  {
-    var ticket = random.Next(colors.BagSize);
-    var color = 0;
-    while (ticket >= colors.Weights[color]) ticket -= colors.Weights[color++];
-    return color;
-  }
-
   public static bool TrySpawn(Board board, Random random, ColorProfile colors, ref int nextId) =>
-    TrySpawn(board, random, DrawColor(random, colors), ref nextId);
+    TrySpawn(board, random, colors.SampleColor(random), ref nextId);
 
   public static bool TrySpawn(Board board, Random random, int color, ref int nextId)
   {

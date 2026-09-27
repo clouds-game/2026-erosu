@@ -91,6 +91,26 @@ class HeadlessTests(unittest.TestCase):
     self.assertEqual(paused['state'], later['state'])
     self.assertEqual(anchors_before, [piece for piece in later['state']['pieces'] if piece.get('anchored')])
 
+  def test_enclosed_fill_start_flag_is_independent_and_invalid_requests_preserve_state(self):
+    plain = self.start()['state']
+    self.assertFalse(plain['enclosed_fill'])
+    disabled = self.send({'command': 'start', 'mode': 'endless', 'seed': 42, 'enclosed_fill': False})['state']
+    self.assertEqual(plain, disabled)
+    for anchored in [False, True]:
+      request = {'command': 'start', 'mode': 'endless', 'seed': 42,
+        'enclosed_fill': True, 'anchored_blocks': anchored}
+      initial = self.send(request)['state']
+      self.assertTrue(initial['enclosed_fill'])
+      self.assertEqual(anchored, initial['anchored_blocks'])
+      self.assertEqual(initial, self.send(request)['state'])
+      for command in ['state', 'placements', 'afterstates']:
+        self.assertEqual(initial, self.send({'command': command})['state'])
+      for invalid in [{**request, 'enclosed_fill': 'true'},
+        {'command': 'start', 'mode': 'puzzle', 'level': 1, 'enclosed_fill': True}]:
+        result = self.send(invalid)
+        self.assertFalse(result['ok'])
+        self.assertEqual(initial, result['state'])
+
   def test_external_time_and_batch_equivalence(self):
     initial = self.start()
     time.sleep(0.1)

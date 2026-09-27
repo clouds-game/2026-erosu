@@ -150,7 +150,7 @@ def train(args):
 def load_ranker(path):
   checkpoint = torch.load(path, map_location='cpu', weights_only=True)
   metadata = checkpoint['metadata']
-  if metadata['version'] != VERSION or metadata['algorithm'] != 'afterstate_behavior_cloning':
+  if metadata['version'] != VERSION or metadata['algorithm'] not in ('afterstate_behavior_cloning', 'afterstate_dagger', 'afterstate_teacher_replay'):
     raise ValueError('Incompatible candidate checkpoint')
   model = CandidateRanker()
   model.load_state_dict(checkpoint['weights'])

@@ -1,19 +1,21 @@
 """游戏规则由 C# 引擎执行；Python 只发送操作并读取观察。"""
 
 import json
+import os
 from pathlib import Path
 import subprocess
 from .trajectory import Recorder
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ENGINE = ROOT / "Headless/bin/Release/net8.0/ChromaDrop.Headless.dll"
+DEFAULT_ENGINE = ROOT / "Headless/bin/Release/net8.0/ChromaDrop.Headless.dll"
+ENGINE = Path(os.environ.get("CHROMA_ENGINE", str(DEFAULT_ENGINE))).expanduser().resolve()
 
 
 class Engine:
   def __init__(self, trace=None):
     if not ENGINE.is_file():
-      raise FileNotFoundError("Run python3 tools/play.py --headless --prepare-only first")
+      raise FileNotFoundError(f"Engine not found: {ENGINE}. Build with tools/play.py --headless --prepare-only, or check CHROMA_ENGINE.")
     self.trace = Recorder(trace, ENGINE) if trace is not None else None
     self.process = subprocess.Popen(
       ["dotnet", str(ENGINE)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,

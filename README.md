@@ -68,7 +68,7 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 
 ## 结构
 
-- `Core/`：纯 C# 规则、方块生成、结算状态机，与 Godot 解耦。
+- `Core/`：纯 C# 规则、方块生成、结算状态机，与 Godot 解耦；`Modes.cs` 集中定义稳定的模式 ID、展示能力、指标、规则策略和会话工厂。
 - `Game/`：Godot 输入、棋盘绘制、必要 HUD、音效和本地保存。
 - `Scenes/Game.tscn`：主场景，棋盘与 HUD 可以分别修改。
 - `Assets/`：项目资源；当前几何图形由 Godot 绘制。
@@ -78,6 +78,11 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 - `tools/`：校验 Godot 下载、导出桌面包和准备 Pages 路径的脚本。
 - `docs/`：中文玩法、美术、开发与验证文档。
 - `archive/web-prototype/`：保留早期网页实验，仅供对照，不属于当前 Godot 构建。
+
+新增模式时先在 `ModeCatalog` 注册展示、能力与成绩指标，再实现独立的
+`IGameModeRules` 策略，并由 `GameSessionFactory` 创建。Godot、Web 和无界面端只消费
+目录与快照，不应复制生成或结算规则。随机行为使用 `SeedStreams` 的命名流，避免一个
+模式新增随机步骤后改变玩家方块序列。
 
 [挑战关卡](docs/挑战关卡.md) · [学习关卡](docs/关卡设计.md) · [玩法设计](docs/玩法设计.md) · [美术与资源](docs/美术与资源.md) · [开发与试玩](docs/开发与试玩.md) · [验证记录](docs/验证记录.md)
 

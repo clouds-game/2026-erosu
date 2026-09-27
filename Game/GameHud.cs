@@ -92,24 +92,29 @@ public partial class GameHud : HBoxContainer
   public void ShowFeedback(string text) => _feedbackText = text;
   public void ClearFeedback() => _feedbackText = "";
 
-  public void Refresh(GameSession game, int best, int bestPollutionCleared, int selectedLevel)
+  public void Refresh(GameSession game, IReadOnlyDictionary<string, int> records)
   {
     var puzzle = game.Puzzle;
     var tutorial = puzzle is { IsTutorial: true };
-    var pollution = game.Mode == SessionMode.Pollution;
-    _stage.Text = puzzle is null ? UiText.Number(game.Score)
-      : PuzzleLevels.DisplayNumber(puzzle).ToString("00") + " / 03";
-    _stage.AddThemeFontSizeOverride("font_size", puzzle is null ? 35 : 27);
+    var progressMetric = game.Metrics.FirstOrDefault(metric => metric.Definition.Display == MetricDisplay.Progress);
+    var counterMetric = game.Metrics.FirstOrDefault(metric => metric.Definition.Display == MetricDisplay.Counter);
+    _stage.Text = !game.Capabilities.PuzzleObjectives ? UiText.Number(game.Score)
+      : PuzzleLevels.DisplayNumber(puzzle!).ToString("00") + " / 03";
+    _stage.AddThemeFontSizeOverride("font_size", !game.Capabilities.PuzzleObjectives ? 35 : 27);
     _levels.Text = Texts.Get("choose_mode");
-    _speed.Visible = puzzle is null;
-    _speed.Text = puzzle is null ? "LV " + game.Level.ToString("00") : "";
-    _record.Visible = puzzle is null;
-    _record.Text = puzzle is null
-      ? Texts.Get("best", UiText.Number(best)) + (pollution ? " · " + Texts.Get("best_purified", bestPollutionCleared) : "")
-      : "";
-    _pollution.Visible = pollution;
-    _pollution.Text = pollution ? Texts.Get("purified") + " " + UiText.Number(game.PollutionCleared) : "";
-    _progress.Visible = puzzle is not null || pollution;
+    _speed.Visible = game.Capabilities.ShowLevel;
+    _speed.Text = game.Capabilities.ShowLevel ? "LV " + game.Level.ToString("00") : "";
+    _record.Visible = !game.Capabilities.PuzzleObjectives;
+    var scoreRecord = records.GetValueOrDefault(ModeCatalog.RecordKey(game.Mode, "score"));
+    _record.Text = !game.Capabilities.PuzzleObjectives ? Texts.Get("best", UiText.Number(scoreRecord)) : "";
+    if (counterMetric is not null)
+    {
+      var record = records.GetValueOrDefault(ModeCatalog.RecordKey(game.Mode, counterMetric.Key));
+      _record.Text += " · " + Texts.Get(counterMetric.Definition.RecordLabelKey ?? counterMetric.Definition.LabelKey, record);
+    }
+    _pollution.Visible = counterMetric is not null;
+    _pollution.Text = counterMetric is null ? "" : Texts.Get(counterMetric.Definition.LabelKey) + " " + UiText.Number(counterMetric.Value);
+    _progress.Visible = puzzle is not null || progressMetric is not null;
     if (puzzle is not null)
     {
       var total = tutorial ? 3 : Math.Min(_progressTiles.Length, puzzle.Sequence.Count);
@@ -121,13 +126,13 @@ public partial class GameHud : HBoxContainer
         icon.Modulate = new Color(1, 1, 1, i < remaining ? 1 : 0.25f);
       }
     }
-    else if (pollution)
+    else if (progressMetric is not null)
     {
       for (var i = 0; i < _progressTiles.Length; i++)
       {
         var icon = _progressTiles[i];
-        icon.GetParent<Control>().Visible = true;
-        icon.Modulate = new Color(1, 1, 1, i < game.PollutionCountdown ? 1 : 0.25f);
+        icon.GetParent<Control>().Visible = i < progressMetric.Definition.Maximum.GetValueOrDefault(_progressTiles.Length);
+        icon.Modulate = new Color(1, 1, 1, i < progressMetric.Value ? 1 : 0.25f);
       }
     }
     _instruction.Visible = tutorial && !game.IsFinished && _feedbackText.Length == 0;
@@ -142,7 +147,7 @@ public partial class GameHud : HBoxContainer
     _feedback.Text = _feedbackText;
     _feedback.Visible = _feedbackText.Length > 0;
     _nextPanel.Visible = !tutorial && game.Next.Count > 0;
-    _next.CustomMinimumSize = new Vector2(104, puzzle is null ? 270 : 420);
+    _next.CustomMinimumSize = new Vector2(104, game.Capabilities.ShowFullSequence ? 420 : 270);
     _next.Pieces = game.Next;
     _next.QueueRedraw();
   }

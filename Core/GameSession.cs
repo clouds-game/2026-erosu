@@ -1,5 +1,6 @@
 namespace ChromaDrop.Core;
 
+[Obsolete("Use ModeId and GameSessionFactory for new code.")]
 public enum SessionMode { Free, Pollution, Puzzle }
 public enum GamePhase { Falling, Clearing, Settling, Rising, Over, Won }
 public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, ScoreAward Award)
@@ -7,78 +8,95 @@ public sealed record ClearWave(IReadOnlyList<Piece> Pieces, int Chain, ScoreAwar
   public int Points => Award.Total;
 }
 
+#pragma warning disable CS0618 // Compatibility constructors intentionally reference the legacy enum.
 public sealed class GameSession
 {
+  private sealed record LegacySetup(IGameModeRules Rules, Board Board, PieceBag Bag);
+  private readonly IGameModeRules _rules;
   private readonly PieceBag? _bag;
-  private readonly PieceBag? _pollutionBag;
-  private readonly Random? _pollutionRandom;
   private readonly Queue<Piece> _next = new();
   private double _timer;
   private double _lockTimer;
   private int _chain;
-  private int _lastPollutionRise;
 
-  public const int PollutionInterval = 6;
-  public const int PollutionRiseRows = 2;
+  internal GameSession(IGameModeRules rules, Board board, PieceBag? bag, IEnumerable<Piece>? sequence)
+  {
+	_rules = rules;
+	_bag = bag;
+	Board = board;
+	if (sequence is not null)
+	  foreach (var piece in sequence) _next.Enqueue(piece);
+	if (_bag is not null)
+	  for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
+	Spawn();
+  }
+
+  [Obsolete("Use GameSessionFactory.Create(GameSelection, seed, board) for deterministic mode sessions.")]
+  public GameSession(Random? random = null, Board? board = null)
+	: this(CreateLegacySetup(SessionMode.Free, random, board)) { }
+
+  [Obsolete("Use GameSessionFactory.Create(GameSelection, seed, board) for deterministic mode sessions.")]
+  public GameSession(SessionMode mode, Random? random = null, Board? board = null)
+	: this(CreateLegacySetup(mode, random, board)) { }
+
+  [Obsolete("Use GameSessionFactory.Create(PuzzleLevel) for puzzle sessions.")]
+  public GameSession(PuzzleLevel puzzle)
+	: this(new PuzzleModeRules(puzzle), CreatePuzzleBoard(puzzle), null, puzzle.Sequence) { }
+
+  private GameSession(LegacySetup setup) : this(setup.Rules, setup.Board, setup.Bag, null) { }
+
+  private static LegacySetup CreateLegacySetup(SessionMode mode, Random? random, Board? board)
+  {
+	if (mode == SessionMode.Puzzle) throw new ArgumentException("Use the puzzle constructor for puzzle sessions.");
+	var source = random ?? new Random();
+	IGameModeRules rules = mode == SessionMode.Pollution
+	  ? new PollutionModeRules(source.Next())
+	  : new FreeModeRules();
+	return new LegacySetup(rules, board ?? new Board(), new PieceBag(source));
+  }
+
+  private static Board CreatePuzzleBoard(PuzzleLevel puzzle)
+  {
+	var board = new Board();
+	foreach (var piece in puzzle.InitialPieces) board.Add(piece);
+	return board;
+  }
 
   public Board Board { get; }
-  public SessionMode Mode { get; }
+  public ModeId Mode => _rules.Id;
+  public ModeDefinition ModeDefinition => _rules.Definition;
+  public ModePresentation Presentation => _rules.Presentation;
+  public ModeCapabilities Capabilities => _rules.Definition.Capabilities;
   public Piece? Active { get; private set; }
-  public IReadOnlyList<Piece> Next => _next.Take(Puzzle is null ? 3 : _next.Count).ToArray();
-  public PuzzleLevel? Puzzle { get; }
+  public IReadOnlyList<Piece> Next => _next.Take(Math.Min(_rules.PreviewCount, _next.Count)).ToArray();
+  public PuzzleLevel? Puzzle => _rules.Puzzle;
   public int Remaining => _next.Count + (Active is null ? 0 : 1);
   public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;
   public GamePhase Phase { get; private set; } = GamePhase.Falling;
   public bool Paused { get; private set; }
   public ClearWave? Wave { get; private set; }
+  public ModeTransition? Transition { get; private set; }
   public int Score { get; private set; }
   public int Cleared { get; private set; }
   public int BestChain { get; private set; }
   public int Locked { get; private set; }
-  public int PollutionCleared { get; private set; }
-  public int PollutionCountdown => Mode == SessionMode.Pollution
-	? PollutionInterval - (Locked - _lastPollutionRise)
-	: 0;
   public int Level => Math.Min(11, 1 + Locked / 15);
   public double ClearProgress => Math.Clamp(_timer / 0.42, 0, 1);
-  public double RiseProgress => Phase == GamePhase.Rising ? Math.Clamp(_timer / 0.22, 0, 1) : 1;
+  public double TransitionProgress => Phase == GamePhase.Rising ? Math.Clamp(_timer / 0.22, 0, 1) : 1;
   public bool AcceptsInput => !Paused && Phase == GamePhase.Falling;
+  public IReadOnlyList<RunMetric> Metrics => _rules.GetMetrics(this);
+  public string ResultTitleKey => _rules.ResultTitleKey(this);
+  public string ContinueKey => _rules.ContinueKey(this);
+  public ContinueAction ContinueAction => _rules.GetContinueAction(this);
   public event Action<ClearWave>? Matched;
   public event Action? PieceLocked;
-  public event Action? PollutionRose;
+  public event Action<ModeTransition>? TransitionStarted;
 
-  public GameSession(Random? random = null, Board? board = null)
-	: this(SessionMode.Free, random, board) { }
-
-  public GameSession(SessionMode mode, Random? random = null, Board? board = null)
-  {
-	if (mode == SessionMode.Puzzle) throw new ArgumentException("Use the puzzle constructor for puzzle sessions.");
-	Mode = mode;
-	Board = board ?? new Board();
-	random ??= new Random();
-	_bag = new PieceBag(random);
-	if (mode == SessionMode.Pollution)
-	{
-	  _pollutionRandom = new Random(random.Next());
-	  _pollutionBag = new PieceBag(_pollutionRandom, -1, pollution: true);
-	}
-	for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
-	Spawn();
-  }
-
-  public GameSession(PuzzleLevel puzzle)
-  {
-	Mode = SessionMode.Puzzle;
-	Puzzle = puzzle;
-	Board = new Board();
-	foreach (var piece in puzzle.InitialPieces) Board.Add(piece);
-	foreach (var piece in puzzle.Sequence) _next.Enqueue(piece);
-	Spawn();
-  }
+  public RunMetric? Metric(string key) => Metrics.FirstOrDefault(metric => metric.Key == key);
 
   public static GameSession CreateDemo()
   {
-	var game = new GameSession();
+	var game = GameSessionFactory.Create(GameSelection.Free);
 	game.Board.Add(Piece.Create(-1, Shape.O, 0, 0, 16));
 	game.Board.Add(Piece.Create(-2, Shape.O, 0, 2, 16));
 	game.Active = Piece.Create(-3, Shape.O, 0, 4, 0);
@@ -143,9 +161,7 @@ public sealed class GameSession
 	switch (Phase)
 	{
 	  case GamePhase.Falling:
-		// Puzzles advance only through player input; touching the floor never
-		// consumes a piece until the player commits it with hard drop.
-		if (Puzzle is not null)
+		if (!_rules.UsesAutomaticFall)
 		{
 		  if (softDrop && _timer >= 0.045) { Move(0, 1); _timer = 0; }
 		  if (!softDrop) _timer = 0;
@@ -184,6 +200,7 @@ public sealed class GameSession
 		{
 		  _timer = 0;
 		  _chain = 0;
+		  Transition = null;
 		  CheckMatches();
 		}
 		break;
@@ -227,12 +244,27 @@ public sealed class GameSession
 	var matches = Board.FindMatches();
 	if (matches.Count == 0)
 	{
-	  // Judge only after all waves and gravity have settled, including the
-	  // final supplied piece. An exhausted queue must not hide a victory.
-	  if (Puzzle?.IsComplete(this) == true) Phase = GamePhase.Won;
-	  else if (Mode == SessionMode.Pollution && Locked > 0 && Locked - _lastPollutionRise >= PollutionInterval)
-		StartPollutionRise();
-	  else Spawn();
+	  if (_rules.IsComplete(this))
+	  {
+		Phase = GamePhase.Won;
+		return;
+	  }
+	  var transition = _rules.AfterBoardSettled(this);
+	  if (transition is not null)
+	  {
+		Transition = transition;
+		if (transition.EndsGame)
+		{
+		  Phase = GamePhase.Over;
+		  Active = null;
+		  return;
+		}
+		Phase = GamePhase.Rising;
+		_timer = 0;
+		TransitionStarted?.Invoke(transition);
+		return;
+	  }
+	  Spawn();
 	  return;
 	}
 	_chain++;
@@ -240,65 +272,12 @@ public sealed class GameSession
 	Board.Remove(matches);
 	Score += award.Total;
 	Cleared += matches.Count;
-	PollutionCleared += matches.Count(piece => piece.IsPollution);
+	_rules.OnPiecesCleared(matches);
 	BestChain = Math.Max(BestChain, _chain);
 	Wave = new ClearWave(matches, _chain, award);
 	Phase = GamePhase.Clearing;
 	_timer = 0;
 	Matched?.Invoke(Wave);
   }
-
-  private void StartPollutionRise()
-  {
-	_lastPollutionRise = Locked;
-	if (!Board.TryRaise(PollutionRiseRows))
-	{
-	  Phase = GamePhase.Over;
-	  Active = null;
-	  return;
-	}
-
-	var first = _pollutionBag!.Take();
-	var second = _pollutionBag.Take();
-	var placements = PollutionPlacements(first, second).ToArray();
-	_pollutionRandom!.Shuffle(placements);
-	var chosen = placements.FirstOrDefault(pair => !CreatesMatch(pair.First, pair.Second));
-	if (chosen.First is null) chosen = placements[0];
-	Board.Add(chosen.First);
-	Board.Add(chosen.Second);
-	Phase = GamePhase.Rising;
-	_timer = 0;
-	PollutionRose?.Invoke();
-  }
-
-  private static IEnumerable<(Piece First, Piece Second)> PollutionPlacements(Piece first, Piece second)
-  {
-	foreach (var placement in PlacePair(first, second)) yield return placement;
-	if (first.Color != second.Color)
-	  foreach (var placement in PlacePair(first with { Color = second.Color }, second with { Color = first.Color }))
-		yield return placement;
-  }
-
-  private static IEnumerable<(Piece First, Piece Second)> PlacePair(Piece first, Piece second)
-  {
-	var firstWidth = first.Cells.Max(cell => cell.X) + 1;
-	var secondWidth = second.Cells.Max(cell => cell.X) + 1;
-	var firstY = Board.Height - 1 - first.Cells.Max(cell => cell.Y);
-	var secondY = Board.Height - 1 - second.Cells.Max(cell => cell.Y);
-	for (var firstX = 0; firstX <= Board.Width - firstWidth; firstX++)
-	  for (var secondX = 0; secondX <= Board.Width - secondWidth; secondX++)
-	  {
-		var separate = firstX + firstWidth <= secondX || secondX + secondWidth <= firstX;
-		if (separate) yield return (first.Offset(firstX, firstY), second.Offset(secondX, secondY));
-	  }
-  }
-
-  private bool CreatesMatch(Piece first, Piece second)
-  {
-	var trial = new Board();
-	foreach (var piece in Board.Pieces) trial.Add(piece);
-	trial.Add(first);
-	trial.Add(second);
-	return trial.FindMatches().Count > 0;
-  }
 }
+#pragma warning restore CS0618

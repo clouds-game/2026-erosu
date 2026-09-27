@@ -10,7 +10,7 @@
         <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="#303946" /></pattern></defs>
         <rect width="400" height="720" fill="#1b212c" />
         <rect width="400" height="720" fill="url(#grid)" />
-        @{ var riseOffset = game.Phase == GamePhase.Rising ? (1 - game.RiseProgress) * GameSession.PollutionRiseRows * 40 : 0; }
+        @{ var riseOffset = game.Phase == GamePhase.Rising ? (1 - game.TransitionProgress) * (game.Transition?.Rows ?? 0) * 40 : 0; }
         <g transform="@($"translate(0 {riseOffset:0.###})")">
           @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
         </g>
@@ -29,36 +29,36 @@
       @if (game.Paused || game.IsFinished)
       {
         <div class="overlay">
-          <strong>@T(game.Paused ? "paused" : game.Phase == GamePhase.Won ? PuzzleLevels.CompletionKey(game.Puzzle!) : game.Puzzle is not null ? "puzzle_failed" : "game_over")</strong>
-          <button @onclick="Confirm">@T(game.Paused ? "resume" : game.Phase == GamePhase.Won ? PuzzleLevels.ContinueKey(game.Puzzle!) : "play_again")</button>
-          <small>@(game.Paused ? T("resume_hint") : game.Mode == SessionMode.Pollution
-            ? T("pollution_result", UiText.Number(game.Score), game.PollutionCleared)
-            : T("score_value", UiText.Number(game.Score)))</small>
+          <strong>@T(game.Paused ? "paused" : game.ResultTitleKey)</strong>
+          <button @onclick="Confirm">@T(game.Paused ? "resume" : game.ContinueKey)</button>
+          <small>@(game.Paused ? T("resume_hint") : ResultSummary())</small>
         </div>
       }
       else if (notice_key.Length > 0) { <div class="notice" role="status">@T(notice_key, notice_arguments)</div> }
     </section>
     <aside>
       <div class="overview">
-        <select class="mode" aria-label="@T("mode")" value="@selected_level" @onchange="SelectLevel" @onfocus="PauseForFocus">
-          <option value="0">@T("free_play")</option>
-          <option value="-2">@T("pollution_mode")</option>
+        <select class="mode" aria-label="@T("mode")" value="@selection.Token" @onchange="SelectMode" @onfocus="PauseForFocus">
+          @foreach (var mode in ModeCatalog.Standalone)
+          {
+            <option value="@mode.Token">@T(mode.Presentation.NameKey)</option>
+          }
           @foreach (var tutorial in new[] { false, true })
           {
             <optgroup label="@T(tutorial ? "learn" : "challenges")">
               @foreach (var level in PuzzleLevels.All.Where(level => level.IsTutorial == tutorial))
               {
-                <option value="@level.Number">@T("puzzle_label", PuzzleLevels.DisplayNumber(level), T(level.TitleKey))@(IsCompleted(level.Number) ? " *" : "")</option>
+                <option value="@GameSelection.Puzzle(level.Number).Token">@T("puzzle_label", PuzzleLevels.DisplayNumber(level), T(level.TitleKey))@(IsCompleted(level.Number) ? " *" : "")</option>
               }
             </optgroup>
           }
         </select>
         <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
-        @if (game.Puzzle is { } puzzle)
+        @if (game.Capabilities.PuzzleObjectives && game.Puzzle is { } puzzle)
         {
           <p class="puzzle-goal">@T(puzzle.GoalKey, puzzle.Target)</p>
           <dl><dt>@T("remaining")</dt><dd>@game.Remaining</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd></dl>
-          @if (!puzzle.IsTutorial && game.Next.Count > 0)
+          @if (game.Capabilities.ShowFullSequence && !puzzle.IsTutorial && game.Next.Count > 0)
           {
             <span class="muted">@T("sequence")</span>
             <div class="previews">
@@ -72,10 +72,10 @@
         }
         else
         {
-          <span class="muted">@T("best", UiText.Number(game.Mode == SessionMode.Pollution ? pollution_best : best))</span>
-          @if (game.Mode == SessionMode.Pollution)
+          <span class="muted">@T("best", UiText.Number(Record("score")))</span>
+          @foreach (var metric in game.Metrics.Where(metric => metric.Definition.Display == MetricDisplay.Counter))
           {
-            <span class="muted">@T("best_purified", pollution_best_cleared)</span>
+            <span class="muted">@T(metric.Definition.RecordLabelKey ?? metric.Definition.LabelKey, Record(metric.Key))</span>
           }
           <span class="next-label muted">@T("next")</span>
           <div class="previews">
@@ -86,12 +86,12 @@
           </div>
           <dl>
             <dt>@T("level")</dt><dd>@game.Level</dd>
-            @if (game.Mode == SessionMode.Pollution)
+            @foreach (var metric in game.Metrics.Where(metric => metric.Definition.Display is MetricDisplay.Progress or MetricDisplay.Counter))
             {
-              <dt>@T("pollution_tide")</dt><dd>@game.PollutionCountdown</dd>
-              <dt>@T("purified")</dt><dd>@game.PollutionCleared</dd>
+              <dt>@T(metric.Definition.LabelKey)</dt><dd>@metric.Value</dd>
             }
-            else { <dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd> }
+            @if (!game.Metrics.Any(metric => metric.Definition.Display == MetricDisplay.Counter))
+            { <dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd> }
             <dt>@T("chain")</dt><dd>×@game.BestChain</dd>
           </dl>
         }
@@ -100,7 +100,7 @@
         <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
         <button @onclick="TogglePause" disabled="@game.IsFinished">@T(game.Paused ? "resume" : "pause") [P]</button>
         <button @onclick="() => Start()">@T("restart") [R]</button>
-        <button @onclick="ShowHintOrDemo" disabled="@(game.Puzzle is not null && game.IsFinished)">@T(game.Puzzle is null ? "demo" : "hint") [F2]</button>
+        <button @onclick="ShowHintOrDemo" disabled="@(game.Presentation.Help.Action == HelpAction.PuzzleHint && game.IsFinished)">@T(game.Presentation.Help.LabelKey) [F2]</button>
         <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
         <label class="language"><span>@T("language")</span>
           <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
@@ -130,12 +130,10 @@
   private readonly CancellationTokenSource cancellation = new();
   private readonly HashSet<string> held = [];
   private Task? loop;
-  private int selected_level = PuzzleLevels.DefaultLevel;
-  private int completed_levels;
+  private GameSelection selection = GameSelection.Puzzle(PuzzleLevels.DefaultLevel);
+  private readonly HashSet<int> completed_levels = [];
+  private readonly Dictionary<string, int> records = [];
   private bool ready;
-  private int best;
-  private int pollution_best;
-  private int pollution_best_cleared;
   private bool sound_enabled;
   private readonly UiText texts = new();
   private string notice_key = "";
@@ -151,13 +149,24 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=pollution-1");
+    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=modes-2");
     texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
     await interop.InvokeVoidAsync("setLanguage", texts.Language);
-    best = await interop.InvokeAsync<int>("loadBest");
-    pollution_best = await interop.InvokeAsync<int>("loadPollutionBest");
-    pollution_best_cleared = await interop.InvokeAsync<int>("loadPollutionCleared");
-    completed_levels = (await interop.InvokeAsync<int>("loadCompleted")) & PuzzleLevels.ProgressMask;
+    foreach (var mode in ModeCatalog.Standalone)
+      foreach (var metric in mode.Metrics.Where(metric => metric.RecordPolicy == RecordPolicy.Max))
+      {
+        var key = ModeCatalog.RecordKey(mode.Id, metric.Key);
+        var legacy = (mode.Id, metric.Key) switch
+        {
+          (ModeId.Free, "score") => "chroma_best",
+          (ModeId.Pollution, "score") => "chroma_pollution_best",
+          (ModeId.Pollution, "purified") => "chroma_pollution_cleared",
+          _ => ""
+        };
+        records[key] = await interop.InvokeAsync<int>("loadRecord", key, legacy);
+      }
+    foreach (var number in await interop.InvokeAsync<int[]>("loadCompletedIds"))
+      if (PuzzleLevels.All.Any(level => level.Number == number)) completed_levels.Add(number);
     callback = DotNetObjectReference.Create(this);
     await interop.InvokeVoidAsync("connect", callback);
     ready = true;
@@ -207,28 +216,16 @@
         held_direction = game.AcceptsInput ? direction : 0;
         game.Advance(delta, held.Contains("ArrowDown") || held.Contains("KeyS"));
         if (!game.Paused && (notice_time -= delta) <= 0) notice_key = "";
-        if (game.Phase == GamePhase.Won && !IsCompleted(selected_level))
+        if (game.Phase == GamePhase.Won && selection.PuzzleNumber is int completed && completed_levels.Add(completed))
         {
-          completed_levels |= 1 << (selected_level - 1);
-          if (interop is not null) await interop.InvokeVoidAsync("saveCompleted", completed_levels);
+          if (interop is not null) await interop.InvokeVoidAsync("saveCompletedIds", completed_levels.ToArray());
         }
-        if (game.Mode == SessionMode.Free && game.Score > best)
+        foreach (var metric in game.Metrics.Where(metric => metric.Definition.RecordPolicy == RecordPolicy.Max))
         {
-          best = game.Score;
-          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best);
-        }
-        if (game.Mode == SessionMode.Pollution)
-        {
-          if (game.Score > pollution_best)
-          {
-            pollution_best = game.Score;
-            if (interop is not null) await interop.InvokeVoidAsync("savePollutionBest", pollution_best);
-          }
-          if (game.PollutionCleared > pollution_best_cleared)
-          {
-            pollution_best_cleared = game.PollutionCleared;
-            if (interop is not null) await interop.InvokeVoidAsync("savePollutionCleared", pollution_best_cleared);
-          }
+          var key = ModeCatalog.RecordKey(game.Mode, metric.Key);
+          if (metric.Value <= records.GetValueOrDefault(key)) continue;
+          records[key] = metric.Value;
+          if (interop is not null) await interop.InvokeVoidAsync("saveRecord", key, metric.Value);
         }
         await InvokeAsync(StateHasChanged);
       }
@@ -238,16 +235,11 @@
 
   private void Start(bool demo = false)
   {
-    if (demo) selected_level = 0;
-    game = demo ? GameSession.CreateDemo()
-      : selected_level == -2 ? new GameSession(SessionMode.Pollution)
-      : selected_level == 0 ? new GameSession()
-      : new GameSession(PuzzleLevels.All[selected_level - 1]);
+    if (demo) selection = GameSelection.Free;
+    game = demo ? GameSession.CreateDemo() : GameSessionFactory.Create(selection, Random.Shared.Next());
     held.Clear();
     held_direction = 0;
-    notice_key = game.Mode == SessionMode.Pollution ? "pollution_intro"
-      : game.Puzzle is { IsTutorial: false } ? "challenge_intro"
-      : game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";
+    notice_key = demo ? "demo_hint" : game.Presentation.IntroKey;
     notice_arguments = [];
     notice_time = 3;
     game.Matched += wave =>
@@ -282,40 +274,49 @@
   private void TogglePause() { game.SetPaused(!game.Paused); held.Clear(); }
   private void Confirm()
   {
-    if (game.Phase == GamePhase.Won)
+    if (game.IsFinished && game.ContinueAction == ContinueAction.NextPuzzle)
     {
-      completed_levels |= 1 << (selected_level - 1);
-      if (interop is not null) _ = interop.InvokeVoidAsync("saveCompleted", completed_levels);
-      selected_level = PuzzleLevels.NextLevel(selected_level);
+      if (selection.PuzzleNumber is not int levelNumber) return;
+      completed_levels.Add(levelNumber);
+      if (interop is not null) _ = interop.InvokeVoidAsync("saveCompletedIds", completed_levels.ToArray());
+      selection = GameSelection.Puzzle(PuzzleLevels.NextLevel(levelNumber));
       Start();
     }
-    else if (game.Phase == GamePhase.Over) Start();
+    else if (game.IsFinished) Start();
     else if (game.Paused) TogglePause();
   }
-  private bool IsCompleted(int number) => number > 0 && (completed_levels & (1 << (number - 1))) != 0;
-  private void SelectLevel(ChangeEventArgs args)
+  private bool IsCompleted(int number) => completed_levels.Contains(number);
+  private void SelectMode(ChangeEventArgs args)
   {
-    if (!int.TryParse(args.Value?.ToString(), out var number) || number < -2 || number > PuzzleLevels.All.Count || number == -1) return;
-    selected_level = number;
+    if (!GameSelection.TryParse(args.Value?.ToString(), out var selected)) return;
+    selection = selected;
     Start();
   }
   private void ShowHintOrDemo()
   {
-    if (game.Mode == SessionMode.Free) { Start(true); return; }
-    if (game.Mode == SessionMode.Pollution)
+    switch (game.Presentation.Help.Action)
     {
-      game.SetPaused(false);
-      held.Clear();
-      notice_key = "pollution_intro";
-      notice_arguments = [];
-      notice_time = 4;
-      return;
+      case HelpAction.Demo:
+        Start(true);
+        return;
+      case HelpAction.Rules:
+        notice_key = game.Presentation.Help.ContentKey;
+        notice_time = 4;
+        break;
+      case HelpAction.PuzzleHint:
+        notice_key = game.Puzzle!.HintKey;
+        notice_time = 12;
+        break;
     }
     game.SetPaused(false);
     held.Clear();
-    notice_key = game.Puzzle.HintKey;
     notice_arguments = [];
-    notice_time = 12;
+  }
+  private int Record(string metric) => records.GetValueOrDefault(ModeCatalog.RecordKey(game.Mode, metric));
+  private string ResultSummary()
+  {
+    var counter = game.Metrics.FirstOrDefault(metric => metric.Definition.Display == MetricDisplay.Counter);
+    return T(game.Presentation.ResultSummaryKey, UiText.Number(game.Score), counter?.Value ?? 0);
   }
   private void ToggleSound() { sound_enabled = !sound_enabled; PlayTone(500, 0.1); }
   private void PlayTone(int frequency, double duration)

@@ -14,11 +14,9 @@ public partial class GameController : Control
   private GameOverlay _result = null!;
   private GameAudio _audio = null!;
   private readonly UiText _texts = new();
-  private int _selectedLevel = 1;
-  private int _completedLevels;
-  private int _best;
-  private int _pollutionBest;
-  private int _pollutionBestCleared;
+  private GameSelection _selection = GameSelection.Puzzle(1);
+  private readonly HashSet<int> _completedLevels = new();
+  private readonly Dictionary<string, int> _records = new();
   private double _noticeTimer;
   private int _heldDirection;
   private double _repeatTimer;
@@ -42,27 +40,21 @@ public partial class GameController : Control
     if (save.Load(SavePath) == Error.Ok)
     {
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
-      _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & PuzzleLevels.ProgressMask;
-      _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
-      _pollutionBest = Math.Max(0, save.GetValue("progress", "pollution_best_score", 0).AsInt32());
-      _pollutionBestCleared = Math.Max(0, save.GetValue("progress", "pollution_best_cleared", 0).AsInt32());
+      LoadProgress(save);
       _audio.Enabled = save.GetValue("settings", "sound_enabled", true).AsBool();
     }
     var captureLanguage = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture-lang="));
     if (captureLanguage is not null) _texts.SetLanguage(captureLanguage["--capture-lang=".Length..]);
-    _selectedLevel = PuzzleLevels.All.Where(level => level.IsTutorial)
-      .FirstOrDefault(level => (_completedLevels & (1 << (level.Number - 1))) == 0)?.Number
-      ?? PuzzleLevels.DefaultLevel;
+    _selection = GameSelection.Puzzle(PuzzleLevels.All.Where(level => level.IsTutorial)
+      .FirstOrDefault(level => !_completedLevels.Contains(level.Number))?.Number
+      ?? PuzzleLevels.DefaultLevel);
     ApplyLanguageFont();
     _hud.Texts = _texts;
     foreach (var overlay in new[] { _modes, _pauseMenu, _result })
     {
       overlay.Texts = _texts;
-      overlay.LevelRequested += number =>
-      {
-        if (number == -1) OpenModes();
-        else { _selectedLevel = number; Start(); }
-      };
+      overlay.SelectionRequested += selection => { _selection = selection; Start(); };
+      overlay.ModesRequested += OpenModes;
       overlay.CloseRequested += CloseOverlay;
       overlay.RestartRequested += () => Start();
       overlay.ContinueRequested += Confirm;
@@ -74,8 +66,17 @@ public partial class GameController : Control
     _hud.PauseRequested += TogglePause;
     var args = OS.GetCmdlineUserArgs();
     var levelArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-level="));
-    if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
-      && captureLevel >= -2 && captureLevel <= PuzzleLevels.All.Count && captureLevel != -1) _selectedLevel = captureLevel;
+    if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel))
+      _selection = captureLevel switch
+      {
+        -2 => GameSelection.Pollution,
+        0 => GameSelection.Free,
+        _ when PuzzleLevels.All.Any(level => level.Number == captureLevel) => GameSelection.Puzzle(captureLevel),
+        _ => _selection
+      };
+    var modeArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-mode="));
+    if (modeArg is not null && GameSelection.TryParse(modeArg["--capture-mode=".Length..], out var captureSelection))
+      _selection = captureSelection;
     Start(args.Contains("--demo"));
     if (args.Contains("--capture-modes")) OpenModes();
     if (args.Contains("--capture-pause")) OpenPause();
@@ -129,21 +130,13 @@ public partial class GameController : Control
       _noticeTimer -= delta;
       if (_noticeTimer <= 0) _hud.ClearFeedback();
     }
-    if (_game.Phase == GamePhase.Won && (_completedLevels & (1 << (_selectedLevel - 1))) == 0)
+    if (_game.Phase == GamePhase.Won && _selection.PuzzleNumber is int completed && _completedLevels.Add(completed))
     {
-      _completedLevels |= 1 << (_selectedLevel - 1);
       SaveProgress();
     }
-    if (_game.Mode == SessionMode.Pollution &&
-      (_game.Score > _pollutionBest || _game.PollutionCleared > _pollutionBestCleared))
-    {
-      _pollutionBest = Math.Max(_pollutionBest, _game.Score);
-      _pollutionBestCleared = Math.Max(_pollutionBestCleared, _game.PollutionCleared);
-      SaveProgress();
-    }
+    if (UpdateRecords()) SaveProgress();
     if (_game.IsFinished && !_result.Visible && !_modes.Visible) OpenResult();
-    _hud.Refresh(_game, _game.Mode == SessionMode.Pollution ? _pollutionBest : _best,
-      _pollutionBestCleared, _selectedLevel);
+    _hud.Refresh(_game, _records);
     _board.QueueRedraw();
   }
 
@@ -191,11 +184,8 @@ public partial class GameController : Control
 
   private void Start(bool demo = false)
   {
-    if (demo) _selectedLevel = 0;
-    _game = demo ? GameSession.CreateDemo()
-      : _selectedLevel == -2 ? new GameSession(SessionMode.Pollution)
-      : _selectedLevel == 0 ? new GameSession()
-      : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
+    if (demo) _selection = GameSelection.Free;
+    _game = demo ? GameSession.CreateDemo() : GameSessionFactory.Create(_selection, Random.Shared.Next());
     _board.Session = _game;
     _hud.ClearFeedback();
     _modes.Visible = _pauseMenu.Visible = _result.Visible = false;
@@ -206,38 +196,41 @@ public partial class GameController : Control
       _hud.ShowFeedback("+" + UiText.Number(wave.Points) + "  ×" + wave.Chain);
       _noticeTimer = 2.5;
       _audio.Match(wave.Chain);
-      if (_game.Mode != SessionMode.Free || _game.Score <= _best) return;
-      _best = _game.Score;
-      SaveProgress();
     };
 
   }
 
   private void Confirm()
   {
-    if (_game.Phase == GamePhase.Won)
+    if (_game.IsFinished && _game.ContinueAction == ContinueAction.NextPuzzle)
     {
-      _completedLevels |= 1 << (_selectedLevel - 1);
+      if (_selection.PuzzleNumber is not int levelNumber) return;
+      _completedLevels.Add(levelNumber);
       SaveProgress();
-      _selectedLevel = PuzzleLevels.NextLevel(_selectedLevel);
+      _selection = GameSelection.Puzzle(PuzzleLevels.NextLevel(levelNumber));
       Start();
     }
-    else if (_game.Phase == GamePhase.Over) Start();
+    else if (_game.IsFinished) Start();
     else if (_game.Paused) TogglePause();
   }
 
   private void ShowHintOrDemo()
   {
-    if (_game.Mode == SessionMode.Free) { Start(true); return; }
-    if (_game.Mode == SessionMode.Pollution)
+    switch (_game.Presentation.Help.Action)
     {
-      CloseOverlay();
-      ShowNotice("pollution_intro");
-      return;
+      case HelpAction.Demo:
+        Start(true);
+        break;
+      case HelpAction.Rules:
+        CloseOverlay();
+        ShowNotice(_game.Presentation.Help.ContentKey);
+        break;
+      case HelpAction.PuzzleHint:
+        CloseOverlay();
+        ShowNotice(_game.Puzzle!.HintKey);
+        _noticeTimer = 12;
+        break;
     }
-    CloseOverlay();
-    ShowNotice(_game.Puzzle!.HintKey);
-    _noticeTimer = 12;
   }
 
   private void ApplyLanguageFont()
@@ -253,7 +246,7 @@ public partial class GameController : Control
   {
     _game.SetPaused(true);
     _pauseMenu.Visible = _result.Visible = false;
-    _modes.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _modes.Render(_game, _selection, _completedLevels, _audio.Enabled);
     _modes.Visible = true;
     ResetRepeat();
   }
@@ -263,7 +256,7 @@ public partial class GameController : Control
     if (_game.IsFinished) return;
     _game.SetPaused(true);
     _modes.Visible = _result.Visible = false;
-    _pauseMenu.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _pauseMenu.Render(_game, _selection, _completedLevels, _audio.Enabled);
     _pauseMenu.Visible = true;
     ResetRepeat();
   }
@@ -271,7 +264,7 @@ public partial class GameController : Control
   private void OpenResult()
   {
     _modes.Visible = _pauseMenu.Visible = false;
-    _result.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    _result.Render(_game, _selection, _completedLevels, _audio.Enabled);
     _result.Visible = true;
     ResetRepeat();
   }
@@ -286,9 +279,9 @@ public partial class GameController : Control
 
   private void RefreshOverlay()
   {
-    if (_modes.Visible) _modes.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
-    if (_pauseMenu.Visible) _pauseMenu.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
-    if (_result.Visible) _result.Render(_game, _selectedLevel, _completedLevels, _audio.Enabled);
+    if (_modes.Visible) _modes.Render(_game, _selection, _completedLevels, _audio.Enabled);
+    if (_pauseMenu.Visible) _pauseMenu.Render(_game, _selection, _completedLevels, _audio.Enabled);
+    if (_result.Visible) _result.Render(_game, _selection, _completedLevels, _audio.Enabled);
   }
 
   private void ChangeLanguage()
@@ -331,13 +324,62 @@ public partial class GameController : Control
   {
     var save = new ConfigFile();
     save.SetValue("settings", "language", _texts.Language);
-    save.SetValue("progress", "best_score", _best);
-    save.SetValue("progress", "pollution_best_score", _pollutionBest);
-    save.SetValue("progress", "pollution_best_cleared", _pollutionBestCleared);
-    save.SetValue("progress", "completed_levels", _completedLevels);
+    foreach (var record in _records) save.SetValue("records", record.Key, record.Value);
+    save.SetValue("progress", "completed_level_ids", string.Join(',', _completedLevels.Order()));
+    var legacyMask = _completedLevels.Where(number => number is > 0 and <= 31)
+      .Aggregate(0, (mask, number) => mask | (1 << (number - 1)));
+    save.SetValue("progress", "completed_levels", legacyMask);
     save.SetValue("settings", "sound_enabled", _audio.Enabled);
     var result = save.Save(SavePath);
     if (result != Error.Ok) GD.PushWarning($"Could not save local progress: {result}");
+  }
+
+  private void LoadProgress(ConfigFile save)
+  {
+    var ids = save.GetValue("progress", "completed_level_ids", "").AsString();
+    if (ids.Length > 0)
+    {
+      foreach (var value in ids.Split(',', StringSplitOptions.RemoveEmptyEntries))
+        if (int.TryParse(value, out var number) && PuzzleLevels.All.Any(level => level.Number == number))
+          _completedLevels.Add(number);
+    }
+    else
+    {
+      var legacyMask = save.GetValue("progress", "completed_levels", 0).AsInt32();
+      foreach (var level in PuzzleLevels.All)
+        if (level.Number <= 31 && (legacyMask & (1 << (level.Number - 1))) != 0)
+          _completedLevels.Add(level.Number);
+    }
+
+    foreach (var mode in ModeCatalog.Standalone)
+      foreach (var metric in mode.Metrics.Where(metric => metric.RecordPolicy == RecordPolicy.Max))
+      {
+        var key = ModeCatalog.RecordKey(mode.Id, metric.Key);
+        var legacyKey = (mode.Id, metric.Key) switch
+        {
+          (ModeId.Free, "score") => "best_score",
+          (ModeId.Pollution, "score") => "pollution_best_score",
+          (ModeId.Pollution, "purified") => "pollution_best_cleared",
+          _ => ""
+        };
+        var value = save.HasSectionKey("records", key)
+          ? save.GetValue("records", key, 0).AsInt32()
+          : legacyKey.Length > 0 ? save.GetValue("progress", legacyKey, 0).AsInt32() : 0;
+        _records[key] = Math.Max(0, value);
+      }
+  }
+
+  private bool UpdateRecords()
+  {
+    var changed = false;
+    foreach (var metric in _game.Metrics.Where(metric => metric.Definition.RecordPolicy == RecordPolicy.Max))
+    {
+      var key = ModeCatalog.RecordKey(_game.Mode, metric.Key);
+      if (metric.Value <= _records.GetValueOrDefault(key)) continue;
+      _records[key] = metric.Value;
+      changed = true;
+    }
+    return changed;
   }
 
   private static void RegisterInput()

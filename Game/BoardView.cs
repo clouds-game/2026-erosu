@@ -27,7 +27,7 @@ public partial class BoardView : Control
     var game = Session;
     if (game is null) return;
     var riseOffset = game.Phase == GamePhase.Rising
-      ? new Vector2(0, (float)((1 - game.RiseProgress) * GameSession.PollutionRiseRows * CellSize))
+      ? new Vector2(0, (float)((1 - game.TransitionProgress) * (game.Transition?.Rows ?? 0) * CellSize))
       : Vector2.Zero;
     foreach (var piece in game.Board.Pieces) PiecePainter.Draw(this, piece, riseOffset, CellSize);
     if (game.Phase == GamePhase.Falling)

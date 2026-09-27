@@ -8,7 +8,8 @@ public partial class GameOverlay : Control
 {
   [Export] public int Kind { get; set; } // 0 modes, 1 pause, 2 result
   public UiText Texts { get; set; } = new();
-  public event Action<int>? LevelRequested;
+  public event Action<GameSelection>? SelectionRequested;
+  public event Action? ModesRequested;
   public event Action? CloseRequested;
   public event Action? RestartRequested;
   public event Action? ContinueRequested;
@@ -39,18 +40,18 @@ public partial class GameOverlay : Control
     panel.AddChild(_body);
   }
 
-  public void Render(GameSession game, int selectedLevel, int completedLevels, bool soundEnabled)
+  public void Render(GameSession game, GameSelection selection, IReadOnlySet<int> completedLevels, bool soundEnabled)
   {
     foreach (var child in _body.GetChildren()) { _body.RemoveChild(child); child.QueueFree(); }
     switch (Kind)
     {
-      case 0: Modes(selectedLevel, completedLevels); break;
+      case 0: Modes(selection, completedLevels); break;
       case 1: Pause(game, soundEnabled); break;
       case 2: Result(game); break;
     }
   }
 
-  private void Modes(int selectedLevel, int completedLevels)
+  private void Modes(GameSelection selection, IReadOnlySet<int> completedLevels)
   {
     Header(Texts.Get("choose_mode"));
     var columns = new HBoxContainer();
@@ -64,17 +65,20 @@ public partial class GameOverlay : Control
       AddLabel(column, Texts.Get(tutorial ? "learn" : "challenges"), 25, PixelUi.Gold);
       foreach (var level in PuzzleLevels.All.Where(level => level.IsTutorial == tutorial))
       {
-        var done = (completedLevels & (1 << (level.Number - 1))) != 0;
+        var done = completedLevels.Contains(level.Number);
         var text = PuzzleLevels.DisplayNumber(level).ToString("00") + "  " + Texts.Get(level.TitleKey) + (done ? "  ✓" : "");
-        var button = AddButton(column, text, selectedLevel == level.Number);
-        button.Pressed += () => LevelRequested?.Invoke(level.Number);
+        var levelSelection = GameSelection.Puzzle(level.Number);
+        var button = AddButton(column, text, selection == levelSelection);
+        button.Pressed += () => SelectionRequested?.Invoke(levelSelection);
       }
     }
     Space(_body, 12);
-    var free = AddButton(_body, Texts.Get("free_play"), selectedLevel == 0);
-    free.Pressed += () => LevelRequested?.Invoke(0);
-    var pollution = AddButton(_body, Texts.Get("pollution_mode"), selectedLevel == -2);
-    pollution.Pressed += () => LevelRequested?.Invoke(-2);
+    foreach (var mode in ModeCatalog.Standalone)
+    {
+      var modeSelection = new GameSelection(mode.Id);
+      var button = AddButton(_body, Texts.Get(mode.Presentation.NameKey), selection == modeSelection);
+      button.Pressed += () => SelectionRequested?.Invoke(modeSelection);
+    }
   }
 
   private void Pause(GameSession game, bool soundEnabled)
@@ -97,26 +101,23 @@ public partial class GameOverlay : Control
     Space(_body, 5);
     AddLabel(_body, Texts.Get("controls_line_1"), 18, PixelUi.Muted);
     AddLabel(_body, Texts.Get("controls_line_2"), 18, PixelUi.Muted);
-    if (game.Puzzle is not null)
-    {
-      var hint = AddButton(_body, Texts.Get("hint"));
-      hint.Pressed += () => HintRequested?.Invoke();
-    }
+    var help = AddButton(_body, Texts.Get(game.Presentation.Help.LabelKey));
+    help.Pressed += () => HintRequested?.Invoke();
     Space(_body, 5);
     var modes = AddButton(_body, Texts.Get("choose_mode"));
-    modes.Pressed += () => LevelRequested?.Invoke(-1);
+    modes.Pressed += () => ModesRequested?.Invoke();
   }
 
   private void Result(GameSession game)
   {
     var won = game.Phase == GamePhase.Won;
-    Header(Texts.Get(won ? PuzzleLevels.CompletionKey(game.Puzzle!) : game.Puzzle is null ? "game_over" : "puzzle_failed"));
+    Header(Texts.Get(game.ResultTitleKey));
     AddLabel(_body, UiText.Number(game.Score), 56, PixelUi.Gold);
     AddLabel(_body, Texts.Get("chain") + " ×" + game.BestChain, 21, PixelUi.Muted);
-    if (game.Mode == SessionMode.Pollution)
-      AddLabel(_body, Texts.Get("purified") + " " + UiText.Number(game.PollutionCleared), 21, PixelUi.Gold);
+    foreach (var metric in game.Metrics.Where(metric => metric.Definition.Display == MetricDisplay.Counter))
+      AddLabel(_body, Texts.Get(metric.Definition.LabelKey) + " " + UiText.Number(metric.Value), 21, PixelUi.Gold);
     Space(_body, 14);
-    var primary = AddButton(_body, Texts.Get(won ? PuzzleLevels.ContinueKey(game.Puzzle!) : "play_again"), true);
+    var primary = AddButton(_body, Texts.Get(game.ContinueKey), true);
     primary.Pressed += () => ContinueRequested?.Invoke();
     if (won)
     {
@@ -124,7 +125,7 @@ public partial class GameOverlay : Control
       retry.Pressed += () => RestartRequested?.Invoke();
     }
     var modes = AddButton(_body, Texts.Get("choose_mode"));
-    modes.Pressed += () => LevelRequested?.Invoke(-1);
+    modes.Pressed += () => ModesRequested?.Invoke();
   }
 
   private void Header(string text)

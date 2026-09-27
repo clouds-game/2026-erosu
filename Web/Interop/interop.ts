@@ -35,23 +35,14 @@ export function connect(callback: DotNetCallback): void {
 }
 
 export function disconnect(): void { detach?.(); detach = undefined; }
-export function loadBest(): number {
-  try { return Math.max(0, Number(localStorage.getItem('chroma_best')) || 0); } catch { return 0; }
+export function loadRecord(key: string, legacyKey?: string): number {
+  try {
+    const value = localStorage.getItem(`chroma_record_${key}`) ?? (legacyKey ? localStorage.getItem(legacyKey) : null);
+    return Math.max(0, Math.trunc(Number(value) || 0));
+  } catch { return 0; }
 }
-export function saveBest(score: number): void {
-  try { localStorage.setItem('chroma_best', String(score)); } catch { /* Saving is optional. */ }
-}
-export function loadPollutionBest(): number {
-  try { return Math.max(0, Number(localStorage.getItem('chroma_pollution_best')) || 0); } catch { return 0; }
-}
-export function savePollutionBest(score: number): void {
-  try { localStorage.setItem('chroma_pollution_best', String(score)); } catch { /* Saving is optional. */ }
-}
-export function loadPollutionCleared(): number {
-  try { return Math.max(0, Number(localStorage.getItem('chroma_pollution_cleared')) || 0); } catch { return 0; }
-}
-export function savePollutionCleared(count: number): void {
-  try { localStorage.setItem('chroma_pollution_cleared', String(count)); } catch { /* Saving is optional. */ }
+export function saveRecord(key: string, value: number): void {
+  try { localStorage.setItem(`chroma_record_${key}`, String(value)); } catch { /* Saving is optional. */ }
 }
 export function tone(frequency: number, duration: number): void {
   audio ??= new AudioContext();
@@ -94,10 +85,19 @@ export async function initializeLanguage(): Promise<void> {
   await setLanguage(prefix === 'zh' || prefix === 'cn' ? 'zh-CN' : prefix === 'ja' ? 'ja' : 'en');
 }
 
-export function loadCompleted(): number {
-  try { return Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_completed')) || 0)) & 0x7fffffff; }
-  catch { return 0; }
+export function loadCompletedIds(): number[] {
+  try {
+    const saved = localStorage.getItem('chroma_completed_levels');
+    if (saved) return (JSON.parse(saved) as unknown[]).filter(value => Number.isInteger(value) && Number(value) > 0).map(Number);
+    const legacy = Math.max(0, Math.trunc(Number(localStorage.getItem('chroma_completed')) || 0)) & 0x7fffffff;
+    return Array.from({ length: 31 }, (_, index) => index + 1).filter(number => (legacy & (1 << (number - 1))) !== 0);
+  } catch { return []; }
 }
-export function saveCompleted(completed: number): void {
-  try { localStorage.setItem('chroma_completed', String(completed)); } catch { /* Saving is optional. */ }
+export function saveCompletedIds(completed: number[]): void {
+  try {
+    const normalized = [...new Set(completed.filter(number => Number.isInteger(number) && number > 0))].sort((a, b) => a - b);
+    localStorage.setItem('chroma_completed_levels', JSON.stringify(normalized));
+    const legacy = normalized.filter(number => number <= 31).reduce((mask, number) => mask | (1 << (number - 1)), 0);
+    localStorage.setItem('chroma_completed', String(legacy));
+  } catch { /* Saving is optional. */ }
 }

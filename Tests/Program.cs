@@ -82,7 +82,7 @@ var tests = new (string Name, Action Run)[]
     for (var index = 0; index < 3; index++)
     {
       var level = PuzzleLevels.All[index];
-      var game = new GameSession(level);
+      var game = GameSessionFactory.Create(level);
       Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
       Check(game.Remaining == 1 && game.Next.Count == 0);
       var target = targets[index];
@@ -97,13 +97,13 @@ var tests = new (string Name, Action Run)[]
       game.HardDrop();
       game.SetPaused(true);
       Check(game.Locked == 1 && !game.Paused);
-      var retry = new GameSession(level);
+      var retry = GameSessionFactory.Create(level);
       Check(retry.Cleared == 0 && retry.Remaining == 1 && retry.Board.Pieces.Count == level.InitialPieces.Count);
     }
   }),
   ("Puzzle thinking time and floor contact never consume a piece", () =>
   {
-    var game = new GameSession(PuzzleLevels.All[0]);
+    var game = GameSessionFactory.Create(PuzzleLevels.All[0]);
     var original = game.Active;
     game.Advance(100);
     Check(game.Active == original && game.Locked == 0);
@@ -115,7 +115,7 @@ var tests = new (string Name, Action Run)[]
   }),
   ("Exhausted puzzle sequences fail without injecting random pieces", () =>
   {
-    var game = new GameSession(PuzzleLevels.All[0]);
+    var game = GameSessionFactory.Create(PuzzleLevels.All[0]);
     while (game.Move(1, 0)) { }
     game.HardDrop();
     Check(game.Phase == GamePhase.Over && game.Remaining == 0 && game.Next.Count == 0 && game.Active is null);
@@ -127,7 +127,7 @@ var tests = new (string Name, Action Run)[]
         Piece.Create(-1, Shape.O, 0, 0, 16), Piece.Create(-2, Shape.O, 0, 2, 16), Piece.Create(-3, Shape.O, 0, 4, 16),
         Piece.Create(-4, Shape.O, 1, 0, 14), Piece.Create(-5, Shape.O, 1, 2, 12), Piece.Create(-6, Shape.O, 1, 4, 10)
       }, new[] { Piece.Create(1, Shape.O, 2) });
-    var game = new GameSession(level);
+    var game = GameSessionFactory.Create(level);
     while (game.Move(1, 0)) { }
     game.HardDrop();
     game.SetPaused(true);
@@ -142,7 +142,7 @@ var tests = new (string Name, Action Run)[]
     var level = new PuzzleLevel(99, "", "", PuzzleGoal.ClearBlocks, 3,
       new[] { Piece.Create(-1, Shape.O, 1, 4, 0) },
       new[] { Piece.Create(1, Shape.O, 0), Piece.Create(2, Shape.T, 1), Piece.Create(3, Shape.I, 2) });
-    var game = new GameSession(level);
+    var game = GameSessionFactory.Create(level);
     Check(game.Phase == GamePhase.Over && game.Next.Select(piece => piece.Shape).SequenceEqual(new[] { Shape.T, Shape.I }));
   }),
   ("Whole blocks are counted, not their four cells", () =>
@@ -256,7 +256,7 @@ var tests = new (string Name, Action Run)[]
       Piece.Create(-1, Shape.O, 0, 0, 16), Piece.Create(-2, Shape.O, 0, 2, 16), Piece.Create(-3, Shape.O, 0, 4, 16),
       Piece.Create(-4, Shape.O, 1, 0, 14), Piece.Create(-5, Shape.O, 1, 2, 12), Piece.Create(-6, Shape.O, 1, 4, 10));
     var game = Enumerable.Range(0, 100)
-      .Select(seed => new GameSession(new Random(seed), board))
+      .Select(seed => GameSessionFactory.Create(GameSelection.Free, seed, board))
       .First(candidate => candidate.Active!.Color >= 2);
     for (var i = 0; i < 10; i++) game.Move(1, 0);
     game.HardDrop();
@@ -285,7 +285,7 @@ var tests = new (string Name, Action Run)[]
   }),
   ("Ghost and movement respect the floor and walls", () =>
   {
-    var game = new GameSession(new Random(7));
+    var game = GameSessionFactory.Create(GameSelection.Free, 7);
     for (var i = 0; i < 15; i++) game.Move(-1, 0);
     Check(game.Active!.Cells.Min(cell => cell.X) == 0);
     Check(!game.Move(-1, 0));
@@ -297,7 +297,7 @@ var tests = new (string Name, Action Run)[]
   {
     var board = new Board();
     for (var x = 0; x < 10; x += 2) board.Add(Piece.Create(-1 - x, Shape.O, 0, x, 0));
-    var game = new GameSession(new Random(1), board);
+    var game = GameSessionFactory.Create(GameSelection.Free, 1, board);
     Check(game.Phase == GamePhase.Over && game.Active is null);
     game.HardDrop();
     game.Advance(10);
@@ -325,9 +325,9 @@ var tests = new (string Name, Action Run)[]
   {
     static GameSession ReachFirstRise(int seed)
     {
-      var game = new GameSession(SessionMode.Pollution, new Random(seed));
-      Check(game.PollutionCountdown == 6);
-      for (var turn = 0; turn < GameSession.PollutionInterval; turn++)
+      var game = GameSessionFactory.Create(GameSelection.Pollution, seed);
+      Check(game.Metric("next_rise")?.Value == 6);
+      for (var turn = 0; turn < 6; turn++)
       {
         var target = turn % 2 == 0 ? 0 : 7;
         while (game.Active!.Cells.Min(cell => cell.X) != target &&
@@ -335,13 +335,13 @@ var tests = new (string Name, Action Run)[]
         game.HardDrop();
         for (var tick = 0; tick < 1000 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++)
           game.Advance(0.05);
-        if (turn < GameSession.PollutionInterval - 1)
+        if (turn < 5)
         {
           Check(game.Phase == GamePhase.Falling);
-          Check(game.PollutionCountdown == GameSession.PollutionInterval - turn - 1);
+          Check(game.Metric("next_rise")?.Value == 6 - turn - 1);
         }
       }
-      Check(game.Phase == GamePhase.Rising && !game.AcceptsInput && game.PollutionCountdown == GameSession.PollutionInterval);
+      Check(game.Phase == GamePhase.Rising && !game.AcceptsInput && game.Metric("next_rise")?.Value == 6);
       return game;
     }
 
@@ -363,13 +363,13 @@ var tests = new (string Name, Action Run)[]
       var board = BoardOf(
         Piece.Create(-1, Shape.O, 0, 0, 16) with { IsPollution = true },
         Piece.Create(-2, Shape.O, 0, 2, 16) with { IsPollution = true });
-      var candidate = new GameSession(SessionMode.Pollution, new Random(seed), board);
+      var candidate = GameSessionFactory.Create(GameSelection.Pollution, seed, board);
       if (candidate.Active!.Color == 0) { game = candidate; break; }
     }
     Check(game is not null);
     while (game!.Active!.Cells.Min(cell => cell.X) < 4) Check(game.Move(1, 0));
     game.HardDrop();
-    Check(game.Phase == GamePhase.Clearing && game.Cleared == 3 && game.PollutionCleared == 2);
+    Check(game.Phase == GamePhase.Clearing && game.Cleared == 3 && game.Metric("purified")?.Value == 2);
     Check(game.Score == game.Wave!.Award.Total && game.Wave.Pieces.Count == 3);
   }),
   ("Raising preserves whole pieces and refuses to push any cell above the board", () =>
@@ -386,7 +386,7 @@ var tests = new (string Name, Action Run)[]
   {
     static void LockSix(GameSession game, int target)
     {
-      for (var turn = 0; turn < GameSession.PollutionInterval && !game.IsFinished; turn++)
+      for (var turn = 0; turn < 6 && !game.IsFinished; turn++)
       {
         while (game.Active!.Cells.Min(cell => cell.X) != target &&
           game.Move(Math.Sign(target - game.Active.Cells.Min(cell => cell.X)), 0)) { }
@@ -399,14 +399,14 @@ var tests = new (string Name, Action Run)[]
     var pushedBoard = new Board();
     for (var y = 0; y < Board.Height; y += 2)
       pushedBoard.Add(Piece.Create(-100 - y, Shape.O, y % 4 / 2, 0, y));
-    var pushed = new GameSession(SessionMode.Pollution, new Random(11), pushedBoard);
+    var pushed = GameSessionFactory.Create(GameSelection.Pollution, 11, pushedBoard);
     LockSix(pushed, 6);
     Check(pushed.Phase == GamePhase.Over && pushed.Board.Pieces.All(piece => !piece.IsPollution));
 
     var spawnBoard = new Board();
     for (var y = 2; y < Board.Height; y += 2)
       spawnBoard.Add(Piece.Create(-200 - y, Shape.O, y % 4 / 2, 4, y));
-    var blockedSpawn = new GameSession(SessionMode.Pollution, new Random(17), spawnBoard);
+    var blockedSpawn = GameSessionFactory.Create(GameSelection.Pollution, 17, spawnBoard);
     LockSix(blockedSpawn, 0);
     Check(blockedSpawn.Phase == GamePhase.Over);
     Check(blockedSpawn.Board.Pieces.Count(piece => piece.IsPollution) == 2);
@@ -416,7 +416,7 @@ var tests = new (string Name, Action Run)[]
     for (var seed = 0; seed < 20; seed++)
     {
       var random = new Random(seed);
-      var game = new GameSession(new Random(seed));
+      var game = GameSessionFactory.Create(GameSelection.Free, seed);
       for (var turn = 0; turn < 100 && game.Phase != GamePhase.Over; turn++)
       {
         for (var i = random.Next(4); i > 0; i--) game.Rotate();
@@ -436,7 +436,7 @@ var tests = new (string Name, Action Run)[]
       }
     }
   })
-};
+}.Concat(ModeArchitectureTests.Cases).ToArray();
 
 var failures = 0;
 foreach (var test in tests)
@@ -479,7 +479,7 @@ static void Settle(Board board)
 
 static GameSession Play(PuzzleLevel level, IReadOnlyList<(int X, int Rotations)> moves, out IReadOnlyList<string> waves)
 {
-  var game = new GameSession(level);
+  var game = GameSessionFactory.Create(level);
   Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
   Check(game.Remaining == moves.Count && game.Next.Count == moves.Count - 1);
   var observed = new List<string>();

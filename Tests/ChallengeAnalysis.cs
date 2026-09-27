@@ -31,7 +31,7 @@ static class ChallengeAnalysis
       {
         for (var column = 0; column < Board.Width; column++)
         {
-          var game = new GameSession(level with { InitialPieces = board, Sequence = new[] { level.Sequence[step] } });
+          var game = GameSessionFactory.Create(level with { InitialPieces = board, Sequence = new[] { level.Sequence[step] } });
           if (game.IsFinished) continue;
           var valid = true;
           for (var turn = 0; turn < rotation; turn++) valid &= game.Rotate();

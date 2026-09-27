@@ -47,12 +47,13 @@ public sealed class JsonEngine
       {
         var mode = request.GetProperty("mode").GetString();
         GameSession next;
-        if (mode is "endless" or "pollution")
+        var standalone = mode == "endless" ? GameSelection.Free
+          : GameSelection.TryParse(mode, out var parsed) && parsed.Mode != ModeId.Puzzle ? parsed
+          : (GameSelection?)null;
+        if (standalone is not null)
         {
           Require(!seen.Contains("level"), "Endless and pollution modes do not accept level.");
-          next = mode == "pollution"
-            ? new GameSession(SessionMode.Pollution, new Random(request.GetProperty("seed").GetInt32()))
-            : new GameSession(new Random(request.GetProperty("seed").GetInt32()));
+          next = GameSessionFactory.Create(standalone.Value, request.GetProperty("seed").GetInt32());
         }
         else
         {
@@ -60,7 +61,7 @@ public sealed class JsonEngine
           var level = request.GetProperty("level").GetInt32();
           var puzzle = PuzzleLevels.All.FirstOrDefault(item => item.Number == level);
           Require(puzzle is not null, "Unknown puzzle level.");
-          next = new GameSession(puzzle!);
+          next = GameSessionFactory.Create(puzzle!);
         }
         _game = next;
         _ticks = 0;
@@ -122,12 +123,14 @@ public sealed class JsonEngine
   private object? Snapshot() => _game is not { } game ? null : new
   {
     Width = Board.Width, Height = Board.Height,
-    Mode = game.Mode switch { SessionMode.Free => "endless", SessionMode.Pollution => "pollution", _ => "puzzle" },
+    Mode = game.Mode switch { ModeId.Free => "endless", ModeId.Puzzle => "puzzle", _ => ModeCatalog.Get(game.Mode).Token },
     Puzzle = game.Puzzle,
     game.Phase, game.Paused, game.AcceptsInput, game.IsFinished,
     game.Score, game.Cleared, game.BestChain, game.Locked, game.Level,
-    game.PollutionCleared, game.PollutionCountdown,
-    game.Remaining, game.ClearProgress, game.RiseProgress, game.Active, Ghost = game.Ghost(),
+    PollutionCleared = game.Metric("purified")?.Value ?? 0,
+    PollutionCountdown = game.Metric("next_rise")?.Value ?? 0,
+    game.Metrics,
+    game.Remaining, game.ClearProgress, RiseProgress = game.TransitionProgress, game.Active, Ghost = game.Ghost(),
     game.Next, Pieces = game.Board.Pieces, game.Wave
   };
 

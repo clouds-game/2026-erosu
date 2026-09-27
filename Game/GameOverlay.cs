@@ -73,6 +73,8 @@ public partial class GameOverlay : Control
     Space(_body, 12);
     var free = AddButton(_body, Texts.Get("free_play"), selectedLevel == 0);
     free.Pressed += () => LevelRequested?.Invoke(0);
+    var pollution = AddButton(_body, Texts.Get("pollution_mode"), selectedLevel == -2);
+    pollution.Pressed += () => LevelRequested?.Invoke(-2);
   }
 
   private void Pause(GameSession game, bool soundEnabled)
@@ -111,6 +113,8 @@ public partial class GameOverlay : Control
     Header(Texts.Get(won ? PuzzleLevels.CompletionKey(game.Puzzle!) : game.Puzzle is null ? "game_over" : "puzzle_failed"));
     AddLabel(_body, UiText.Number(game.Score), 56, PixelUi.Gold);
     AddLabel(_body, Texts.Get("chain") + " ×" + game.BestChain, 21, PixelUi.Muted);
+    if (game.Mode == SessionMode.Pollution)
+      AddLabel(_body, Texts.Get("purified") + " " + UiText.Number(game.PollutionCleared), 21, PixelUi.Gold);
     Space(_body, 14);
     var primary = AddButton(_body, Texts.Get(won ? PuzzleLevels.ContinueKey(game.Puzzle!) : "play_again"), true);
     primary.Pressed += () => ContinueRequested?.Invoke();

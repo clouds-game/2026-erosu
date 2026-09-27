@@ -17,6 +17,8 @@ public partial class GameController : Control
   private int _selectedLevel = 1;
   private int _completedLevels;
   private int _best;
+  private int _pollutionBest;
+  private int _pollutionBestCleared;
   private double _noticeTimer;
   private int _heldDirection;
   private double _repeatTimer;
@@ -42,6 +44,8 @@ public partial class GameController : Control
       _texts.SetLanguage(save.GetValue("settings", "language", _texts.Language).AsString());
       _completedLevels = save.GetValue("progress", "completed_levels", 0).AsInt32() & PuzzleLevels.ProgressMask;
       _best = Math.Max(0, save.GetValue("progress", "best_score", 0).AsInt32());
+      _pollutionBest = Math.Max(0, save.GetValue("progress", "pollution_best_score", 0).AsInt32());
+      _pollutionBestCleared = Math.Max(0, save.GetValue("progress", "pollution_best_cleared", 0).AsInt32());
       _audio.Enabled = save.GetValue("settings", "sound_enabled", true).AsBool();
     }
     var captureLanguage = OS.GetCmdlineUserArgs().FirstOrDefault(arg => arg.StartsWith("--capture-lang="));
@@ -56,7 +60,7 @@ public partial class GameController : Control
       overlay.Texts = _texts;
       overlay.LevelRequested += number =>
       {
-        if (number < 0) OpenModes();
+        if (number == -1) OpenModes();
         else { _selectedLevel = number; Start(); }
       };
       overlay.CloseRequested += CloseOverlay;
@@ -71,7 +75,7 @@ public partial class GameController : Control
     var args = OS.GetCmdlineUserArgs();
     var levelArg = args.FirstOrDefault(arg => arg.StartsWith("--capture-level="));
     if (levelArg is not null && int.TryParse(levelArg["--capture-level=".Length..], out var captureLevel)
-      && captureLevel >= 0 && captureLevel <= PuzzleLevels.All.Count) _selectedLevel = captureLevel;
+      && captureLevel >= -2 && captureLevel <= PuzzleLevels.All.Count && captureLevel != -1) _selectedLevel = captureLevel;
     Start(args.Contains("--demo"));
     if (args.Contains("--capture-modes")) OpenModes();
     if (args.Contains("--capture-pause")) OpenPause();
@@ -130,8 +134,16 @@ public partial class GameController : Control
       _completedLevels |= 1 << (_selectedLevel - 1);
       SaveProgress();
     }
+    if (_game.Mode == SessionMode.Pollution &&
+      (_game.Score > _pollutionBest || _game.PollutionCleared > _pollutionBestCleared))
+    {
+      _pollutionBest = Math.Max(_pollutionBest, _game.Score);
+      _pollutionBestCleared = Math.Max(_pollutionBestCleared, _game.PollutionCleared);
+      SaveProgress();
+    }
     if (_game.IsFinished && !_result.Visible && !_modes.Visible) OpenResult();
-    _hud.Refresh(_game, _best, _selectedLevel);
+    _hud.Refresh(_game, _game.Mode == SessionMode.Pollution ? _pollutionBest : _best,
+      _pollutionBestCleared, _selectedLevel);
     _board.QueueRedraw();
   }
 
@@ -180,7 +192,10 @@ public partial class GameController : Control
   private void Start(bool demo = false)
   {
     if (demo) _selectedLevel = 0;
-    _game = demo ? GameSession.CreateDemo() : _selectedLevel == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
+    _game = demo ? GameSession.CreateDemo()
+      : _selectedLevel == -2 ? new GameSession(SessionMode.Pollution)
+      : _selectedLevel == 0 ? new GameSession()
+      : new GameSession(PuzzleLevels.All[_selectedLevel - 1]);
     _board.Session = _game;
     _hud.ClearFeedback();
     _modes.Visible = _pauseMenu.Visible = _result.Visible = false;
@@ -191,7 +206,7 @@ public partial class GameController : Control
       _hud.ShowFeedback("+" + UiText.Number(wave.Points) + "  ×" + wave.Chain);
       _noticeTimer = 2.5;
       _audio.Match(wave.Chain);
-      if (_game.Puzzle is not null || _game.Score <= _best) return;
+      if (_game.Mode != SessionMode.Free || _game.Score <= _best) return;
       _best = _game.Score;
       SaveProgress();
     };
@@ -213,9 +228,15 @@ public partial class GameController : Control
 
   private void ShowHintOrDemo()
   {
-    if (_game.Puzzle is null) { Start(true); return; }
+    if (_game.Mode == SessionMode.Free) { Start(true); return; }
+    if (_game.Mode == SessionMode.Pollution)
+    {
+      CloseOverlay();
+      ShowNotice("pollution_intro");
+      return;
+    }
     CloseOverlay();
-    ShowNotice(_game.Puzzle.HintKey);
+    ShowNotice(_game.Puzzle!.HintKey);
     _noticeTimer = 12;
   }
 
@@ -311,6 +332,8 @@ public partial class GameController : Control
     var save = new ConfigFile();
     save.SetValue("settings", "language", _texts.Language);
     save.SetValue("progress", "best_score", _best);
+    save.SetValue("progress", "pollution_best_score", _pollutionBest);
+    save.SetValue("progress", "pollution_best_cleared", _pollutionBestCleared);
     save.SetValue("progress", "completed_levels", _completedLevels);
     save.SetValue("settings", "sound_enabled", _audio.Enabled);
     var result = save.Save(SavePath);

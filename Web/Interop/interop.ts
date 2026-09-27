@@ -41,6 +41,18 @@ export function loadBest(): number {
 export function saveBest(score: number): void {
   try { localStorage.setItem('chroma_best', String(score)); } catch { /* Saving is optional. */ }
 }
+export function loadPollutionBest(): number {
+  try { return Math.max(0, Number(localStorage.getItem('chroma_pollution_best')) || 0); } catch { return 0; }
+}
+export function savePollutionBest(score: number): void {
+  try { localStorage.setItem('chroma_pollution_best', String(score)); } catch { /* Saving is optional. */ }
+}
+export function loadPollutionCleared(): number {
+  try { return Math.max(0, Number(localStorage.getItem('chroma_pollution_cleared')) || 0); } catch { return 0; }
+}
+export function savePollutionCleared(count: number): void {
+  try { localStorage.setItem('chroma_pollution_cleared', String(count)); } catch { /* Saving is optional. */ }
+}
 export function tone(frequency: number, duration: number): void {
   audio ??= new AudioContext();
   if (audio.state === 'suspended') void audio.resume();

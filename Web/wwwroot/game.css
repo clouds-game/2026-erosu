@@ -1,5 +1,5 @@
-@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=challenge-3') format('opentype'); font-display: swap; }
-@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=challenge-3') format('opentype'); font-display: swap; }
+@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=pollution-1') format('opentype'); font-display: swap; }
+@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=pollution-1') format('opentype'); font-display: swap; }
 html:lang(zh-CN) { font-family: ChromaSC, sans-serif; }
 html:lang(ja) { font-family: ChromaJP, sans-serif; }
 :root { color-scheme: dark; font-family: system-ui, sans-serif; color: #e6edf3; background: #101319; }
@@ -16,6 +16,7 @@ button:disabled { opacity: .4; cursor: default; }
 .playfield > svg { width: 100%; height: 100%; display: block; }
 .outline { fill: none; stroke: #101319; stroke-width: 3; }
 .mark { color: #101319; fill: none; stroke: currentColor; opacity: .4; stroke-width: 1.2; }
+.pollution-mark { fill: none; stroke: #101319; stroke-width: 2; opacity: .38; }
 aside { line-height: 1.35; grid-column: 2; grid-row: 1 / -1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
 .overview, .actions { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .muted, .keys, dl { color: #8391a5; font-size: 13px; }

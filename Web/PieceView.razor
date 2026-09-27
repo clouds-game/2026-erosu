@@ -13,6 +13,10 @@
     @if (!Has(cell.X + 1, cell.Y)) { <path d="@($"M{x + 39} {y}v40")" class="outline" /> }
     @if (!Ghost)
     {
+      @if (Piece.IsPollution)
+      {
+        <path d="@($"M{x + 4} {y + 16}l10 -10M{x + 26} {y + 16}l10 -10M{x + 4} {y + 34}l10 -10M{x + 26} {y + 34}l10 -10")" class="pollution-mark" />
+      }
       <g transform="@($"translate({x + 20} {y + 20})")" class="mark">
         @switch (Piece.Color)
         {

@@ -321,6 +321,96 @@ var tests = new (string Name, Action Run)[]
     Check(counts.Count == PieceBag.ColorCount);
     Check(Enumerable.Range(0, PieceBag.ColorCount).Select(color => counts[color]).SequenceEqual([10, 9, 8, 7, 6]));
   }),
+  ("Pollution rises after every sixth player lock with deterministic whole pieces", () =>
+  {
+    static GameSession ReachFirstRise(int seed)
+    {
+      var game = new GameSession(SessionMode.Pollution, new Random(seed));
+      Check(game.PollutionCountdown == 6);
+      for (var turn = 0; turn < GameSession.PollutionInterval; turn++)
+      {
+        var target = turn % 2 == 0 ? 0 : 7;
+        while (game.Active!.Cells.Min(cell => cell.X) != target &&
+          game.Move(Math.Sign(target - game.Active.Cells.Min(cell => cell.X)), 0)) { }
+        game.HardDrop();
+        for (var tick = 0; tick < 1000 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++)
+          game.Advance(0.05);
+        if (turn < GameSession.PollutionInterval - 1)
+        {
+          Check(game.Phase == GamePhase.Falling);
+          Check(game.PollutionCountdown == GameSession.PollutionInterval - turn - 1);
+        }
+      }
+      Check(game.Phase == GamePhase.Rising && !game.AcceptsInput && game.PollutionCountdown == GameSession.PollutionInterval);
+      return game;
+    }
+
+    var first = ReachFirstRise(42);
+    var second = ReachFirstRise(42);
+    var pollution = first.Board.Pieces.Where(piece => piece.IsPollution).ToArray();
+    Check(pollution.Length == 2 && pollution.All(piece => piece.Cells.Count == 4));
+    Check(pollution.SelectMany(piece => piece.Cells).Distinct().Count() == 8);
+    Check(pollution.SelectMany(piece => piece.Cells).All(cell => cell.Y >= Board.Height - 2));
+    Check(first.Board.Pieces.Select(PieceState).SequenceEqual(second.Board.Pieces.Select(PieceState)));
+    first.Advance(0.23);
+    Check(first.Phase is GamePhase.Falling or GamePhase.Clearing);
+  }),
+  ("Pollution pieces use ordinary matching and scoring while tracking their origin", () =>
+  {
+    GameSession? game = null;
+    for (var seed = 0; seed < 200; seed++)
+    {
+      var board = BoardOf(
+        Piece.Create(-1, Shape.O, 0, 0, 16) with { IsPollution = true },
+        Piece.Create(-2, Shape.O, 0, 2, 16) with { IsPollution = true });
+      var candidate = new GameSession(SessionMode.Pollution, new Random(seed), board);
+      if (candidate.Active!.Color == 0) { game = candidate; break; }
+    }
+    Check(game is not null);
+    while (game!.Active!.Cells.Min(cell => cell.X) < 4) Check(game.Move(1, 0));
+    game.HardDrop();
+    Check(game.Phase == GamePhase.Clearing && game.Cleared == 3 && game.PollutionCleared == 2);
+    Check(game.Score == game.Wave!.Award.Total && game.Wave.Pieces.Count == 3);
+  }),
+  ("Raising preserves whole pieces and refuses to push any cell above the board", () =>
+  {
+    var board = BoardOf(Piece.Create(1, Shape.O, 0, 2, 5), Piece.Create(2, Shape.I, 1, 4, 17));
+    Check(board.TryRaise(2));
+    Check(board.Pieces.Single(piece => piece.Id == 1).Cells.Min(cell => cell.Y) == 3);
+    Check(board.Pieces.Single(piece => piece.Id == 2).Cells.Max(cell => cell.Y) == 15);
+    var blocked = BoardOf(Piece.Create(1, Shape.O, 0, 0, 1));
+    Check(!blocked.TryRaise(2));
+    Check(blocked.Pieces.Single().Cells.Min(cell => cell.Y) == 1);
+  }),
+  ("Pollution rise ends the session when it pushes above the board or blocks spawn", () =>
+  {
+    static void LockSix(GameSession game, int target)
+    {
+      for (var turn = 0; turn < GameSession.PollutionInterval && !game.IsFinished; turn++)
+      {
+        while (game.Active!.Cells.Min(cell => cell.X) != target &&
+          game.Move(Math.Sign(target - game.Active.Cells.Min(cell => cell.X)), 0)) { }
+        game.HardDrop();
+        for (var tick = 0; tick < 1000 && game.Phase is GamePhase.Clearing or GamePhase.Settling or GamePhase.Rising; tick++)
+          game.Advance(0.05);
+      }
+    }
+
+    var pushedBoard = new Board();
+    for (var y = 0; y < Board.Height; y += 2)
+      pushedBoard.Add(Piece.Create(-100 - y, Shape.O, y % 4 / 2, 0, y));
+    var pushed = new GameSession(SessionMode.Pollution, new Random(11), pushedBoard);
+    LockSix(pushed, 6);
+    Check(pushed.Phase == GamePhase.Over && pushed.Board.Pieces.All(piece => !piece.IsPollution));
+
+    var spawnBoard = new Board();
+    for (var y = 2; y < Board.Height; y += 2)
+      spawnBoard.Add(Piece.Create(-200 - y, Shape.O, y % 4 / 2, 4, y));
+    var blockedSpawn = new GameSession(SessionMode.Pollution, new Random(17), spawnBoard);
+    LockSix(blockedSpawn, 0);
+    Check(blockedSpawn.Phase == GamePhase.Over);
+    Check(blockedSpawn.Board.Pieces.Count(piece => piece.IsPollution) == 2);
+  }),
   ("Seeded games keep four-cell shapes valid throughout play", () =>
   {
     for (var seed = 0; seed < 20; seed++)
@@ -361,6 +451,12 @@ static void Check(bool condition, string? message = null)
 {
   if (!condition) throw new InvalidOperationException(message ?? "Assertion failed.");
 }
+
+static string PieceState(Piece piece) => string.Join(";", new[]
+{
+  piece.Id.ToString(), piece.Shape.ToString(), piece.Color.ToString(), piece.IsPollution.ToString(),
+  string.Join(",", piece.Cells.Select(cell => $"{cell.X}:{cell.Y}"))
+});
 
 static void AdvanceUntil(GameSession game, GamePhase phase)
 {

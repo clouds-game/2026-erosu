@@ -1,12 +1,12 @@
 namespace ChromaDrop.Core;
 
-public sealed class PieceBag(Random random)
+public sealed class PieceBag(Random random, int firstId = 1, bool pollution = false)
 {
   public const int ColorCount = 5;
   private static readonly int[] ColorWeights = [10, 9, 8, 7, 6];
   private readonly Stack<Shape> _shapes = new();
   private readonly Stack<int> _colors = new();
-  private int _nextId = 1;
+  private int _nextId = firstId;
 
   public Piece Take()
   {
@@ -24,6 +24,8 @@ public sealed class PieceBag(Random random)
       random.Shuffle(colors);
       foreach (var color in colors) _colors.Push(color);
     }
-    return Piece.Create(_nextId++, _shapes.Pop(), _colors.Pop());
+    var piece = Piece.Create(_nextId, _shapes.Pop(), _colors.Pop()) with { IsPollution = pollution };
+    _nextId += pollution ? -1 : 1;
+    return piece;
   }
 }

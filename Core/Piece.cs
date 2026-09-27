@@ -7,7 +7,7 @@ public readonly record struct Cell(int X, int Y)
   public Cell Offset(int x, int y) => new(X + x, Y + y);
 }
 
-public sealed record Piece(int Id, Shape Shape, int Color, IReadOnlyList<Cell> Cells)
+public sealed record Piece(int Id, Shape Shape, int Color, IReadOnlyList<Cell> Cells, bool IsPollution = false)
 {
   public Piece Offset(int x, int y) => this with
   {

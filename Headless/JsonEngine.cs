@@ -47,14 +47,16 @@ public sealed class JsonEngine
       {
         var mode = request.GetProperty("mode").GetString();
         GameSession next;
-        if (mode == "endless")
+        if (mode is "endless" or "pollution")
         {
-          Require(!seen.Contains("level"), "Endless mode does not accept level.");
-          next = new GameSession(new Random(request.GetProperty("seed").GetInt32()));
+          Require(!seen.Contains("level"), "Endless and pollution modes do not accept level.");
+          next = mode == "pollution"
+            ? new GameSession(SessionMode.Pollution, new Random(request.GetProperty("seed").GetInt32()))
+            : new GameSession(new Random(request.GetProperty("seed").GetInt32()));
         }
         else
         {
-          Require(mode == "puzzle" && !seen.Contains("seed"), "Use endless with seed or puzzle with level.");
+          Require(mode == "puzzle" && !seen.Contains("seed"), "Use endless/pollution with seed or puzzle with level.");
           var level = request.GetProperty("level").GetInt32();
           var puzzle = PuzzleLevels.All.FirstOrDefault(item => item.Number == level);
           Require(puzzle is not null, "Unknown puzzle level.");
@@ -120,10 +122,12 @@ public sealed class JsonEngine
   private object? Snapshot() => _game is not { } game ? null : new
   {
     Width = Board.Width, Height = Board.Height,
-    Mode = game.Puzzle is null ? "endless" : "puzzle", Puzzle = game.Puzzle,
+    Mode = game.Mode switch { SessionMode.Free => "endless", SessionMode.Pollution => "pollution", _ => "puzzle" },
+    Puzzle = game.Puzzle,
     game.Phase, game.Paused, game.AcceptsInput, game.IsFinished,
     game.Score, game.Cleared, game.BestChain, game.Locked, game.Level,
-    game.Remaining, game.ClearProgress, game.Active, Ghost = game.Ghost(),
+    game.PollutionCleared, game.PollutionCountdown,
+    game.Remaining, game.ClearProgress, game.RiseProgress, game.Active, Ghost = game.Ghost(),
     game.Next, Pieces = game.Board.Pieces, game.Wave
   };
 

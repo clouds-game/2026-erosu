@@ -8,6 +8,8 @@ public partial class BoardView : Control
   public GameSession? Session { get; set; }
   public const float CellSize = 32;
 
+  public override void _Ready() => ClipContents = true;
+
   public override void _Draw()
   {
     DrawRect(new Rect2(Vector2.Zero, Size), PiecePainter.BoardColor);
@@ -24,7 +26,10 @@ public partial class BoardView : Control
 
     var game = Session;
     if (game is null) return;
-    foreach (var piece in game.Board.Pieces) PiecePainter.Draw(this, piece, Vector2.Zero, CellSize);
+    var riseOffset = game.Phase == GamePhase.Rising
+      ? new Vector2(0, (float)((1 - game.RiseProgress) * GameSession.PollutionRiseRows * CellSize))
+      : Vector2.Zero;
+    foreach (var piece in game.Board.Pieces) PiecePainter.Draw(this, piece, riseOffset, CellSize);
     if (game.Phase == GamePhase.Falling)
     {
       var ghost = game.Ghost();

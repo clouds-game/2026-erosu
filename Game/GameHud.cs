@@ -17,6 +17,8 @@ public partial class GameHud : HBoxContainer
   private Label _key = null!;
   private Label _feedback = null!;
   private Label _speed = null!;
+  private Label _record = null!;
+  private Label _pollution = null!;
   private Button _levels = null!;
   private PanelContainer _instructionPanel = null!;
   private VBoxContainer _progress = null!;
@@ -50,6 +52,10 @@ public partial class GameHud : HBoxContainer
     Spacer(left);
     _speed = AddLabel(left, "", 21, PixelUi.Muted);
     _speed.HorizontalAlignment = HorizontalAlignment.Center;
+    _record = AddLabel(left, "", 18, PixelUi.Muted);
+    _record.HorizontalAlignment = HorizontalAlignment.Center;
+    _pollution = AddLabel(left, "", 21, PixelUi.Gold);
+    _pollution.HorizontalAlignment = HorizontalAlignment.Center;
     _levels = AddButton(left, "");
     _levels.Pressed += () => LevelsRequested?.Invoke();
 
@@ -86,17 +92,24 @@ public partial class GameHud : HBoxContainer
   public void ShowFeedback(string text) => _feedbackText = text;
   public void ClearFeedback() => _feedbackText = "";
 
-  public void Refresh(GameSession game, int best, int selectedLevel)
+  public void Refresh(GameSession game, int best, int bestPollutionCleared, int selectedLevel)
   {
     var puzzle = game.Puzzle;
     var tutorial = puzzle is { IsTutorial: true };
+    var pollution = game.Mode == SessionMode.Pollution;
     _stage.Text = puzzle is null ? UiText.Number(game.Score)
       : PuzzleLevels.DisplayNumber(puzzle).ToString("00") + " / 03";
     _stage.AddThemeFontSizeOverride("font_size", puzzle is null ? 35 : 27);
     _levels.Text = Texts.Get("choose_mode");
     _speed.Visible = puzzle is null;
     _speed.Text = puzzle is null ? "LV " + game.Level.ToString("00") : "";
-    _progress.Visible = puzzle is not null;
+    _record.Visible = puzzle is null;
+    _record.Text = puzzle is null
+      ? Texts.Get("best", UiText.Number(best)) + (pollution ? " · " + Texts.Get("best_purified", bestPollutionCleared) : "")
+      : "";
+    _pollution.Visible = pollution;
+    _pollution.Text = pollution ? Texts.Get("purified") + " " + UiText.Number(game.PollutionCleared) : "";
+    _progress.Visible = puzzle is not null || pollution;
     if (puzzle is not null)
     {
       var total = tutorial ? 3 : Math.Min(_progressTiles.Length, puzzle.Sequence.Count);
@@ -106,6 +119,15 @@ public partial class GameHud : HBoxContainer
         var icon = _progressTiles[i];
         icon.GetParent<Control>().Visible = i < total;
         icon.Modulate = new Color(1, 1, 1, i < remaining ? 1 : 0.25f);
+      }
+    }
+    else if (pollution)
+    {
+      for (var i = 0; i < _progressTiles.Length; i++)
+      {
+        var icon = _progressTiles[i];
+        icon.GetParent<Control>().Visible = true;
+        icon.Modulate = new Color(1, 1, 1, i < game.PollutionCountdown ? 1 : 0.25f);
       }
     }
     _instruction.Visible = tutorial && !game.IsFinished && _feedbackText.Length == 0;

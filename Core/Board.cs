@@ -58,6 +58,14 @@ public sealed class Board
     _pieces.RemoveAll(piece => ids.Contains(piece.Id));
   }
 
+  public bool TryRaise(int rows)
+  {
+    if (rows <= 0) return true;
+    if (_pieces.SelectMany(piece => piece.Cells).Any(cell => cell.Y - rows < 0)) return false;
+    for (var i = 0; i < _pieces.Count; i++) _pieces[i] = _pieces[i].Offset(0, -rows);
+    return true;
+  }
+
   public bool StepGravity()
   {
     var occupied = new Dictionary<Cell, int>();

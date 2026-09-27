@@ -12,6 +12,7 @@ public sealed class GameSession
   private readonly Random? _obstacleRandom;
   private readonly Random? _fillRandom;
   private int _lastFillTurn;
+  private readonly HashSet<Cell> _knownEnclosedCells = [];
   private int _nextGeneratedId = -1;
   private int _lastObstacleTurn;
   private readonly Queue<Piece> _next = new();
@@ -84,6 +85,7 @@ public sealed class GameSession
     AnchoredBlocks = source.AnchoredBlocks;
     EnclosedFill = source.EnclosedFill;
     _lastFillTurn = source._lastFillTurn;
+    _knownEnclosedCells.UnionWith(source._knownEnclosedCells);
     Score = source.Score;
     Cleared = source.Cleared;
     BestChain = source.BestChain;
@@ -242,14 +244,27 @@ public sealed class GameSession
         if (_timer >= 0.06)
         {
           _timer = 0;
-          if (!Board.StepGravity()) CheckMatches();
+          var moved = Board.StepGravity();
+          RefreshEnclosureHistory(rememberNew: false);
+          if (!moved) CheckMatches();
         }
         break;
     }
   }
 
+  private void RefreshEnclosureHistory(bool rememberNew)
+  {
+    if (!EnclosedFill) return;
+    var closed = Board.FindEnclosedEmptyCells().ToHashSet();
+    var occupied = Board.Pieces.SelectMany(piece => piece.Cells).ToHashSet();
+    // A filled pocket stays known until its empty cells reconnect to the top.
+    _knownEnclosedCells.RemoveWhere(cell => !occupied.Contains(cell) && !closed.Contains(cell));
+    if (rememberNew) _knownEnclosedCells.UnionWith(closed);
+  }
+
   private void Spawn()
   {
+    RefreshEnclosureHistory(rememberNew: true);
     if (_next.Count == 0)
     {
       Active = null;
@@ -314,10 +329,13 @@ public sealed class GameSession
       if (EnclosedFill && Locked > 0 && _lastFillTurn != Locked)
       {
         _lastFillTurn = Locked;
+        var newCells = Board.FindEnclosedEmptyCells().Where(cell => !_knownEnclosedCells.Contains(cell)).ToArray();
         if (_fillRandom is null)
-          EnclosedFillPending = AnchoredSpawnPending || Board.FindEnclosedEmptyCells().Count > 0;
-        else if (EnclosedRegions.Fill(Board, _fillRandom, Colors!, ref _nextGeneratedId) > 0)
+          EnclosedFillPending = AnchoredSpawnPending || newCells.Length > 0;
+        else if (newCells.Length > 0)
         {
+          _knownEnclosedCells.UnionWith(newCells);
+          EnclosedRegions.Fill(Board, _fillRandom, Colors!, ref _nextGeneratedId, newCells);
           CheckMatches(); // Resolve fill matches, but never refill twice in this turn.
           return;
         }
@@ -331,6 +349,7 @@ public sealed class GameSession
     _chain++;
     var award = ScoreRules.Calculate(matches, _chain);
     Board.Remove(matches);
+    RefreshEnclosureHistory(rememberNew: false);
     Score += award.Total;
     Cleared += matches.Count;
     BestChain = Math.Max(BestChain, _chain);

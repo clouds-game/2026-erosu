@@ -49,17 +49,19 @@
           case PieceKind.White:
             <circle r="5" class="white-mark" />
             break;
-          case PieceKind.Black when TurnsRemaining is > 0 and <= 3:
-            @for (var i = 0; i < TurnsRemaining.Value; i++)
-            {
-              var dotX = (i - (TurnsRemaining.Value - 1) / 2.0) * 7;
-              <circle cx="@dotX" r="2.2" fill="#f6f1e4" />
-            }
-            break;
         }
         </g>
       }
     }
+  }
+  @if (!Ghost && Piece.Kind == PieceKind.Black &&
+    TurnsRemaining is > 0 and <= BlackWhiteModeRules.BlackLifetime)
+  {
+    var badge = BadgeCell();
+    var badgeX = badge.X * 40;
+    var badgeY = badge.Y * 40;
+    <rect x="@(badgeX + 9)" y="@(badgeY + 7)" width="22" height="26" class="countdown-badge" />
+    <path d="@CountdownPath(badgeX, badgeY, TurnsRemaining.Value)" class="countdown-digit" />
   }
 </g>
 
@@ -78,4 +80,41 @@
   };
   private bool Has(int x, int y) => Piece.Cells.Contains(new Cell(x, y));
   private bool IsFirst(Cell cell) => cell == Piece.Cells.OrderBy(item => item.Y).ThenBy(item => item.X).First();
+  private Cell BadgeCell()
+  {
+    var centerX = Piece.Cells.Average(cell => cell.X);
+    var centerY = Piece.Cells.Average(cell => cell.Y);
+    return Piece.Cells
+      .OrderBy(cell => Math.Pow(cell.X - centerX, 2) + Math.Pow(cell.Y - centerY, 2))
+      .ThenBy(cell => cell.Y)
+      .ThenBy(cell => cell.X)
+      .First();
+  }
+  private static string CountdownPath(int x, int y, int digit)
+  {
+    const int top = 1, upperRight = 2, lowerRight = 4, bottom = 8;
+    const int lowerLeft = 16, upperLeft = 32, middle = 64;
+    var mask = digit switch
+    {
+      1 => upperRight | lowerRight,
+      2 => top | upperRight | middle | lowerLeft | bottom,
+      3 => top | upperRight | middle | lowerRight | bottom,
+      4 => upperLeft | middle | upperRight | lowerRight,
+      _ => 0
+    };
+    var left = x + 15;
+    var right = x + 25;
+    var upper = y + 12;
+    var center = y + 20;
+    var lower = y + 28;
+    var segments = new List<string>();
+    if ((mask & top) != 0) segments.Add($"M{left} {upper}H{right}");
+    if ((mask & upperRight) != 0) segments.Add($"M{right} {upper}V{center}");
+    if ((mask & lowerRight) != 0) segments.Add($"M{right} {center}V{lower}");
+    if ((mask & bottom) != 0) segments.Add($"M{left} {lower}H{right}");
+    if ((mask & lowerLeft) != 0) segments.Add($"M{left} {center}V{lower}");
+    if ((mask & upperLeft) != 0) segments.Add($"M{left} {upper}V{center}");
+    if ((mask & middle) != 0) segments.Add($"M{left} {center}H{right}");
+    return string.Join(" ", segments);
+  }
 }

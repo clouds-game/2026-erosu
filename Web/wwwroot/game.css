@@ -17,6 +17,8 @@ button:disabled { opacity: .4; cursor: default; }
 .outline { fill: none; stroke: #101319; stroke-width: 3; }
 .mark { color: #101319; fill: none; stroke: currentColor; opacity: .4; stroke-width: 1.2; }
 .special-outline { fill: none; stroke: #f6f1e4; stroke-width: 1.5; opacity: .75; }
+.countdown-badge { fill: #f6f1e4; }
+.countdown-digit { fill: none; stroke: #171c27; stroke-width: 3; stroke-linecap: square; stroke-linejoin: miter; }
 .white-mark { fill: none; stroke: #253044; stroke-width: 1.5; }
 .pollution-mark { fill: none; stroke: #101319; stroke-width: 2; opacity: .38; }
 aside { line-height: 1.35; grid-column: 2; grid-row: 1 / -1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; }

@@ -253,7 +253,7 @@ internal sealed class PollutionModeRules : GameModeRulesBase
 
 internal sealed class BlackWhiteModeRules : GameModeRulesBase
 {
-  public const int BlackLifetime = 3;
+  public const int BlackLifetime = 4;
   private readonly Random _revealRandom;
 
   public BlackWhiteModeRules(int seed) =>

@@ -7,7 +7,7 @@ internal static class BlackWhiteModeTests
     ("Black-white candidate bags contain one concealed special in every five pieces", CandidateBag),
     ("Black-white previews conceal the reveal without changing the shape stream", ConcealedPreview),
     ("White pieces match every color and overlapping groups clear once", WildcardMatching),
-    ("Black pieces never match and expire after three later locks", BlackLifetime),
+    ("Black pieces never match and expire after four later locks", BlackLifetime),
     ("Matches caused by black expiration continue the current chain", ExpirationChain)
   };
 
@@ -45,7 +45,7 @@ internal static class BlackWhiteModeTests
         special.HardDrop();
         AdvanceUntilStable(special);
         var locked = special.Board.Pieces.Single(piece => piece.Id == id);
-        Assert(special.TurnsRemaining(locked) == 3);
+        Assert(special.TurnsRemaining(locked) == 4);
         verifiedLockedBlack = true;
       }
     }
@@ -79,16 +79,18 @@ internal static class BlackWhiteModeTests
     for (var seed = 0; seed < 200; seed++)
     {
       var board = BoardOf(
-        Special(-10, PieceKind.Black, 0, 16) with { ExpiresAtLock = 3 },
-        Special(-11, PieceKind.Black, 2, 16) with { ExpiresAtLock = 3 });
+        Special(-10, PieceKind.Black, 0, 16) with { ExpiresAtLock = 4 },
+        Special(-11, PieceKind.Black, 2, 16) with { ExpiresAtLock = 4 });
       var candidate = GameSessionFactory.Create(GameSelection.BlackWhite, seed, board);
       var valid = true;
-      for (var turn = 0; turn < 3; turn++)
+      for (var turn = 0; turn < 4; turn++)
       {
+        var tracked = candidate.Board.Pieces.Single(piece => piece.Id == -10);
+        Assert(candidate.TurnsRemaining(tracked) == 4 - turn);
         candidate.HardDrop();
         AdvanceUntilStable(candidate);
         if (candidate.IsFinished || candidate.Score != 0) { valid = false; break; }
-        if (turn < 2 && candidate.Phase != GamePhase.Falling) { valid = false; break; }
+        if (turn < 3 && candidate.Phase != GamePhase.Falling) { valid = false; break; }
       }
       if (valid && candidate.Phase == GamePhase.Expiring) { game = candidate; break; }
     }

@@ -26,6 +26,14 @@ public static class PiecePainter
       var position = origin + new Vector2(cell.X, cell.Y) * size;
       target.DrawTextureRectRegion(PixelUi.Sheet,
         new Rect2(position, Vector2.One * size), tileRegion, tint);
+      if (piece.Anchored && !ghost)
+      {
+        var inset = size / 8;
+        var dot = Vector2.One * size / 12;
+        foreach (var corner in new[] { new Vector2(inset, inset), new Vector2(size - inset - dot.X, inset),
+          new Vector2(inset, size - inset - dot.Y), new Vector2(size - inset - dot.X, size - inset - dot.Y) })
+          target.DrawRect(new Rect2(position + corner, dot), PixelUi.Ink);
+      }
       if (flash > 0 && !ghost)
         target.DrawTextureRectRegion(PixelUi.Sheet,
           new Rect2(position, Vector2.One * size), PixelUi.WhiteTileRegion,

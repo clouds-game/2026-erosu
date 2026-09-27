@@ -65,9 +65,9 @@ public sealed class Board
       foreach (var cell in piece.Cells)
         occupied.Add(cell, piece.Id);
 
-    // Support propagates upward from the floor. Everything else falls together,
-    // including interlocked shapes; list order cannot change the result.
-    var movable = _pieces.Select(piece => piece.Id).ToHashSet();
+    // Support propagates upward from the floor and anchored pieces. Everything
+    // else falls together, including interlocked shapes; order cannot change the result.
+    var movable = _pieces.Where(piece => !piece.Anchored).Select(piece => piece.Id).ToHashSet();
     bool changed;
     do
     {

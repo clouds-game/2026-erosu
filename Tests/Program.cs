@@ -11,6 +11,66 @@ if (args.Contains("--analyze-challenge"))
 
 var tests = new (string Name, Action Run)[]
 {
+  ("Anchored pieces support stacks independently of insertion order", () =>
+  {
+    foreach (var reverse in new[] { false, true })
+    {
+      var anchor = Piece.Create(-1, Shape.O, 0, 0, 12) with { Anchored = true };
+      var pieces = new[] { anchor, Piece.Create(1, Shape.O, 1, 0, 10),
+        Piece.Create(2, Shape.O, 2, 0, 8), Piece.Create(3, Shape.O, 3, 4, 8) };
+      var board = BoardOf(reverse ? pieces.Reverse().ToArray() : pieces);
+      Settle(board);
+      Check(board.Pieces.Single(piece => piece.Id == -1) == anchor);
+      Check(board.Pieces.Single(piece => piece.Id == 1).Cells.Min(cell => cell.Y) == 10);
+      Check(board.Pieces.Single(piece => piece.Id == 2).Cells.Min(cell => cell.Y) == 8);
+      Check(board.Pieces.Single(piece => piece.Id == 3).Cells.Min(cell => cell.Y) == 16);
+    }
+  }),
+  ("Anchors count as whole pieces and matching releases their supported stack", () =>
+  {
+    var anchor = Piece.Create(-1, Shape.O, 0, 0, 12) with { Anchored = true };
+    var board = BoardOf(anchor, Piece.Create(1, Shape.O, 0, 2, 12),
+      Piece.Create(2, Shape.O, 1, 0, 10));
+    Check(board.FindMatches().Count == 0);
+    board.Add(Piece.Create(3, Shape.O, 0, 4, 12));
+    var matches = board.FindMatches();
+    Check(matches.Count == 3 && matches.Contains(anchor));
+    board.Remove(matches);
+    Settle(board);
+    Check(board.Pieces.Count == 1 && board.Pieces[0].Cells.Min(cell => cell.Y) == 16);
+  }),
+  ("Anchored starts are deterministic, valid, and opt-in across color profiles", () =>
+  {
+    foreach (var colors in ColorProfile.All)
+      for (var seed = 0; seed < 100; seed++)
+      {
+        var game = new GameSession(new Random(seed), colors: colors, anchoredBlocks: true);
+        var repeat = new GameSession(new Random(seed), colors: colors, anchoredBlocks: true);
+        Check(game.AnchoredBlocks && game.Board.Pieces.Count == AnchoredObstacles.Count);
+        Check(JsonSerializer.Serialize(game.Board.Pieces) == JsonSerializer.Serialize(repeat.Board.Pieces));
+        Check(!game.Board.StepGravity() && game.Board.FindMatches().Count == 0);
+        Check(game.Active is not null && game.Board.CanPlace(game.Active));
+        Check(game.Board.Pieces.All(piece => piece.Anchored && piece.Id < 0 &&
+          piece.Cells.Count == 4 && piece.Cells.All(cell => cell.Y >= Board.Height - 6) && colors.Weights[piece.Color] > 0));
+        var plain = new GameSession(new Random(seed), colors: colors);
+        var disabled = new GameSession(new Random(seed), colors: colors, anchoredBlocks: false);
+        Check(!plain.AnchoredBlocks && plain.Board.Pieces.Count == 0);
+        Check(JsonSerializer.Serialize(plain.Next) == JsonSerializer.Serialize(disabled.Next));
+        Check(JsonSerializer.Serialize(plain.Active) == JsonSerializer.Serialize(disabled.Active));
+      }
+  }),
+  ("Placement previews preserve anchors without changing the live board", () =>
+  {
+    var game = new GameSession(new Random(42), anchoredBlocks: true);
+    var before = JsonSerializer.Serialize(game.Board.Pieces);
+    var action = Enumerable.Range(0, 40).First(action => game.Placement(action) is not null);
+    var preview = game.PreviewPlacement(action)!;
+    Check(preview.AnchoredBlocks && JsonSerializer.Serialize(game.Board.Pieces) == before);
+    game.Place(action);
+    for (var i = 0; i < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; i++) game.Advance(1.0 / 60);
+    Check(JsonSerializer.Serialize(preview.Board.Pieces) == JsonSerializer.Serialize(game.Board.Pieces));
+    Check(preview.Score == game.Score && preview.Phase == game.Phase);
+  }),
   ("Locale aliases and unsupported languages resolve consistently", () =>
   {
     foreach (var (input, expected) in new[] { ("en-US", "en"), ("zh_TW", "zh-CN"), ("cn", "zh-CN"), ("ja-JP", "ja"), ("fr", "en"), ("", "en") })

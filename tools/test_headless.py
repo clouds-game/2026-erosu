@@ -49,6 +49,28 @@ class HeadlessTests(unittest.TestCase):
     classic = self.send({"command": "start", "mode": "endless", "seed": 42, "color_profile": "classic"})["state"]
     self.assertEqual([10, 9, 8, 7, 6, 0, 0], classic["color_weights"])
 
+  def test_anchored_start_is_opt_in_seeded_and_preserved_by_queries(self):
+    plain = self.start()['state']
+    self.assertFalse(plain['anchored_blocks'])
+    explicit = self.send({'command': 'start', 'mode': 'endless', 'seed': 42, 'anchored_blocks': False})
+    self.assertEqual(plain, explicit['state'])
+    request = {'command': 'start', 'mode': 'endless', 'seed': 42, 'anchored_blocks': True}
+    initial = self.send(request)['state']
+    self.assertEqual(3, len(initial['pieces']))
+    self.assertTrue(all(piece['anchored'] for piece in initial['pieces']))
+    self.assertEqual(initial, self.send(request)['state'])
+    for command in ['placements', 'afterstates', 'state']:
+      self.assertEqual(initial, self.send({'command': command})['state'])
+    for invalid in [
+      {'command': 'start', 'mode': 'puzzle', 'level': 1, 'anchored_blocks': True},
+      {**request, 'anchored_blocks': 'true'},
+    ]:
+      rejected = self.send(invalid)
+      self.assertFalse(rejected['ok'])
+      self.assertEqual(initial, rejected['state'])
+    advanced = self.send({'command': 'tick', 'count': 180})['state']
+    self.assertEqual(initial['pieces'], advanced['pieces'])
+
   def test_external_time_and_batch_equivalence(self):
     initial = self.start()
     time.sleep(0.1)

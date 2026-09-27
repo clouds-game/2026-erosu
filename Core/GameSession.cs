@@ -19,6 +19,7 @@ public sealed class GameSession
   public IReadOnlyList<Piece> Next => _next.Take(Puzzle is null ? 3 : _next.Count).ToArray();
   public PuzzleLevel? Puzzle { get; }
   public ColorProfile? Colors { get; }
+  public bool AnchoredBlocks { get; }
   public int Remaining => _next.Count + (Active is null ? 0 : 1);
   public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;
   public GamePhase Phase { get; private set; } = GamePhase.Falling;
@@ -34,11 +35,14 @@ public sealed class GameSession
   public event Action<ClearWave>? Matched;
   public event Action? PieceLocked;
 
-  public GameSession(Random? random = null, Board? board = null, ColorProfile? colors = null)
+  public GameSession(Random? random = null, Board? board = null, ColorProfile? colors = null, bool anchoredBlocks = false)
   {
     Board = board ?? new Board();
     Colors = colors ?? ColorProfile.Default;
-    _bag = new PieceBag(random ?? new Random(), Colors);
+    random ??= new Random();
+    AnchoredBlocks = anchoredBlocks;
+    if (anchoredBlocks) AnchoredObstacles.Populate(Board, random, Colors);
+    _bag = new PieceBag(random, Colors);
     for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
     Spawn();
   }
@@ -61,6 +65,7 @@ public sealed class GameSession
     Active = source.Active;
     Colors = source.Colors;
     Puzzle = source.Puzzle;
+    AnchoredBlocks = source.AnchoredBlocks;
     Score = source.Score;
     Cleared = source.Cleared;
     BestChain = source.BestChain;

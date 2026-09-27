@@ -28,7 +28,7 @@ public sealed class JsonEngine
       var command = request.GetProperty("command").GetString();
       var fields = command switch
       {
-        "start" => new[] { "mode", "seed", "level", "color_profile" },
+        "start" => new[] { "mode", "seed", "level", "color_profile", "anchored_blocks" },
         "tick" => new[] { "count", "soft_drop" },
         "move" => new[] { "direction" },
         "place" => new[] { "action" },
@@ -53,11 +53,12 @@ public sealed class JsonEngine
           Require(!seen.Contains("level"), "Endless mode does not accept level.");
           var colors = request.TryGetProperty("color_profile", out var profile)
             ? ColorProfile.Find(profile.GetString() ?? "") : ColorProfile.Default;
-          next = new GameSession(new Random(request.GetProperty("seed").GetInt32()), colors: colors);
+          next = new GameSession(new Random(request.GetProperty("seed").GetInt32()), colors: colors,
+            anchoredBlocks: request.TryGetProperty("anchored_blocks", out var anchored) && anchored.GetBoolean());
         }
         else
         {
-          Require(mode == "puzzle" && !seen.Contains("seed") && !seen.Contains("color_profile"), "Use endless with seed or puzzle with level.");
+          Require(mode == "puzzle" && !seen.Contains("seed") && !seen.Contains("color_profile") && !seen.Contains("anchored_blocks"), "Use endless with seed or puzzle with level.");
           var level = request.GetProperty("level").GetInt32();
           var puzzle = PuzzleLevels.All.FirstOrDefault(item => item.Number == level);
           Require(puzzle is not null, "Unknown puzzle level.");
@@ -140,7 +141,7 @@ public sealed class JsonEngine
     Width = Board.Width, Height = Board.Height,
     ColorProfile = game.Colors?.Id, ColorWeights = game.Colors?.Weights, Colors = ColorRules.All,
     Mode = game.Puzzle is null ? "endless" : "puzzle", Puzzle = game.Puzzle,
-    game.Phase, game.Paused, game.AcceptsInput, game.IsFinished,
+    game.AnchoredBlocks, game.Phase, game.Paused, game.AcceptsInput, game.IsFinished,
     game.Score, game.Cleared, game.BestChain, game.Locked, game.Level,
     game.Remaining, game.ClearProgress, game.Active, Ghost = game.Ghost(),
     game.Next, Pieces = game.Board.Pieces, game.Wave

@@ -46,6 +46,7 @@ jobs:
       - run: pip install -r AI/requirements-rl.txt
       - run: dotnet build Headless/ChromaDrop.Headless.csproj -c Release --nologo
       - run: python -m unittest discover -s tools -p 'test_neural.py'
+      - run: python -m unittest discover -s tools -p 'test_imitation.py'
 
   desktop:
     name: Desktop (${{ matrix.target }})

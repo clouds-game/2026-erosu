@@ -19,6 +19,7 @@ class PlacementEnv:
 
   def observe(self):
     actions = self.engine.command('placements')['actions']
+    self.actions = actions
     mask = np.array([a['piece'] is not None for a in actions], dtype=bool)
     if not mask.any():
       raise RuntimeError('No legal action at a live decision point')

@@ -92,3 +92,5 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 颜色与奖励调参、固定 AI 生存分布：[颜色压力实验](docs/颜色压力实验.md)。
 
 棋盘状态神经网络与独立生存/得分训练：[CNN 与 PPO](docs/CNN与PPO训练.md)。
+
+教师示范与 PPO 微调对照：[模仿学习实验](docs/模仿学习实验.md)。

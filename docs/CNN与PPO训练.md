@@ -133,3 +133,5 @@ JSON 和轨迹，插件会增加第二套环境桥接。此前已评估 Godot AI
 [实验 JSON](../AI/reports/ppo-initial-experiment.json)。本机检查点为
 `build/ai/ppo-survival.pt`、`build/ai/ppo-score.pt`，未提交二进制权重到仓库。
 生存策略 seed=4000000 的 22 块轨迹已逐响应验证通过；该局零分，保留作为真实结果。
+
+后续固定架构的教师示范、克隆初始化与多种子 PPO 对照见[模仿学习实验](模仿学习实验.md)。

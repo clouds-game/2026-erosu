@@ -23,24 +23,33 @@ def candidates(state):
         while valid(top + 1):
           top += 1
         landing = {(x + left, y + top) for x, y in cells}
-        filled = set(occupied) | landing
-        heights = [state["height"] - min((y for x, y in filled if x == column), default=state["height"])
-          for column in range(state["width"])]
-        holes = sum((x, y) not in filled for x, height in enumerate(heights)
-          for y in range(state["height"] - height, state["height"]))
-        neighbors = {}
-        for x, y in landing:
-          for cell in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
-            if cell in occupied:
-              piece = occupied[cell]
-              neighbors[piece["id"]] = piece["color"]
-        same = sum(color == state["active"]["color"] for color in neighbors.values())
-        features = [sum(heights) / state["width"], holes / state["width"],
-          sum(abs(a - b) for a, b in zip(heights, heights[1:])) / state["width"],
-          state["height"] - top, same, len(neighbors) - same]
+        features = placement_features(state, landing, occupied)
         yield rotation, left, features
     height = max(y for x, y in cells) + 1
     cells = [(height - 1 - y, x) for x, y in cells]
+
+
+def placement_features(state, landing, occupied=None):
+  """Score an actual landing without predicting clears or future pieces."""
+  if occupied is None:
+    occupied = {(c["x"], c["y"]): p for p in state["pieces"] for c in p["cells"]}
+  top = min(y for _, y in landing)
+  filled = set(occupied) | landing
+  heights = [state["height"] - min((y for x, y in filled if x == column), default=state["height"])
+    for column in range(state["width"])]
+  holes = sum((x, y) not in filled for x, height in enumerate(heights)
+    for y in range(state["height"] - height, state["height"]))
+  neighbors = {}
+  for x, y in landing:
+    for cell in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
+      if cell in occupied:
+        piece = occupied[cell]
+        neighbors[piece["id"]] = piece["color"]
+  same = sum(color == state["active"]["color"] for color in neighbors.values())
+  features = [sum(heights) / state["width"], holes / state["width"],
+    sum(abs(a - b) for a, b in zip(heights, heights[1:])) / state["width"],
+    state["height"] - top, same, len(neighbors) - same]
+  return features
 
 
 def choose(state, weights, random):

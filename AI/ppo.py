@@ -60,12 +60,26 @@ def train(args):
   np.random.seed(args.seed)
   torch.manual_seed(args.seed)
   model = ActorCritic()
+  parent = None
+  if args.init_model is not None:
+    model, parent = load_model(args.init_model)
+    for key in ('objective', 'max_pieces', 'color_profile'):
+      if parent[key] != getattr(args, key):
+        raise ValueError(f'Initialization task mismatch: {key}')
+    output_paths = (args.model, args.model.with_suffix('.initial.pt'), args.model.with_suffix('.json'), args.model.with_suffix('.tmp'))
+    if args.init_model.resolve() in {path.resolve() for path in output_paths}:
+      raise ValueError('Initialization and output checkpoints must differ')
+  model.train()
+  torch.manual_seed(args.seed)
   optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
   rng = random.Random(args.seed)
   training_seeds, episodes, history = [], [], []
   initial_metadata = {'observation_version': OBS_VERSION, 'objective': args.objective,
     'color_profile': args.color_profile, 'max_pieces': args.max_pieces,
-    'training_seed': args.seed, 'training_seeds': [], 'steps': 0,
+    'training_seed': args.seed, 'training_seeds': list(parent['training_seeds']) if parent else [],
+    'validation_seeds': list(parent.get('validation_seeds', [])) if parent else [],
+    'initialization_sha256': hashlib.sha256(args.init_model.read_bytes()).hexdigest() if parent else None,
+    'steps': 0,
     'source_sha256': source_hash(), 'engine_sha256': hashlib.sha256(ENGINE.read_bytes()).hexdigest(),
     'torch_version': str(torch.__version__), 'parameters': sum(p.numel() for p in model.parameters())}
   args.model.parent.mkdir(parents=True, exist_ok=True)
@@ -108,11 +122,9 @@ def train(args):
         'recent_mean_score': statistics.mean(x['score'] for x in recent) if recent else None}
       history.append(row)
       print(json.dumps(row), flush=True)
-      metadata = {'observation_version': OBS_VERSION, 'objective': args.objective,
-        'color_profile': args.color_profile, 'max_pieces': args.max_pieces,
-        'training_seed': args.seed, 'training_seeds': training_seeds, 'steps': steps,
-        'source_sha256': source_hash(), 'engine_sha256': hashlib.sha256(ENGINE.read_bytes()).hexdigest(),
-        'torch_version': str(torch.__version__), 'parameters': sum(p.numel() for p in model.parameters())}
+      metadata = {**initial_metadata, 'steps': steps,
+        'training_seeds': sorted(set(initial_metadata['training_seeds']) | set(training_seeds)),
+        'source_sha256': source_hash()}
       args.model.parent.mkdir(parents=True, exist_ok=True)
       temporary = args.model.with_suffix('.tmp')
       torch.save({'metadata': metadata, 'weights': model.state_dict()}, temporary)
@@ -137,8 +149,8 @@ def evaluate(args):
   model, metadata = load_model(args.model)
   torch.manual_seed(args.seed)
   seeds = list(range(args.seed, args.seed + args.episodes))
-  if set(seeds) & set(metadata['training_seeds']):
-    raise ValueError('Evaluation seeds overlap training seeds')
+  if set(seeds) & (set(metadata['training_seeds']) | set(metadata.get('validation_seeds', []))):
+    raise ValueError('Evaluation seeds overlap training or model-selection seeds')
   # Use the trained task horizon and objective: budget is a model input.
   runs = []
   env = PlacementEnv(metadata['objective'], metadata['max_pieces'], metadata['color_profile'])
@@ -189,6 +201,7 @@ def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('mode', choices=['train', 'evaluate', 'play'])
   parser.add_argument('--model', type=Path, required=True)
+  parser.add_argument('--init-model', type=Path, help='Initialize weights from a compatible checkpoint; starts a fresh optimizer')
   parser.add_argument('--objective', choices=['survival', 'score'], default='survival')
   parser.add_argument('--color-profile', choices=['classic', 'rare_six', 'rare_seven'], default='rare_seven')
   parser.add_argument('--max-pieces', type=int, default=300)

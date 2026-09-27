@@ -9,8 +9,7 @@ public static class EnclosedRegions
     {
       var id = nextId;
       while (board.Pieces.Any(piece => piece.Id == id)) id--;
-      board.Add(Piece.Create(id, Shape.Single, colors.SampleColor(random), cell.X, cell.Y)
-        with { Anchored = true });
+      board.Add(Piece.Create(id, Shape.Single, colors.SampleColor(random), cell.X, cell.Y));
       nextId = id - 1;
     }
     return cells.Count;

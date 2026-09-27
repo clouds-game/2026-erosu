@@ -21,16 +21,16 @@ public sealed class GameSession
 
   public Board Board { get; }
   public Piece? Active { get; private set; }
-  public IReadOnlyList<Piece> Next => _next.Take(Puzzle is null ? 3 : _next.Count).ToArray();
+  public IReadOnlyList<Piece> Next => _next.Where(piece => !piece.Anchored).Take(Puzzle is null ? 3 : _next.Count).ToArray();
   public PuzzleLevel? Puzzle { get; }
   public ColorProfile? Colors { get; }
   public bool AnchoredBlocks { get; }
   public bool EnclosedFill { get; }
   public bool EnclosedFillPending { get; private set; }
   public bool AnchoredSpawnPending { get; private set; }
-  public Piece? IncomingAnchor { get; private set; }
-  public IReadOnlyList<Piece> Forecast => IncomingAnchor is { } anchor ? new[] { anchor }.Concat(Next).ToArray() : Next;
-  public int Remaining => _next.Count + (Active is null ? 0 : 1);
+  public Piece? IncomingAnchor => _next.FirstOrDefault(piece => piece.Anchored);
+  public IReadOnlyList<Piece> Forecast => _next.ToArray();
+  public int Remaining => _next.Count(piece => !piece.Anchored) + (Active is null ? 0 : 1);
   public bool IsFinished => Phase is GamePhase.Over or GamePhase.Won;
   public GamePhase Phase { get; private set; } = GamePhase.Falling;
   public bool Paused { get; private set; }
@@ -61,7 +61,6 @@ public sealed class GameSession
     _bag = new PieceBag(random, Colors);
     for (var i = 0; i < 3; i++) _next.Enqueue(_bag.Take());
     Spawn();
-    PlanObstacle();
   }
 
   public GameSession(PuzzleLevel puzzle)
@@ -78,14 +77,13 @@ public sealed class GameSession
   {
     Board = new Board();
     foreach (var piece in source.Board.Pieces) Board.Add(piece);
-    foreach (var piece in source.Next) _next.Enqueue(piece);
+    foreach (var piece in source.Forecast) _next.Enqueue(piece);
     Active = source.Active;
     Colors = source.Colors;
     Puzzle = source.Puzzle;
     AnchoredBlocks = source.AnchoredBlocks;
     EnclosedFill = source.EnclosedFill;
     _lastFillTurn = source._lastFillTurn;
-    IncomingAnchor = source.IncomingAnchor;
     Score = source.Score;
     Cleared = source.Cleared;
     BestChain = source.BestChain;
@@ -270,14 +268,16 @@ public sealed class GameSession
       Active = null;
       Phase = GamePhase.Over;
     }
+    PlanObstacle();
   }
 
   private void PlanObstacle()
   {
     if (_obstacleRandom is null || IsFinished) return;
-    if (_obstacleRandom.NextDouble() < AnchoredObstacles.SpawnProbability)
-      IncomingAnchor = Piece.Create(_nextGeneratedId, Shape.Single,
-        Colors!.SampleColor(_obstacleRandom)) with { Anchored = true };
+    if (_obstacleRandom.NextDouble() >= AnchoredObstacles.SpawnProbability) return;
+    while (Board.Pieces.Any(piece => piece.Id == _nextGeneratedId)) _nextGeneratedId--;
+    _next.Enqueue(Piece.Create(_nextGeneratedId--, Shape.Single,
+      Colors!.SampleColor(_obstacleRandom)) with { Anchored = true });
   }
 
   private void Lock()
@@ -298,14 +298,18 @@ public sealed class GameSession
       if (AnchoredBlocks && Locked > 0 && _lastObstacleTurn != Locked)
       {
         _lastObstacleTurn = Locked;
-        if (IncomingAnchor is { } anchor)
+        // Fixed-square events advance through the same forecast as normal pieces.
+        // Consume them only when they reach the front, after the preceding piece settles.
+        while (_next.TryPeek(out var anchor) && anchor.Anchored)
         {
+          _next.Dequeue();
           if (_obstacleRandom is not null)
-            AnchoredObstacles.TrySpawn(Board, _obstacleRandom, anchor.Color, ref _nextGeneratedId);
-          else AnchoredSpawnPending = true; // Forecast color is visible; position is hidden.
+          {
+            var reservedId = anchor.Id;
+            AnchoredObstacles.TrySpawn(Board, _obstacleRandom, anchor.Color, ref reservedId);
+          }
+          else AnchoredSpawnPending = true; // Color/order are visible; position is hidden.
         }
-        IncomingAnchor = null;
-        PlanObstacle();
       }
       if (EnclosedFill && Locked > 0 && _lastFillTurn != Locked)
       {

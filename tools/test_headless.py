@@ -74,7 +74,8 @@ class HeadlessTests(unittest.TestCase):
       action = max((item for item in actions if item['piece']),
         key=lambda item: min(cell['y'] for cell in item['piece']['cells']))['action']
       preview = self.send({'command': 'afterstates'})['actions'][action]['state']
-      self.assertEqual(current['incoming_anchor'] is not None, preview['anchored_spawn_pending'])
+      due = bool(current['forecast']) and current['forecast'][0].get('anchored', False)
+      self.assertEqual(due, preview['anchored_spawn_pending'])
       self.send({'command': 'place', 'action': action})
       advanced = self.send({'command': 'tick', 'count': 120})['state']
       anchors = [piece for piece in advanced['pieces'] if piece.get('anchored')]

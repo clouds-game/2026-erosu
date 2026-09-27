@@ -70,10 +70,23 @@ var tests = new (string Name, Action Run)[]
         Check(EnclosedRegions.Fill(repeat, new Random(seed), profile, ref repeatId) == 70);
         Check(JsonSerializer.Serialize(board.Pieces) == JsonSerializer.Serialize(repeat.Pieces));
         Check(original.All(piece => board.Pieces.Contains(piece)) && board.FindEnclosedEmptyCells().Count == 0);
-        Check(board.Pieces.Where(piece => piece.Id < 0).All(piece => piece.Anchored &&
+        Check(board.Pieces.Where(piece => piece.Id < 0).All(piece => !piece.Anchored &&
           piece.Shape == Shape.Single && piece.Cells.Count == 1 && profile.Weights[piece.Color] > 0));
         Check(board.Pieces.Select(piece => piece.Id).Distinct().Count() == 80 && id == -71);
       }
+  }),
+  ("Enclosed fill squares fall when their supporting boundary is removed", () =>
+  {
+    var board = BoardOf(
+      Piece.Create(1, Shape.Single, 0, 4, 12), Piece.Create(2, Shape.Single, 1, 3, 13),
+      Piece.Create(3, Shape.Single, 2, 5, 13), Piece.Create(4, Shape.Single, 3, 4, 14));
+    var id = -1;
+    Check(EnclosedRegions.Fill(board, new Random(42), ColorProfile.Default, ref id) == 1);
+    var filled = board.Pieces.Single(piece => piece.Id < 0);
+    Check(!filled.Anchored && filled.Cells.Single() == new Cell(4, 13));
+    board.Remove(board.Pieces.Where(piece => piece.Id > 0).ToArray());
+    while (board.StepGravity()) { }
+    Check(board.Pieces.Single().Cells.Single() == new Cell(4, 17));
   }),
   ("Enclosed fill resolves matches once per turn and previews stop before random colors", () =>
   {
@@ -180,6 +193,8 @@ var tests = new (string Name, Action Run)[]
       var random = new TrialRandom(42, trial);
       var game = new GameSession(random, anchoredBlocks: true);
       Check(random.Trials == 1 && game.Board.Pieces.Count == 3);
+      Check(game.Forecast.Take(3).SequenceEqual(game.Next));
+      if (trial == 0) Check(game.Forecast[^1].Anchored);
       for (var turn = 1; turn <= 5; turn++)
       {
         var action = Enumerable.Range(0, 40).Where(action => game.Placement(action) is not null)
@@ -187,15 +202,21 @@ var tests = new (string Name, Action Run)[]
         var before = JsonSerializer.Serialize(game.Board.Pieces);
         var preview = game.PreviewPlacement(action)!;
         Check(JsonSerializer.Serialize(game.Board.Pieces) == before && random.Trials == turn);
-        Check(preview.AnchoredSpawnPending == (trial == 0));
+        Check(preview.AnchoredSpawnPending == (trial == 0 && turn >= 4));
         Check((game.IncomingAnchor is not null) == (trial == 0));
-        if (game.IncomingAnchor is { } incoming) Check(game.Forecast[0] == incoming && incoming.Cells.Count == 1);
+        if (game.IncomingAnchor is { } incoming) Check(game.Forecast.Contains(incoming) && incoming.Cells.Count == 1);
+        var queued = game.Forecast.ToArray();
+        Check(queued.Select(piece => piece.Id).Distinct().Count() == queued.Length);
         game.Place(action);
         for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
+        Check(game.Active!.Id == queued.First(piece => !piece.Anchored).Id && !game.Active.Anchored);
+        Check(game.Forecast.Take(queued.Length - (turn >= 4 && trial == 0 ? 2 : 1))
+          .Select(piece => piece.Id).SequenceEqual(queued.Skip(turn >= 4 && trial == 0 ? 2 : 1).Select(piece => piece.Id)));
+        if (trial == 0) Check(game.Forecast[^1].Anchored);
         Check(game.Locked == turn && !game.AnchoredSpawnPending && random.Trials == turn + 1);
         Check(game.Board.FindMatches().Count == 0);
         var generated = game.Board.Pieces.Where(piece => !preview.Board.Pieces.Any(other => other.Id == piece.Id)).ToArray();
-        Check(generated.Length == (trial == 0 ? 1 : 0));
+        Check(generated.Length == (trial == 0 && turn >= 4 ? 1 : 0));
         Check(generated.All(piece => piece.Anchored && piece.Cells.Count == 1));
         game.SetPaused(true);
         game.Advance(100);
@@ -203,6 +224,21 @@ var tests = new (string Name, Action Run)[]
         game.SetPaused(false);
       }
     }
+  }),
+  ("Queued fixed squares reserve identities independently of enclosed fill", () =>
+  {
+    var board = new Board();
+    for (var x = 0; x < Board.Width; x++)
+      board.Add(Piece.Create(x + 100, Shape.Single, x % 7, x, 10) with { Anchored = true });
+    var game = new GameSession(new TrialRandom(42, 0), board, anchoredBlocks: true, enclosedFill: true);
+    var incoming = game.IncomingAnchor!;
+    game.Place(0);
+    for (var tick = 0; tick < 3600 && game.Phase is GamePhase.Clearing or GamePhase.Settling; tick++) game.Advance(1.0 / 60);
+    Check(game.Board.Pieces.All(piece => piece.Id != incoming.Id));
+    Check(game.Forecast.Contains(incoming));
+    var ids = game.Board.Pieces.Concat(game.Forecast).Select(piece => piece.Id).ToArray();
+    Check(ids.Distinct().Count() == ids.Length);
+    Check(game.Board.Pieces.Any(piece => piece.Id < incoming.Id && !piece.Anchored));
   }),
   ("Obstacle spawning skips full boards and rejects automatic matches", () =>
   {

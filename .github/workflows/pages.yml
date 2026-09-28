@@ -63,7 +63,9 @@ jobs:
         run: dotnet run --project game/Tests/ChromaDrop.Tests.csproj -c Release
       - run: npm ci --prefix game/Web --ignore-scripts
       - run: npm run build --prefix game/Web
-      - run: python3 -m unittest discover -s game/tools -p 'test_web_interop.py'
+      - name: Test browser input adapter
+        if: hashFiles('game/tools/test_web_interop.py') != ''
+        run: python3 -m unittest discover -s game/tools -p 'test_web_interop.py'
       - run: dotnet publish game/Web/ChromaDrop.Web.csproj -c Release -o build/web
       - name: Set this branch's Pages base path
         env:

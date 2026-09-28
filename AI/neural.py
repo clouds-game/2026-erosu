@@ -1,4 +1,4 @@
-"""九通道整块棋盘编码和小型 CNN actor-critic。"""
+"""整块棋盘编码，以及支持当前颜色条件输入的小型 CNN actor-critic。"""
 
 import numpy as np
 import torch
@@ -58,11 +58,12 @@ def encode(state, objective, remaining_fraction, observation_version=OBS_VERSION
 
 
 class ActorCritic(nn.Module):
-  def __init__(self, observation_version=OBS_VERSION):
+  def __init__(self, observation_version=OBS_VERSION, color_conditioned=False):
     super().__init__()
     self.observation_version = observation_version
+    self.color_conditioned = color_conditioned
     channels, meta_size = observation_size(observation_version)
-    self.board = nn.Sequential(nn.Conv2d(channels, 16, 3, padding=1), nn.ReLU(),
+    self.board = nn.Sequential(nn.Conv2d(channels + int(color_conditioned), 16, 3, padding=1), nn.ReLU(),
       nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(),
       nn.Conv2d(32, 32, 3, padding=1), nn.ReLU(), nn.Flatten(),
       nn.Linear(32 * 18 * 10, 128), nn.ReLU())
@@ -72,6 +73,9 @@ class ActorCritic(nn.Module):
     self.value = nn.Linear(128, 1)
 
   def forward(self, board, metadata, mask):
+    if self.color_conditioned:
+      matching = (board[:, :7] * metadata[:, 7:14, None, None]).sum(1, keepdim=True)
+      board = torch.cat([board, matching], dim=1)
     features = self.shared(torch.cat([self.board(board), self.metadata(metadata)], dim=-1))
     logits = self.policy(features).masked_fill(~mask, -1e9)
     return Categorical(logits=logits), self.value(features).squeeze(-1)
@@ -81,16 +85,36 @@ def upgrade(model):
   """扩展输入并零初始化新增权重，保留旧策略输出。"""
   if model.observation_version == FEATURE_OBS_VERSION:
     return model
-  expanded = ActorCritic(FEATURE_OBS_VERSION)
+  expanded = ActorCritic(FEATURE_OBS_VERSION, model.color_conditioned)
   weights = expanded.state_dict()
   for key, value in model.state_dict().items():
     if key == 'board.0.weight':
       weights[key].zero_()
-      weights[key][:, :9] = value
+      weights[key][:, :9] = value[:, :9]
+      if model.color_conditioned:
+        weights[key][:, -1] = value[:, -1]
     elif key == 'metadata.0.weight':
       weights[key].zero_()
       weights[key][:, :META_SIZE] = value
     else:
       weights[key] = value
   expanded.load_state_dict(weights)
+  expanded.train(model.training)
+  return expanded
+
+
+def upgrade_color_conditioning(model):
+  """增加当前颜色匹配平面；新增卷积权重为零，迁移时保持原输出。"""
+  if model.color_conditioned:
+    return model
+  expanded = ActorCritic(model.observation_version, color_conditioned=True)
+  weights = expanded.state_dict()
+  for key, value in model.state_dict().items():
+    if key == 'board.0.weight':
+      weights[key].zero_()
+      weights[key][:, :-1] = value
+    else:
+      weights[key] = value
+  expanded.load_state_dict(weights)
+  expanded.train(model.training)
   return expanded

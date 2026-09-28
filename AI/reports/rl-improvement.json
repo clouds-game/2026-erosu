@@ -1,0 +1,5497 @@
+{
+  "version": 1,
+  "experiment": "multi_mode_rl_improvement",
+  "complete": true,
+  "engine_sha256": "6bd8a88e9570fa49790f0dd7cc87a99bc9015b45ed41ccbef44176a08ea3a8cf",
+  "objective": "survival",
+  "max_pieces": 300,
+  "action_selection": "greedy",
+  "game_modes": [
+    {
+      "color_profile": "classic",
+      "anchored_blocks": false,
+      "enclosed_fill": false
+    },
+    {
+      "color_profile": "classic",
+      "anchored_blocks": false,
+      "enclosed_fill": true
+    },
+    {
+      "color_profile": "classic",
+      "anchored_blocks": true,
+      "enclosed_fill": false
+    },
+    {
+      "color_profile": "classic",
+      "anchored_blocks": true,
+      "enclosed_fill": true
+    },
+    {
+      "color_profile": "rare_six",
+      "anchored_blocks": false,
+      "enclosed_fill": false
+    },
+    {
+      "color_profile": "rare_six",
+      "anchored_blocks": false,
+      "enclosed_fill": true
+    },
+    {
+      "color_profile": "rare_six",
+      "anchored_blocks": true,
+      "enclosed_fill": false
+    },
+    {
+      "color_profile": "rare_six",
+      "anchored_blocks": true,
+      "enclosed_fill": true
+    },
+    {
+      "color_profile": "rare_seven",
+      "anchored_blocks": false,
+      "enclosed_fill": false
+    },
+    {
+      "color_profile": "rare_seven",
+      "anchored_blocks": false,
+      "enclosed_fill": true
+    },
+    {
+      "color_profile": "rare_seven",
+      "anchored_blocks": true,
+      "enclosed_fill": false
+    },
+    {
+      "color_profile": "rare_seven",
+      "anchored_blocks": true,
+      "enclosed_fill": true
+    }
+  ],
+  "selected_candidate": "conditioned",
+  "selected_model_path": "build/ai/rl-improvement/selected.pt",
+  "selected_model_sha256": "01c17a265ef9545ebe6e752c4cd29013da09107279c0a6feb5a3a9a0a2034262",
+  "selection_sha256": "8f0cb29bb65bf946349dec388f7af7a1ba21be5dd4d35359f8d97855f9fd92c6",
+  "selection_provenance": {
+    "method": "highest_macro_mean_locked_on_development_seeds",
+    "development_seeds": [
+      11000000,
+      11000001,
+      11000002,
+      11000003,
+      11000004,
+      11000005,
+      11000006,
+      11000007
+    ],
+    "tie_break": "candidate_order_baseline_first",
+    "candidate_order": [
+      "baseline",
+      "control",
+      "balanced",
+      "imitation",
+      "guided",
+      "conditioned",
+      "imitation-long",
+      "conditioned-long",
+      "refined",
+      "refined-guided"
+    ],
+    "candidate_hashes": {
+      "baseline": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+      "control": "f36a0003bb9e1ff8f19ea0268e57739d56895865a1e53ee82ef13a61b9442f14",
+      "balanced": "f8e1e1959f8d9db879c8bddac8dcd37765c4a054477d25a19cd71bc48cae2055",
+      "imitation": "eb2304ed472a91b26767c13567ed61daedf2d99bf398441401dcc1c13f800c55",
+      "guided": "3d668c356ac7fa9facb296dc9eb81cbbd783c53affaf76c1ef235af5134c45a2",
+      "conditioned": "1fc18e4de643274e6ca68b9de4f9d17eaa60708bf638fb10c8650ab6a4d3a73f",
+      "imitation-long": "f5c38a23f3ee5a120040f9721a3fae06198ca9ac46e2493ff14dade9baf3a9fd",
+      "conditioned-long": "4c0a2ffa6f3f2d1f1c23a30c11ba1d5e860ecf49d1d4c3176a9319dab3ca2c25",
+      "refined": "5b35d2396d6d09cfc84a06afe5f6ebfd100ff7f4a5852e6db572b734930aff23",
+      "refined-guided": "97c35e6cba54ae059a4c8a7b96dbcfd79adb12fac04202f8cdfc1a896f4b689a"
+    },
+    "development_report_hashes": {
+      "baseline": "2ae9c8ca836e201749982ed8555d24fc435251f4ac5ce5ef809068d243c339fa",
+      "control": "60b59721799b07939656d4ad9ecc4172c04e0a7f737b9ccabe6d73f5b30b81a4",
+      "balanced": "2ffe4c9daac1faa5d0eff4383b69ebcbf539856ae86a5176914eabaaf95fea5a",
+      "imitation": "792b35c7328a4f591ed468708c30d2a6993af5d4eb0f32695c0701bd725ceb9d",
+      "guided": "3e92e1d58da830af6fcc29ac2820968be63a524fb1da9422835e05e5290b61ec",
+      "conditioned": "c17b51b7ba2ac1cc8161bd7ce227fbf7f031bfbc8d54d3ae448a8317ef3b3059",
+      "imitation-long": "f25cb228a06191013f04adeed37afd58580ae9116db7190c0233db78df31d5be",
+      "conditioned-long": "930e45b6d50eeef470af475493026de622ff9e0447d30a4d78cf285c4ffc8500",
+      "refined": "ee93afd9f2543fe654ebd9908c9139e50a4d1218816eccffe0f404aeea3b27a0",
+      "refined-guided": "c65a3c51348fe80460ef1a197164fe619538de624bc2189303e59e41d872e8ac"
+    },
+    "selected_candidate": "conditioned",
+    "selected_parent_sha256": "1fc18e4de643274e6ca68b9de4f9d17eaa60708bf638fb10c8650ab6a4d3a73f"
+  },
+  "development": {
+    "purpose": "adaptive_candidate_selection_only",
+    "seeds": [
+      11000000,
+      11000001,
+      11000002,
+      11000003,
+      11000004,
+      11000005,
+      11000006,
+      11000007
+    ],
+    "episodes_per_mode": 8,
+    "candidates": {
+      "baseline": {
+        "model_path": "build/ai/multi-mode-20260928/policy.pt",
+        "model_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+        "dev_report_path": "build/ai/rl-improvement/baseline-dev.json",
+        "dev_report_sha256": "2ae9c8ca836e201749982ed8555d24fc435251f4ac5ce5ef809068d243c339fa",
+        "summary": {
+          "mean_locked": 45.84375,
+          "median_locked": 43.0,
+          "mean_score": 43610.416666666664,
+          "capped": 0,
+          "locked_p10": 28.0,
+          "locked_p90": 65.0,
+          "reached_100": 2,
+          "reached_150": 0
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 40.5,
+            "median_locked": 41.5,
+            "mean_score": 12325,
+            "capped": 0,
+            "locked_p10": 33.7,
+            "locked_p90": 48.6,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 47.5,
+            "median_locked": 47.0,
+            "mean_score": 40812.5,
+            "capped": 0,
+            "locked_p10": 35.0,
+            "locked_p90": 59.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored": {
+            "mean_locked": 30,
+            "median_locked": 28.0,
+            "mean_score": 7325,
+            "capped": 0,
+            "locked_p10": 23.4,
+            "locked_p90": 39.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 75.75,
+            "median_locked": 71.0,
+            "mean_score": 155475,
+            "capped": 0,
+            "locked_p10": 42.6,
+            "locked_p90": 119.5,
+            "reached_100": 2,
+            "reached_150": 0
+          },
+          "rare_six": {
+            "mean_locked": 37.25,
+            "median_locked": 37.0,
+            "mean_score": 9525,
+            "capped": 0,
+            "locked_p10": 26.1,
+            "locked_p90": 47.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 59.875,
+            "median_locked": 57.0,
+            "mean_score": 77062.5,
+            "capped": 0,
+            "locked_p10": 48.4,
+            "locked_p90": 71.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored": {
+            "mean_locked": 43.25,
+            "median_locked": 44.0,
+            "mean_score": 22987.5,
+            "capped": 0,
+            "locked_p10": 28.7,
+            "locked_p90": 57.5,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 53,
+            "median_locked": 51.5,
+            "mean_score": 77075,
+            "capped": 0,
+            "locked_p10": 39.4,
+            "locked_p90": 69.5,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 36.375,
+            "median_locked": 36.0,
+            "mean_score": 6812.5,
+            "capped": 0,
+            "locked_p10": 28.7,
+            "locked_p90": 44.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 50.25,
+            "median_locked": 48.5,
+            "mean_score": 43925,
+            "capped": 0,
+            "locked_p10": 44.5,
+            "locked_p90": 59.1,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 31.5,
+            "median_locked": 32.0,
+            "mean_score": 5925,
+            "capped": 0,
+            "locked_p10": 23.5,
+            "locked_p90": 39.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 44.875,
+            "median_locked": 45.0,
+            "mean_score": 64075,
+            "capped": 0,
+            "locked_p10": 38.4,
+            "locked_p90": 51.1,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "feature_conditioned_ppo",
+          "training_seed": 45,
+          "parameters": 795049,
+          "color_conditioned": false,
+          "checkpoint_ppo_steps": 16384,
+          "additional_ppo_steps": 0,
+          "imitation_examples": 0,
+          "imitation_epochs": 0,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "b303ac63dd77f1c93eece5443a393ee65d8b4708b577620fef82439947a1d6ab",
+          "dataset_sha256": null
+        }
+      },
+      "control": {
+        "model_path": "build/ai/rl-improvement/control.pt",
+        "model_sha256": "f36a0003bb9e1ff8f19ea0268e57739d56895865a1e53ee82ef13a61b9442f14",
+        "dev_report_path": "build/ai/rl-improvement/control-dev.json",
+        "dev_report_sha256": "60b59721799b07939656d4ad9ecc4172c04e0a7f737b9ccabe6d73f5b30b81a4",
+        "summary": {
+          "mean_locked": 39.875,
+          "median_locked": 36.0,
+          "mean_score": 33597.916666666664,
+          "capped": 0,
+          "locked_p10": 26.0,
+          "locked_p90": 59.5,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 34.75,
+            "median_locked": 33.5,
+            "mean_score": 6000,
+            "capped": 0,
+            "locked_p10": 29.0,
+            "locked_p90": 42.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 49.5,
+            "median_locked": 42.5,
+            "mean_score": 56075,
+            "capped": 0,
+            "locked_p10": 32.8,
+            "locked_p90": 79.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored": {
+            "mean_locked": 28.75,
+            "median_locked": 26.5,
+            "mean_score": 8687.5,
+            "capped": 0,
+            "locked_p10": 24.0,
+            "locked_p90": 37.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 47.5,
+            "median_locked": 45.0,
+            "mean_score": 77400,
+            "capped": 0,
+            "locked_p10": 28.7,
+            "locked_p90": 66.6,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six": {
+            "mean_locked": 38.875,
+            "median_locked": 39.5,
+            "mean_score": 9912.5,
+            "capped": 0,
+            "locked_p10": 30.0,
+            "locked_p90": 47.1,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 59.25,
+            "median_locked": 64.5,
+            "mean_score": 89150,
+            "capped": 0,
+            "locked_p10": 36.5,
+            "locked_p90": 74.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored": {
+            "mean_locked": 30.25,
+            "median_locked": 30.5,
+            "mean_score": 6875,
+            "capped": 0,
+            "locked_p10": 24.7,
+            "locked_p90": 35.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 49.75,
+            "median_locked": 44.0,
+            "mean_score": 77437.5,
+            "capped": 0,
+            "locked_p10": 33.5,
+            "locked_p90": 68.1,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 33.875,
+            "median_locked": 36.0,
+            "mean_score": 5837.5,
+            "capped": 0,
+            "locked_p10": 30.1,
+            "locked_p90": 36.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 37.75,
+            "median_locked": 38.5,
+            "mean_score": 21962.5,
+            "capped": 0,
+            "locked_p10": 29.1,
+            "locked_p90": 45.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 29.125,
+            "median_locked": 28.0,
+            "mean_score": 5300,
+            "capped": 0,
+            "locked_p10": 24.5,
+            "locked_p90": 35.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 39.125,
+            "median_locked": 40.0,
+            "mean_score": 38537.5,
+            "capped": 0,
+            "locked_p10": 25.4,
+            "locked_p90": 49.6,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "feature_conditioned_ppo",
+          "training_seed": 46,
+          "parameters": 795049,
+          "color_conditioned": false,
+          "checkpoint_ppo_steps": 61440,
+          "additional_ppo_steps": 61440,
+          "imitation_examples": 0,
+          "imitation_epochs": 0,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+          "dataset_sha256": null
+        }
+      },
+      "balanced": {
+        "model_path": "build/ai/rl-improvement/balanced.pt",
+        "model_sha256": "f8e1e1959f8d9db879c8bddac8dcd37765c4a054477d25a19cd71bc48cae2055",
+        "dev_report_path": "build/ai/rl-improvement/balanced-dev.json",
+        "dev_report_sha256": "2ffe4c9daac1faa5d0eff4383b69ebcbf539856ae86a5176914eabaaf95fea5a",
+        "summary": {
+          "mean_locked": 48.0625,
+          "median_locked": 41.0,
+          "mean_score": 46229.166666666664,
+          "capped": 0,
+          "locked_p10": 30.0,
+          "locked_p90": 70.5,
+          "reached_100": 3,
+          "reached_150": 0
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 43.75,
+            "median_locked": 47.0,
+            "mean_score": 10012.5,
+            "capped": 0,
+            "locked_p10": 30.7,
+            "locked_p90": 54.699999999999996,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 76.75,
+            "median_locked": 71.0,
+            "mean_score": 133812.5,
+            "capped": 0,
+            "locked_p10": 60.1,
+            "locked_p90": 102.7,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "classic_anchored": {
+            "mean_locked": 36.75,
+            "median_locked": 36.5,
+            "mean_score": 9250,
+            "capped": 0,
+            "locked_p10": 27.1,
+            "locked_p90": 46.699999999999996,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 58,
+            "median_locked": 63.0,
+            "mean_score": 92787.5,
+            "capped": 0,
+            "locked_p10": 37.9,
+            "locked_p90": 75.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six": {
+            "mean_locked": 38,
+            "median_locked": 38.5,
+            "mean_score": 7150,
+            "capped": 0,
+            "locked_p10": 32.8,
+            "locked_p90": 43.1,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 67,
+            "median_locked": 64.5,
+            "mean_score": 89550,
+            "capped": 0,
+            "locked_p10": 52.400000000000006,
+            "locked_p90": 88.8,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_six_anchored": {
+            "mean_locked": 38.5,
+            "median_locked": 39.0,
+            "mean_score": 10437.5,
+            "capped": 0,
+            "locked_p10": 31.8,
+            "locked_p90": 46.6,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 57.375,
+            "median_locked": 57.0,
+            "mean_score": 111012.5,
+            "capped": 0,
+            "locked_p10": 29.4,
+            "locked_p90": 84.99999999999999,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 37.5,
+            "median_locked": 35.0,
+            "mean_score": 5412.5,
+            "capped": 0,
+            "locked_p10": 32.7,
+            "locked_p90": 45.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 52.75,
+            "median_locked": 55.5,
+            "mean_score": 46650,
+            "capped": 0,
+            "locked_p10": 43.2,
+            "locked_p90": 60.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 31.5,
+            "median_locked": 30.5,
+            "mean_score": 4912.5,
+            "capped": 0,
+            "locked_p10": 29.0,
+            "locked_p90": 35.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 38.875,
+            "median_locked": 39.0,
+            "mean_score": 33762.5,
+            "capped": 0,
+            "locked_p10": 32.4,
+            "locked_p90": 47.3,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "balanced_ppo",
+          "training_seed": 46,
+          "parameters": 795049,
+          "color_conditioned": false,
+          "checkpoint_ppo_steps": 61440,
+          "additional_ppo_steps": 61440,
+          "imitation_examples": 0,
+          "imitation_epochs": 0,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+          "dataset_sha256": null
+        }
+      },
+      "imitation": {
+        "model_path": "build/ai/rl-improvement/imitation.pt",
+        "model_sha256": "eb2304ed472a91b26767c13567ed61daedf2d99bf398441401dcc1c13f800c55",
+        "dev_report_path": "build/ai/rl-improvement/imitation-dev.json",
+        "dev_report_sha256": "792b35c7328a4f591ed468708c30d2a6993af5d4eb0f32695c0701bd725ceb9d",
+        "summary": {
+          "mean_locked": 44.90625,
+          "median_locked": 42.0,
+          "mean_score": 44050,
+          "capped": 0,
+          "locked_p10": 30.5,
+          "locked_p90": 56.5,
+          "reached_100": 3,
+          "reached_150": 0
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 40.75,
+            "median_locked": 41.0,
+            "mean_score": 10112.5,
+            "capped": 0,
+            "locked_p10": 33.2,
+            "locked_p90": 47.8,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 71.25,
+            "median_locked": 65.0,
+            "mean_score": 144625,
+            "capped": 0,
+            "locked_p10": 46.5,
+            "locked_p90": 105.7,
+            "reached_100": 2,
+            "reached_150": 0
+          },
+          "classic_anchored": {
+            "mean_locked": 34,
+            "median_locked": 32.5,
+            "mean_score": 6562.5,
+            "capped": 0,
+            "locked_p10": 26.1,
+            "locked_p90": 40.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 50,
+            "median_locked": 47.0,
+            "mean_score": 88900,
+            "capped": 0,
+            "locked_p10": 29.5,
+            "locked_p90": 71.39999999999999,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_six": {
+            "mean_locked": 41.125,
+            "median_locked": 41.0,
+            "mean_score": 9912.5,
+            "capped": 0,
+            "locked_p10": 34.8,
+            "locked_p90": 47.5,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 51.125,
+            "median_locked": 50.0,
+            "mean_score": 57650,
+            "capped": 0,
+            "locked_p10": 41.0,
+            "locked_p90": 59.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored": {
+            "mean_locked": 39.75,
+            "median_locked": 40.0,
+            "mean_score": 13012.5,
+            "capped": 0,
+            "locked_p10": 32.7,
+            "locked_p90": 45.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 48.25,
+            "median_locked": 46.5,
+            "mean_score": 60812.5,
+            "capped": 0,
+            "locked_p10": 35.4,
+            "locked_p90": 62.599999999999994,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 37,
+            "median_locked": 35.5,
+            "mean_score": 6950,
+            "capped": 0,
+            "locked_p10": 31.1,
+            "locked_p90": 42.4,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 47,
+            "median_locked": 48.5,
+            "mean_score": 40025,
+            "capped": 0,
+            "locked_p10": 40.5,
+            "locked_p90": 51.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 31.625,
+            "median_locked": 29.5,
+            "mean_score": 5387.5,
+            "capped": 0,
+            "locked_p10": 26.7,
+            "locked_p90": 37.5,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 47,
+            "median_locked": 44.5,
+            "mean_score": 84650,
+            "capped": 0,
+            "locked_p10": 34.8,
+            "locked_p90": 61.099999999999994,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "mixed_behavior_cloning",
+          "training_seed": 42,
+          "parameters": 795049,
+          "color_conditioned": false,
+          "checkpoint_ppo_steps": 0,
+          "additional_ppo_steps": 0,
+          "imitation_examples": 12288,
+          "imitation_epochs": 10,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      },
+      "guided": {
+        "model_path": "build/ai/rl-improvement/guided.pt",
+        "model_sha256": "3d668c356ac7fa9facb296dc9eb81cbbd783c53affaf76c1ef235af5134c45a2",
+        "dev_report_path": "build/ai/rl-improvement/guided-dev.json",
+        "dev_report_sha256": "3e92e1d58da830af6fcc29ac2820968be63a524fb1da9422835e05e5290b61ec",
+        "summary": {
+          "mean_locked": 48.885416666666664,
+          "median_locked": 45.0,
+          "mean_score": 47919.791666666664,
+          "capped": 0,
+          "locked_p10": 32.5,
+          "locked_p90": 69.5,
+          "reached_100": 2,
+          "reached_150": 1
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 40.125,
+            "median_locked": 38.5,
+            "mean_score": 8200,
+            "capped": 0,
+            "locked_p10": 32.4,
+            "locked_p90": 48.199999999999996,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 74.75,
+            "median_locked": 56.5,
+            "mean_score": 128462.5,
+            "capped": 0,
+            "locked_p10": 48.8,
+            "locked_p90": 124.8,
+            "reached_100": 2,
+            "reached_150": 1
+          },
+          "classic_anchored": {
+            "mean_locked": 38.875,
+            "median_locked": 35.0,
+            "mean_score": 12950,
+            "capped": 0,
+            "locked_p10": 31.1,
+            "locked_p90": 48.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 60.375,
+            "median_locked": 56.5,
+            "mean_score": 99237.5,
+            "capped": 0,
+            "locked_p10": 41.7,
+            "locked_p90": 86.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six": {
+            "mean_locked": 43.625,
+            "median_locked": 42.5,
+            "mean_score": 11075,
+            "capped": 0,
+            "locked_p10": 36.1,
+            "locked_p90": 53.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 55.375,
+            "median_locked": 52.0,
+            "mean_score": 61937.5,
+            "capped": 0,
+            "locked_p10": 46.7,
+            "locked_p90": 70.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored": {
+            "mean_locked": 37,
+            "median_locked": 37.0,
+            "mean_score": 9962.5,
+            "capped": 0,
+            "locked_p10": 26.4,
+            "locked_p90": 46.8,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 55.625,
+            "median_locked": 53.0,
+            "mean_score": 88987.5,
+            "capped": 0,
+            "locked_p10": 43.7,
+            "locked_p90": 69.7,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 41.625,
+            "median_locked": 41.5,
+            "mean_score": 9775,
+            "capped": 0,
+            "locked_p10": 34.8,
+            "locked_p90": 48.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 54,
+            "median_locked": 52.0,
+            "mean_score": 57762.5,
+            "capped": 0,
+            "locked_p10": 42.0,
+            "locked_p90": 64.8,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 32.125,
+            "median_locked": 33.0,
+            "mean_score": 4275,
+            "capped": 0,
+            "locked_p10": 28.1,
+            "locked_p90": 35.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 53.125,
+            "median_locked": 56.0,
+            "mean_score": 82412.5,
+            "capped": 0,
+            "locked_p10": 43.2,
+            "locked_p90": 60.3,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "guided_balanced_ppo",
+          "training_seed": 46,
+          "parameters": 795049,
+          "color_conditioned": false,
+          "checkpoint_ppo_steps": 61440,
+          "additional_ppo_steps": 61440,
+          "imitation_examples": 12288,
+          "imitation_epochs": 10,
+          "on_policy_teacher_labels": 61440,
+          "teacher_coef": 0.5,
+          "initialization_sha256": "eb2304ed472a91b26767c13567ed61daedf2d99bf398441401dcc1c13f800c55",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      },
+      "conditioned": {
+        "model_path": "build/ai/rl-improvement/conditioned.pt",
+        "model_sha256": "1fc18e4de643274e6ca68b9de4f9d17eaa60708bf638fb10c8650ab6a4d3a73f",
+        "dev_report_path": "build/ai/rl-improvement/conditioned-dev.json",
+        "dev_report_sha256": "c17b51b7ba2ac1cc8161bd7ce227fbf7f031bfbc8d54d3ae448a8317ef3b3059",
+        "summary": {
+          "mean_locked": 102.25,
+          "median_locked": 83.0,
+          "mean_score": 146353.125,
+          "capped": 4,
+          "locked_p10": 48.0,
+          "locked_p90": 178.0,
+          "reached_100": 33,
+          "reached_150": 17
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 107.625,
+            "median_locked": 97.5,
+            "mean_score": 72212.5,
+            "capped": 0,
+            "locked_p10": 62.0,
+            "locked_p90": 152.7,
+            "reached_100": 4,
+            "reached_150": 1
+          },
+          "classic_fill": {
+            "mean_locked": 231.25,
+            "median_locked": 255.5,
+            "mean_score": 523100,
+            "capped": 4,
+            "locked_p10": 119.9,
+            "locked_p90": 300.0,
+            "reached_100": 8,
+            "reached_150": 6
+          },
+          "classic_anchored": {
+            "mean_locked": 99.75,
+            "median_locked": 87.5,
+            "mean_score": 73525,
+            "capped": 0,
+            "locked_p10": 36.0,
+            "locked_p90": 174.4,
+            "reached_100": 3,
+            "reached_150": 2
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 123.25,
+            "median_locked": 119.5,
+            "mean_score": 293750,
+            "capped": 0,
+            "locked_p10": 80.3,
+            "locked_p90": 174.0,
+            "reached_100": 5,
+            "reached_150": 2
+          },
+          "rare_six": {
+            "mean_locked": 111.125,
+            "median_locked": 125.0,
+            "mean_score": 75250,
+            "capped": 0,
+            "locked_p10": 62.0,
+            "locked_p90": 155.9,
+            "reached_100": 5,
+            "reached_150": 1
+          },
+          "rare_six_fill": {
+            "mean_locked": 122,
+            "median_locked": 124.0,
+            "mean_score": 230750,
+            "capped": 0,
+            "locked_p10": 76.7,
+            "locked_p90": 171.1,
+            "reached_100": 5,
+            "reached_150": 3
+          },
+          "rare_six_anchored": {
+            "mean_locked": 82.75,
+            "median_locked": 80.5,
+            "mean_score": 62412.5,
+            "capped": 0,
+            "locked_p10": 52.2,
+            "locked_p90": 114.79999999999998,
+            "reached_100": 1,
+            "reached_150": 1
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 88.75,
+            "median_locked": 89.0,
+            "mean_score": 162600,
+            "capped": 0,
+            "locked_p10": 54.6,
+            "locked_p90": 121.19999999999999,
+            "reached_100": 1,
+            "reached_150": 1
+          },
+          "rare_seven": {
+            "mean_locked": 75.75,
+            "median_locked": 77.5,
+            "mean_score": 43025,
+            "capped": 0,
+            "locked_p10": 61.4,
+            "locked_p90": 87.6,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 72.125,
+            "median_locked": 73.5,
+            "mean_score": 99912.5,
+            "capped": 0,
+            "locked_p10": 56.5,
+            "locked_p90": 85.7,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 55.875,
+            "median_locked": 63.5,
+            "mean_score": 32525,
+            "capped": 0,
+            "locked_p10": 36.5,
+            "locked_p90": 68.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 56.75,
+            "median_locked": 55.5,
+            "mean_score": 87175,
+            "capped": 0,
+            "locked_p10": 45.1,
+            "locked_p90": 70.9,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "mixed_behavior_cloning",
+          "training_seed": 42,
+          "parameters": 795193,
+          "color_conditioned": true,
+          "checkpoint_ppo_steps": 0,
+          "additional_ppo_steps": 0,
+          "imitation_examples": 12288,
+          "imitation_epochs": 10,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      },
+      "imitation-long": {
+        "model_path": "build/ai/rl-improvement/imitation-long.pt",
+        "model_sha256": "f5c38a23f3ee5a120040f9721a3fae06198ca9ac46e2493ff14dade9baf3a9fd",
+        "dev_report_path": "build/ai/rl-improvement/imitation-long-dev.json",
+        "dev_report_sha256": "f25cb228a06191013f04adeed37afd58580ae9116db7190c0233db78df31d5be",
+        "summary": {
+          "mean_locked": 43.9375,
+          "median_locked": 41.0,
+          "mean_score": 39001.041666666664,
+          "capped": 0,
+          "locked_p10": 30.5,
+          "locked_p90": 60.0,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 40.875,
+            "median_locked": 42.0,
+            "mean_score": 9525,
+            "capped": 0,
+            "locked_p10": 33.4,
+            "locked_p90": 47.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 57.875,
+            "median_locked": 51.5,
+            "mean_score": 97200,
+            "capped": 0,
+            "locked_p10": 39.2,
+            "locked_p90": 86.1,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored": {
+            "mean_locked": 36.625,
+            "median_locked": 38.5,
+            "mean_score": 10500,
+            "capped": 0,
+            "locked_p10": 26.6,
+            "locked_p90": 44.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 51.375,
+            "median_locked": 53.5,
+            "mean_score": 86475,
+            "capped": 0,
+            "locked_p10": 31.8,
+            "locked_p90": 75.8,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six": {
+            "mean_locked": 37,
+            "median_locked": 34.0,
+            "mean_score": 7675,
+            "capped": 0,
+            "locked_p10": 32.1,
+            "locked_p90": 45.6,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 57.25,
+            "median_locked": 53.5,
+            "mean_score": 72587.5,
+            "capped": 0,
+            "locked_p10": 47.2,
+            "locked_p90": 69.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored": {
+            "mean_locked": 41,
+            "median_locked": 38.5,
+            "mean_score": 16825,
+            "capped": 0,
+            "locked_p10": 29.0,
+            "locked_p90": 55.699999999999996,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 50.875,
+            "median_locked": 49.5,
+            "mean_score": 77275,
+            "capped": 0,
+            "locked_p10": 43.0,
+            "locked_p90": 59.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 38.25,
+            "median_locked": 39.5,
+            "mean_score": 8187.5,
+            "capped": 0,
+            "locked_p10": 33.7,
+            "locked_p90": 41.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 44.5,
+            "median_locked": 49.5,
+            "mean_score": 29225,
+            "capped": 0,
+            "locked_p10": 30.1,
+            "locked_p90": 53.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 32.375,
+            "median_locked": 34.5,
+            "mean_score": 8600,
+            "capped": 0,
+            "locked_p10": 25.7,
+            "locked_p90": 36.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 39.25,
+            "median_locked": 37.0,
+            "mean_score": 43937.5,
+            "capped": 0,
+            "locked_p10": 31.5,
+            "locked_p90": 49.699999999999996,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "mixed_behavior_cloning",
+          "training_seed": 42,
+          "parameters": 795049,
+          "color_conditioned": false,
+          "checkpoint_ppo_steps": 0,
+          "additional_ppo_steps": 0,
+          "imitation_examples": 12288,
+          "imitation_epochs": 50,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      },
+      "conditioned-long": {
+        "model_path": "build/ai/rl-improvement/conditioned-long.pt",
+        "model_sha256": "4c0a2ffa6f3f2d1f1c23a30c11ba1d5e860ecf49d1d4c3176a9319dab3ca2c25",
+        "dev_report_path": "build/ai/rl-improvement/conditioned-long-dev.json",
+        "dev_report_sha256": "930e45b6d50eeef470af475493026de622ff9e0447d30a4d78cf285c4ffc8500",
+        "summary": {
+          "mean_locked": 95.45833333333333,
+          "median_locked": 74.0,
+          "mean_score": 144592.70833333334,
+          "capped": 2,
+          "locked_p10": 47.0,
+          "locked_p90": 168.5,
+          "reached_100": 29,
+          "reached_150": 15
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 83.375,
+            "median_locked": 72.5,
+            "mean_score": 47712.5,
+            "capped": 0,
+            "locked_p10": 47.4,
+            "locked_p90": 130.7,
+            "reached_100": 2,
+            "reached_150": 1
+          },
+          "classic_fill": {
+            "mean_locked": 216.875,
+            "median_locked": 196.5,
+            "mean_score": 509800,
+            "capped": 1,
+            "locked_p10": 149.3,
+            "locked_p90": 296.5,
+            "reached_100": 8,
+            "reached_150": 7
+          },
+          "classic_anchored": {
+            "mean_locked": 84.625,
+            "median_locked": 66.0,
+            "mean_score": 61900,
+            "capped": 0,
+            "locked_p10": 37.9,
+            "locked_p90": 140.2,
+            "reached_100": 1,
+            "reached_150": 1
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 171.875,
+            "median_locked": 161.0,
+            "mean_score": 408550,
+            "capped": 1,
+            "locked_p10": 105.60000000000001,
+            "locked_p90": 262.2,
+            "reached_100": 7,
+            "reached_150": 4
+          },
+          "rare_six": {
+            "mean_locked": 79.625,
+            "median_locked": 76.0,
+            "mean_score": 46425,
+            "capped": 0,
+            "locked_p10": 55.9,
+            "locked_p90": 103.3,
+            "reached_100": 3,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 105.625,
+            "median_locked": 99.0,
+            "mean_score": 189550,
+            "capped": 0,
+            "locked_p10": 68.2,
+            "locked_p90": 155.2,
+            "reached_100": 4,
+            "reached_150": 2
+          },
+          "rare_six_anchored": {
+            "mean_locked": 71.625,
+            "median_locked": 63.0,
+            "mean_score": 47512.5,
+            "capped": 0,
+            "locked_p10": 50.5,
+            "locked_p90": 101.7,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 92.875,
+            "median_locked": 85.5,
+            "mean_score": 176462.5,
+            "capped": 0,
+            "locked_p10": 68.2,
+            "locked_p90": 133.9,
+            "reached_100": 2,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 55.25,
+            "median_locked": 57.0,
+            "mean_score": 30762.5,
+            "capped": 0,
+            "locked_p10": 36.1,
+            "locked_p90": 71.0,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 77.125,
+            "median_locked": 78.0,
+            "mean_score": 97062.5,
+            "capped": 0,
+            "locked_p10": 60.8,
+            "locked_p90": 89.89999999999999,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 44.375,
+            "median_locked": 45.5,
+            "mean_score": 18150,
+            "capped": 0,
+            "locked_p10": 37.1,
+            "locked_p90": 49.9,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 62.25,
+            "median_locked": 56.5,
+            "mean_score": 101225,
+            "capped": 0,
+            "locked_p10": 50.8,
+            "locked_p90": 79.39999999999999,
+            "reached_100": 1,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "mixed_behavior_cloning",
+          "training_seed": 42,
+          "parameters": 795193,
+          "color_conditioned": true,
+          "checkpoint_ppo_steps": 0,
+          "additional_ppo_steps": 0,
+          "imitation_examples": 12288,
+          "imitation_epochs": 50,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0,
+          "initialization_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      },
+      "refined": {
+        "model_path": "build/ai/rl-improvement/refined.pt",
+        "model_sha256": "5b35d2396d6d09cfc84a06afe5f6ebfd100ff7f4a5852e6db572b734930aff23",
+        "dev_report_path": "build/ai/rl-improvement/refined-dev.json",
+        "dev_report_sha256": "ee93afd9f2543fe654ebd9908c9139e50a4d1218816eccffe0f404aeea3b27a0",
+        "summary": {
+          "mean_locked": 81.41666666666667,
+          "median_locked": 70.5,
+          "mean_score": 106062.5,
+          "capped": 0,
+          "locked_p10": 46.0,
+          "locked_p90": 120.0,
+          "reached_100": 20,
+          "reached_150": 6
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 75.875,
+            "median_locked": 81.0,
+            "mean_score": 47400,
+            "capped": 0,
+            "locked_p10": 49.6,
+            "locked_p90": 95.4,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "classic_fill": {
+            "mean_locked": 127.25,
+            "median_locked": 108.5,
+            "mean_score": 251675,
+            "capped": 0,
+            "locked_p10": 57.6,
+            "locked_p90": 214.5,
+            "reached_100": 5,
+            "reached_150": 3
+          },
+          "classic_anchored": {
+            "mean_locked": 76.75,
+            "median_locked": 79.0,
+            "mean_score": 55012.5,
+            "capped": 0,
+            "locked_p10": 55.9,
+            "locked_p90": 92.5,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 120.75,
+            "median_locked": 110.0,
+            "mean_score": 315312.5,
+            "capped": 0,
+            "locked_p10": 58.6,
+            "locked_p90": 191.4,
+            "reached_100": 5,
+            "reached_150": 2
+          },
+          "rare_six": {
+            "mean_locked": 75.625,
+            "median_locked": 71.0,
+            "mean_score": 41050,
+            "capped": 0,
+            "locked_p10": 59.1,
+            "locked_p90": 97.3,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 103.125,
+            "median_locked": 87.0,
+            "mean_score": 147712.5,
+            "capped": 0,
+            "locked_p10": 60.5,
+            "locked_p90": 168.6,
+            "reached_100": 2,
+            "reached_150": 1
+          },
+          "rare_six_anchored": {
+            "mean_locked": 68.625,
+            "median_locked": 64.5,
+            "mean_score": 48750,
+            "capped": 0,
+            "locked_p10": 50.8,
+            "locked_p90": 88.0,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 93.25,
+            "median_locked": 95.5,
+            "mean_score": 157062.5,
+            "capped": 0,
+            "locked_p10": 61.1,
+            "locked_p90": 122.8,
+            "reached_100": 4,
+            "reached_150": 0
+          },
+          "rare_seven": {
+            "mean_locked": 62.125,
+            "median_locked": 58.0,
+            "mean_score": 29712.5,
+            "capped": 0,
+            "locked_p10": 47.4,
+            "locked_p90": 79.69999999999999,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 68.25,
+            "median_locked": 70.5,
+            "mean_score": 86912.5,
+            "capped": 0,
+            "locked_p10": 45.5,
+            "locked_p90": 89.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 46.75,
+            "median_locked": 41.5,
+            "mean_score": 19112.5,
+            "capped": 0,
+            "locked_p10": 35.8,
+            "locked_p90": 62.3,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 58.625,
+            "median_locked": 57.5,
+            "mean_score": 73037.5,
+            "capped": 0,
+            "locked_p10": 47.4,
+            "locked_p90": 70.1,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "balanced_ppo",
+          "training_seed": 47,
+          "parameters": 795193,
+          "color_conditioned": true,
+          "checkpoint_ppo_steps": 30720,
+          "additional_ppo_steps": 30720,
+          "imitation_examples": 12288,
+          "imitation_epochs": 10,
+          "on_policy_teacher_labels": 0,
+          "teacher_coef": 0.0,
+          "initialization_sha256": "1fc18e4de643274e6ca68b9de4f9d17eaa60708bf638fb10c8650ab6a4d3a73f",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      },
+      "refined-guided": {
+        "model_path": "build/ai/rl-improvement/refined-guided.pt",
+        "model_sha256": "97c35e6cba54ae059a4c8a7b96dbcfd79adb12fac04202f8cdfc1a896f4b689a",
+        "dev_report_path": "build/ai/rl-improvement/refined-guided-dev.json",
+        "dev_report_sha256": "c65a3c51348fe80460ef1a197164fe619538de624bc2189303e59e41d872e8ac",
+        "summary": {
+          "mean_locked": 101.23958333333333,
+          "median_locked": 89.0,
+          "mean_score": 138662.5,
+          "capped": 3,
+          "locked_p10": 52.0,
+          "locked_p90": 156.0,
+          "reached_100": 38,
+          "reached_150": 14
+        },
+        "by_mode": {
+          "classic": {
+            "mean_locked": 100,
+            "median_locked": 103.0,
+            "mean_score": 60137.5,
+            "capped": 0,
+            "locked_p10": 53.0,
+            "locked_p90": 136.6,
+            "reached_100": 4,
+            "reached_150": 1
+          },
+          "classic_fill": {
+            "mean_locked": 213,
+            "median_locked": 218.5,
+            "mean_score": 428400,
+            "capped": 2,
+            "locked_p10": 125.0,
+            "locked_p90": 300.0,
+            "reached_100": 7,
+            "reached_150": 6
+          },
+          "classic_anchored": {
+            "mean_locked": 94.25,
+            "median_locked": 82.0,
+            "mean_score": 69250,
+            "capped": 0,
+            "locked_p10": 66.0,
+            "locked_p90": 131.6,
+            "reached_100": 3,
+            "reached_150": 1
+          },
+          "classic_anchored_fill": {
+            "mean_locked": 118.5,
+            "median_locked": 106.0,
+            "mean_score": 301137.5,
+            "capped": 1,
+            "locked_p10": 61.6,
+            "locked_p90": 175.39999999999998,
+            "reached_100": 5,
+            "reached_150": 1
+          },
+          "rare_six": {
+            "mean_locked": 92.625,
+            "median_locked": 94.5,
+            "mean_score": 57537.5,
+            "capped": 0,
+            "locked_p10": 48.7,
+            "locked_p90": 125.6,
+            "reached_100": 4,
+            "reached_150": 0
+          },
+          "rare_six_fill": {
+            "mean_locked": 125.375,
+            "median_locked": 133.0,
+            "mean_score": 185762.5,
+            "capped": 0,
+            "locked_p10": 73.7,
+            "locked_p90": 162.9,
+            "reached_100": 5,
+            "reached_150": 4
+          },
+          "rare_six_anchored": {
+            "mean_locked": 69.125,
+            "median_locked": 63.5,
+            "mean_score": 42337.5,
+            "capped": 0,
+            "locked_p10": 53.9,
+            "locked_p90": 90.2,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_six_anchored_fill": {
+            "mean_locked": 113.125,
+            "median_locked": 109.0,
+            "mean_score": 214712.5,
+            "capped": 0,
+            "locked_p10": 93.0,
+            "locked_p90": 140.2,
+            "reached_100": 7,
+            "reached_150": 1
+          },
+          "rare_seven": {
+            "mean_locked": 75,
+            "median_locked": 70.0,
+            "mean_score": 39025,
+            "capped": 0,
+            "locked_p10": 47.5,
+            "locked_p90": 118.0,
+            "reached_100": 2,
+            "reached_150": 0
+          },
+          "rare_seven_fill": {
+            "mean_locked": 89.875,
+            "median_locked": 94.0,
+            "mean_score": 133850,
+            "capped": 0,
+            "locked_p10": 71.4,
+            "locked_p90": 100.5,
+            "reached_100": 1,
+            "reached_150": 0
+          },
+          "rare_seven_anchored": {
+            "mean_locked": 55.5,
+            "median_locked": 59.0,
+            "mean_score": 28912.5,
+            "capped": 0,
+            "locked_p10": 46.2,
+            "locked_p90": 60.6,
+            "reached_100": 0,
+            "reached_150": 0
+          },
+          "rare_seven_anchored_fill": {
+            "mean_locked": 68.5,
+            "median_locked": 68.0,
+            "mean_score": 102887.5,
+            "capped": 0,
+            "locked_p10": 50.8,
+            "locked_p90": 87.2,
+            "reached_100": 0,
+            "reached_150": 0
+          }
+        },
+        "budget": {
+          "algorithm": "guided_balanced_ppo",
+          "training_seed": 47,
+          "parameters": 795193,
+          "color_conditioned": true,
+          "checkpoint_ppo_steps": 30720,
+          "additional_ppo_steps": 30720,
+          "imitation_examples": 12288,
+          "imitation_epochs": 10,
+          "on_policy_teacher_labels": 30720,
+          "teacher_coef": 0.2,
+          "initialization_sha256": "1fc18e4de643274e6ca68b9de4f9d17eaa60708bf638fb10c8650ab6a4d3a73f",
+          "dataset_sha256": "ed281a537f20b2869e3b0b146a8602e756e4be9e4a6a7a164a15fecfccd75f7d"
+        }
+      }
+    }
+  },
+  "test": {
+    "purpose": "held_out_comparison_after_selection_was_frozen",
+    "seeds": [
+      12000000,
+      12000001,
+      12000002,
+      12000003,
+      12000004,
+      12000005,
+      12000006,
+      12000007,
+      12000008,
+      12000009,
+      12000010,
+      12000011,
+      12000012,
+      12000013,
+      12000014,
+      12000015,
+      12000016,
+      12000017,
+      12000018,
+      12000019
+    ],
+    "episodes_per_mode": 20,
+    "baseline": {
+      "model_sha256": "04419d96d78fd6a8de050066264585f44e16af666960054176ea0db810670c9e",
+      "summary": {
+        "mean_locked": 46.9125,
+        "median_locked": 41.0,
+        "mean_score": 47086.666666666664,
+        "capped": 0,
+        "locked_p10": 28.0,
+        "locked_p90": 70.0,
+        "reached_100": 6,
+        "reached_150": 2
+      },
+      "by_mode": {
+        "classic": {
+          "mean_locked": 39.3,
+          "median_locked": 36.0,
+          "mean_score": 9670,
+          "capped": 0,
+          "locked_p10": 30.0,
+          "locked_p90": 52.2,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "classic_fill": {
+          "mean_locked": 82.3,
+          "median_locked": 74.0,
+          "mean_score": 141125,
+          "capped": 0,
+          "locked_p10": 37.5,
+          "locked_p90": 150.0,
+          "reached_100": 4,
+          "reached_150": 2
+        },
+        "classic_anchored": {
+          "mean_locked": 41.3,
+          "median_locked": 39.5,
+          "mean_score": 15655,
+          "capped": 0,
+          "locked_p10": 25.7,
+          "locked_p90": 60.50000000000001,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "classic_anchored_fill": {
+          "mean_locked": 58.5,
+          "median_locked": 58.0,
+          "mean_score": 115055,
+          "capped": 0,
+          "locked_p10": 32.9,
+          "locked_p90": 84.60000000000001,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_six": {
+          "mean_locked": 43.1,
+          "median_locked": 40.0,
+          "mean_score": 12255,
+          "capped": 0,
+          "locked_p10": 33.6,
+          "locked_p90": 50.700000000000024,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_six_fill": {
+          "mean_locked": 65.75,
+          "median_locked": 65.5,
+          "mean_score": 97225,
+          "capped": 0,
+          "locked_p10": 43.7,
+          "locked_p90": 92.30000000000004,
+          "reached_100": 2,
+          "reached_150": 0
+        },
+        "rare_six_anchored": {
+          "mean_locked": 35.5,
+          "median_locked": 32.5,
+          "mean_score": 11285,
+          "capped": 0,
+          "locked_p10": 21.7,
+          "locked_p90": 53.0,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_six_anchored_fill": {
+          "mean_locked": 44.25,
+          "median_locked": 40.0,
+          "mean_score": 64235,
+          "capped": 0,
+          "locked_p10": 28.9,
+          "locked_p90": 61.80000000000001,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_seven": {
+          "mean_locked": 35.1,
+          "median_locked": 35.0,
+          "mean_score": 7110,
+          "capped": 0,
+          "locked_p10": 28.0,
+          "locked_p90": 41.0,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_seven_fill": {
+          "mean_locked": 43.95,
+          "median_locked": 43.5,
+          "mean_score": 38705,
+          "capped": 0,
+          "locked_p10": 33.9,
+          "locked_p90": 56.1,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_seven_anchored": {
+          "mean_locked": 31.05,
+          "median_locked": 32.5,
+          "mean_score": 7370,
+          "capped": 0,
+          "locked_p10": 23.5,
+          "locked_p90": 39.1,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_seven_anchored_fill": {
+          "mean_locked": 42.85,
+          "median_locked": 44.0,
+          "mean_score": 45350,
+          "capped": 0,
+          "locked_p10": 28.9,
+          "locked_p90": 57.60000000000001,
+          "reached_100": 0,
+          "reached_150": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 12000000,
+          "mode": "classic",
+          "locked": 29,
+          "score": 2000,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic",
+          "locked": 48,
+          "score": 17300,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic",
+          "locked": 30,
+          "score": 12900,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic",
+          "locked": 57,
+          "score": 25400,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic",
+          "locked": 41,
+          "score": 8000,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic",
+          "locked": 36,
+          "score": 10100,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic",
+          "locked": 47,
+          "score": 12000,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic",
+          "locked": 30,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic",
+          "locked": 54,
+          "score": 18500,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic",
+          "locked": 42,
+          "score": 11700,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic",
+          "locked": 33,
+          "score": 1800,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic",
+          "locked": 35,
+          "score": 4800,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic",
+          "locked": 52,
+          "score": 22200,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic",
+          "locked": 36,
+          "score": 5100,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic",
+          "locked": 46,
+          "score": 15800,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic",
+          "locked": 32,
+          "score": 4200,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic",
+          "locked": 32,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic",
+          "locked": 36,
+          "score": 8100,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic",
+          "locked": 39,
+          "score": 11100,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic",
+          "locked": 31,
+          "score": 2400,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "classic_fill",
+          "locked": 85,
+          "score": 124900,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic_fill",
+          "locked": 159,
+          "score": 290400,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic_fill",
+          "locked": 149,
+          "score": 371700,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic_fill",
+          "locked": 38,
+          "score": 14700,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic_fill",
+          "locked": 81,
+          "score": 88300,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic_fill",
+          "locked": 61,
+          "score": 83400,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic_fill",
+          "locked": 94,
+          "score": 201000,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic_fill",
+          "locked": 70,
+          "score": 117800,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic_fill",
+          "locked": 177,
+          "score": 408900,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic_fill",
+          "locked": 83,
+          "score": 186500,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic_fill",
+          "locked": 71,
+          "score": 110100,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic_fill",
+          "locked": 41,
+          "score": 29500,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic_fill",
+          "locked": 33,
+          "score": 4700,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic_fill",
+          "locked": 77,
+          "score": 129500,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic_fill",
+          "locked": 59,
+          "score": 65000,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic_fill",
+          "locked": 41,
+          "score": 49100,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic_fill",
+          "locked": 71,
+          "score": 93200,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic_fill",
+          "locked": 30,
+          "score": 17300,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic_fill",
+          "locked": 83,
+          "score": 91200,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic_fill",
+          "locked": 143,
+          "score": 345300,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "classic_anchored",
+          "locked": 32,
+          "score": 4700,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic_anchored",
+          "locked": 26,
+          "score": 4900,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic_anchored",
+          "locked": 33,
+          "score": 5300,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic_anchored",
+          "locked": 60,
+          "score": 29700,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic_anchored",
+          "locked": 40,
+          "score": 10300,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic_anchored",
+          "locked": 59,
+          "score": 29400,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic_anchored",
+          "locked": 40,
+          "score": 13300,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic_anchored",
+          "locked": 23,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic_anchored",
+          "locked": 39,
+          "score": 13200,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic_anchored",
+          "locked": 65,
+          "score": 47800,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic_anchored",
+          "locked": 69,
+          "score": 47100,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic_anchored",
+          "locked": 28,
+          "score": 3000,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic_anchored",
+          "locked": 22,
+          "score": 2200,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic_anchored",
+          "locked": 37,
+          "score": 12000,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic_anchored",
+          "locked": 49,
+          "score": 19700,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic_anchored",
+          "locked": 59,
+          "score": 30700,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic_anchored",
+          "locked": 27,
+          "score": 2500,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic_anchored",
+          "locked": 40,
+          "score": 11100,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic_anchored",
+          "locked": 38,
+          "score": 10100,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic_anchored",
+          "locked": 40,
+          "score": 16100,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "classic_anchored_fill",
+          "locked": 48,
+          "score": 76400,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic_anchored_fill",
+          "locked": 57,
+          "score": 134600,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic_anchored_fill",
+          "locked": 33,
+          "score": 26500,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic_anchored_fill",
+          "locked": 90,
+          "score": 205200,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic_anchored_fill",
+          "locked": 31,
+          "score": 51200,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic_anchored_fill",
+          "locked": 84,
+          "score": 161100,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic_anchored_fill",
+          "locked": 61,
+          "score": 103700,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic_anchored_fill",
+          "locked": 51,
+          "score": 40500,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic_anchored_fill",
+          "locked": 32,
+          "score": 40300,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic_anchored_fill",
+          "locked": 67,
+          "score": 163400,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic_anchored_fill",
+          "locked": 60,
+          "score": 138800,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic_anchored_fill",
+          "locked": 53,
+          "score": 70600,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic_anchored_fill",
+          "locked": 52,
+          "score": 54000,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic_anchored_fill",
+          "locked": 60,
+          "score": 93500,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic_anchored_fill",
+          "locked": 59,
+          "score": 96800,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic_anchored_fill",
+          "locked": 98,
+          "score": 254200,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic_anchored_fill",
+          "locked": 44,
+          "score": 131400,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic_anchored_fill",
+          "locked": 64,
+          "score": 220000,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic_anchored_fill",
+          "locked": 70,
+          "score": 164700,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic_anchored_fill",
+          "locked": 56,
+          "score": 74200,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six",
+          "locked": 27,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six",
+          "locked": 40,
+          "score": 5600,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six",
+          "locked": 38,
+          "score": 7800,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six",
+          "locked": 48,
+          "score": 17500,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six",
+          "locked": 66,
+          "score": 29500,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six",
+          "locked": 80,
+          "score": 43600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six",
+          "locked": 46,
+          "score": 14100,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six",
+          "locked": 39,
+          "score": 9900,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six",
+          "locked": 49,
+          "score": 14800,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six",
+          "locked": 36,
+          "score": 7300,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six",
+          "locked": 30,
+          "score": 1900,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six",
+          "locked": 35,
+          "score": 9200,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six",
+          "locked": 41,
+          "score": 9000,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six",
+          "locked": 35,
+          "score": 8900,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six",
+          "locked": 40,
+          "score": 9100,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six",
+          "locked": 48,
+          "score": 14600,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six",
+          "locked": 34,
+          "score": 4300,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six",
+          "locked": 45,
+          "score": 17500,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six",
+          "locked": 49,
+          "score": 15300,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six",
+          "locked": 36,
+          "score": 5200,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six_fill",
+          "locked": 45,
+          "score": 32800,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six_fill",
+          "locked": 115,
+          "score": 257300,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six_fill",
+          "locked": 113,
+          "score": 237700,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six_fill",
+          "locked": 76,
+          "score": 118700,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six_fill",
+          "locked": 59,
+          "score": 56500,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six_fill",
+          "locked": 30,
+          "score": 2600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six_fill",
+          "locked": 44,
+          "score": 23400,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six_fill",
+          "locked": 41,
+          "score": 31000,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six_fill",
+          "locked": 67,
+          "score": 99800,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six_fill",
+          "locked": 70,
+          "score": 114300,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six_fill",
+          "locked": 58,
+          "score": 80400,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six_fill",
+          "locked": 45,
+          "score": 80900,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six_fill",
+          "locked": 64,
+          "score": 98800,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six_fill",
+          "locked": 60,
+          "score": 44100,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six_fill",
+          "locked": 68,
+          "score": 117600,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six_fill",
+          "locked": 68,
+          "score": 111200,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six_fill",
+          "locked": 71,
+          "score": 125200,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six_fill",
+          "locked": 84,
+          "score": 126400,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six_fill",
+          "locked": 47,
+          "score": 40100,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six_fill",
+          "locked": 90,
+          "score": 145700,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six_anchored",
+          "locked": 25,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six_anchored",
+          "locked": 18,
+          "score": 2500,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six_anchored",
+          "locked": 22,
+          "score": 2300,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six_anchored",
+          "locked": 27,
+          "score": 2000,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six_anchored",
+          "locked": 49,
+          "score": 22600,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six_anchored",
+          "locked": 53,
+          "score": 30500,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six_anchored",
+          "locked": 53,
+          "score": 27200,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six_anchored",
+          "locked": 27,
+          "score": 2100,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six_anchored",
+          "locked": 31,
+          "score": 12400,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six_anchored",
+          "locked": 32,
+          "score": 4700,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six_anchored",
+          "locked": 41,
+          "score": 13800,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six_anchored",
+          "locked": 36,
+          "score": 15200,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six_anchored",
+          "locked": 33,
+          "score": 6100,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six_anchored",
+          "locked": 27,
+          "score": 2200,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six_anchored",
+          "locked": 33,
+          "score": 5100,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six_anchored",
+          "locked": 49,
+          "score": 22500,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six_anchored",
+          "locked": 24,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six_anchored",
+          "locked": 19,
+          "score": 3100,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six_anchored",
+          "locked": 66,
+          "score": 38500,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six_anchored",
+          "locked": 45,
+          "score": 12900,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six_anchored_fill",
+          "locked": 55,
+          "score": 83900,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six_anchored_fill",
+          "locked": 38,
+          "score": 55100,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six_anchored_fill",
+          "locked": 45,
+          "score": 51000,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six_anchored_fill",
+          "locked": 33,
+          "score": 10200,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six_anchored_fill",
+          "locked": 29,
+          "score": 22200,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six_anchored_fill",
+          "locked": 61,
+          "score": 108700,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six_anchored_fill",
+          "locked": 28,
+          "score": 8300,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six_anchored_fill",
+          "locked": 29,
+          "score": 20200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six_anchored_fill",
+          "locked": 39,
+          "score": 63700,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six_anchored_fill",
+          "locked": 36,
+          "score": 59500,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six_anchored_fill",
+          "locked": 90,
+          "score": 268600,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six_anchored_fill",
+          "locked": 69,
+          "score": 95100,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six_anchored_fill",
+          "locked": 23,
+          "score": 14300,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six_anchored_fill",
+          "locked": 44,
+          "score": 35800,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six_anchored_fill",
+          "locked": 54,
+          "score": 138600,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six_anchored_fill",
+          "locked": 41,
+          "score": 79700,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six_anchored_fill",
+          "locked": 34,
+          "score": 17500,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six_anchored_fill",
+          "locked": 53,
+          "score": 72800,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six_anchored_fill",
+          "locked": 53,
+          "score": 43100,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six_anchored_fill",
+          "locked": 31,
+          "score": 36400,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven",
+          "locked": 37,
+          "score": 6800,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven",
+          "locked": 41,
+          "score": 12100,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven",
+          "locked": 26,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven",
+          "locked": 28,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven",
+          "locked": 36,
+          "score": 15100,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven",
+          "locked": 41,
+          "score": 10600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven",
+          "locked": 37,
+          "score": 10300,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven",
+          "locked": 59,
+          "score": 29800,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven",
+          "locked": 36,
+          "score": 7900,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven",
+          "locked": 30,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven",
+          "locked": 30,
+          "score": 1900,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven",
+          "locked": 36,
+          "score": 6200,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven",
+          "locked": 34,
+          "score": 11300,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven",
+          "locked": 28,
+          "score": 1700,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven",
+          "locked": 41,
+          "score": 11300,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven",
+          "locked": 32,
+          "score": 2100,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven",
+          "locked": 36,
+          "score": 3900,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven",
+          "locked": 30,
+          "score": 4800,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven",
+          "locked": 33,
+          "score": 2800,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven",
+          "locked": 31,
+          "score": 3600,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven_fill",
+          "locked": 44,
+          "score": 28100,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven_fill",
+          "locked": 39,
+          "score": 45000,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven_fill",
+          "locked": 53,
+          "score": 84800,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven_fill",
+          "locked": 40,
+          "score": 12700,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven_fill",
+          "locked": 32,
+          "score": 7200,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven_fill",
+          "locked": 34,
+          "score": 5400,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven_fill",
+          "locked": 33,
+          "score": 22100,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven_fill",
+          "locked": 46,
+          "score": 42600,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven_fill",
+          "locked": 56,
+          "score": 92000,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven_fill",
+          "locked": 43,
+          "score": 51500,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven_fill",
+          "locked": 41,
+          "score": 16600,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven_fill",
+          "locked": 44,
+          "score": 22000,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven_fill",
+          "locked": 47,
+          "score": 42500,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven_fill",
+          "locked": 46,
+          "score": 38200,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven_fill",
+          "locked": 65,
+          "score": 63700,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven_fill",
+          "locked": 38,
+          "score": 15600,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven_fill",
+          "locked": 34,
+          "score": 15600,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven_fill",
+          "locked": 46,
+          "score": 40100,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven_fill",
+          "locked": 41,
+          "score": 28000,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven_fill",
+          "locked": 57,
+          "score": 100400,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven_anchored",
+          "locked": 31,
+          "score": 3300,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven_anchored",
+          "locked": 18,
+          "score": 2500,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven_anchored",
+          "locked": 25,
+          "score": 2800,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven_anchored",
+          "locked": 19,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven_anchored",
+          "locked": 26,
+          "score": 2600,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven_anchored",
+          "locked": 35,
+          "score": 16600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven_anchored",
+          "locked": 32,
+          "score": 4800,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven_anchored",
+          "locked": 34,
+          "score": 10200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven_anchored",
+          "locked": 24,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven_anchored",
+          "locked": 25,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven_anchored",
+          "locked": 33,
+          "score": 6400,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven_anchored",
+          "locked": 44,
+          "score": 14500,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven_anchored",
+          "locked": 40,
+          "score": 13400,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven_anchored",
+          "locked": 34,
+          "score": 11400,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven_anchored",
+          "locked": 38,
+          "score": 8900,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven_anchored",
+          "locked": 24,
+          "score": 2300,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven_anchored",
+          "locked": 39,
+          "score": 10500,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven_anchored",
+          "locked": 33,
+          "score": 11400,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven_anchored",
+          "locked": 38,
+          "score": 23500,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven_anchored",
+          "locked": 29,
+          "score": 2300,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 57,
+          "score": 98300,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 45,
+          "score": 48000,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 35,
+          "score": 30900,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 28,
+          "score": 3800,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 27,
+          "score": 2800,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 67,
+          "score": 100800,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 30,
+          "score": 15500,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 44,
+          "score": 49300,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 44,
+          "score": 53200,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 29,
+          "score": 13000,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 53,
+          "score": 61800,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 41,
+          "score": 44300,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 63,
+          "score": 79400,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 45,
+          "score": 71700,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 31,
+          "score": 10200,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 44,
+          "score": 77700,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 36,
+          "score": 23200,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 53,
+          "score": 55000,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 51,
+          "score": 42400,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 34,
+          "score": 25700,
+          "capped": false
+        }
+      ]
+    },
+    "selected": {
+      "model_sha256": "01c17a265ef9545ebe6e752c4cd29013da09107279c0a6feb5a3a9a0a2034262",
+      "summary": {
+        "mean_locked": 105.7125,
+        "median_locked": 88.0,
+        "mean_score": 151652.91666666666,
+        "capped": 8,
+        "locked_p10": 48.0,
+        "locked_p90": 179.19999999999993,
+        "reached_100": 96,
+        "reached_150": 40
+      },
+      "by_mode": {
+        "classic": {
+          "mean_locked": 149.15,
+          "median_locked": 123.5,
+          "mean_score": 110355,
+          "capped": 3,
+          "locked_p10": 75.7,
+          "locked_p90": 300.0,
+          "reached_100": 15,
+          "reached_150": 6
+        },
+        "classic_fill": {
+          "mean_locked": 223.7,
+          "median_locked": 239.0,
+          "mean_score": 491380,
+          "capped": 5,
+          "locked_p10": 131.8,
+          "locked_p90": 300.0,
+          "reached_100": 19,
+          "reached_150": 15
+        },
+        "classic_anchored": {
+          "mean_locked": 94.1,
+          "median_locked": 88.5,
+          "mean_score": 71335,
+          "capped": 0,
+          "locked_p10": 53.300000000000004,
+          "locked_p90": 150.50000000000003,
+          "reached_100": 7,
+          "reached_150": 2
+        },
+        "classic_anchored_fill": {
+          "mean_locked": 148.9,
+          "median_locked": 146.5,
+          "mean_score": 353910,
+          "capped": 0,
+          "locked_p10": 67.5,
+          "locked_p90": 236.40000000000003,
+          "reached_100": 15,
+          "reached_150": 9
+        },
+        "rare_six": {
+          "mean_locked": 87.55,
+          "median_locked": 75.0,
+          "mean_score": 53220,
+          "capped": 0,
+          "locked_p10": 57.9,
+          "locked_p90": 140.4,
+          "reached_100": 7,
+          "reached_150": 1
+        },
+        "rare_six_fill": {
+          "mean_locked": 122.35,
+          "median_locked": 135.5,
+          "mean_score": 217830,
+          "capped": 0,
+          "locked_p10": 85.3,
+          "locked_p90": 160.3,
+          "reached_100": 13,
+          "reached_150": 6
+        },
+        "rare_six_anchored": {
+          "mean_locked": 70.7,
+          "median_locked": 58.5,
+          "mean_score": 42135,
+          "capped": 0,
+          "locked_p10": 46.8,
+          "locked_p90": 111.30000000000001,
+          "reached_100": 3,
+          "reached_150": 0
+        },
+        "rare_six_anchored_fill": {
+          "mean_locked": 102.35,
+          "median_locked": 102.0,
+          "mean_score": 199010,
+          "capped": 0,
+          "locked_p10": 73.4,
+          "locked_p90": 135.2,
+          "reached_100": 11,
+          "reached_150": 1
+        },
+        "rare_seven": {
+          "mean_locked": 64.6,
+          "median_locked": 60.5,
+          "mean_score": 31385,
+          "capped": 0,
+          "locked_p10": 39.9,
+          "locked_p90": 89.00000000000001,
+          "reached_100": 1,
+          "reached_150": 0
+        },
+        "rare_seven_fill": {
+          "mean_locked": 80.6,
+          "median_locked": 82.5,
+          "mean_score": 113420,
+          "capped": 0,
+          "locked_p10": 56.7,
+          "locked_p90": 103.30000000000001,
+          "reached_100": 4,
+          "reached_150": 0
+        },
+        "rare_seven_anchored": {
+          "mean_locked": 57.8,
+          "median_locked": 56.5,
+          "mean_score": 31540,
+          "capped": 0,
+          "locked_p10": 37.8,
+          "locked_p90": 84.4,
+          "reached_100": 0,
+          "reached_150": 0
+        },
+        "rare_seven_anchored_fill": {
+          "mean_locked": 66.75,
+          "median_locked": 63.5,
+          "mean_score": 104315,
+          "capped": 0,
+          "locked_p10": 46.8,
+          "locked_p90": 85.1,
+          "reached_100": 1,
+          "reached_150": 0
+        }
+      },
+      "runs": [
+        {
+          "seed": 12000000,
+          "mode": "classic",
+          "locked": 46,
+          "score": 16500,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic",
+          "locked": 141,
+          "score": 98100,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic",
+          "locked": 55,
+          "score": 25100,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic",
+          "locked": 105,
+          "score": 69100,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic",
+          "locked": 127,
+          "score": 101400,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic",
+          "locked": 259,
+          "score": 213100,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic",
+          "locked": 89,
+          "score": 53100,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic",
+          "locked": 134,
+          "score": 87500,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic",
+          "locked": 164,
+          "score": 124500,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic",
+          "locked": 300,
+          "score": 267900,
+          "capped": true
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic",
+          "locked": 196,
+          "score": 167700,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic",
+          "locked": 143,
+          "score": 92900,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic",
+          "locked": 114,
+          "score": 75800,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic",
+          "locked": 78,
+          "score": 38800,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic",
+          "locked": 300,
+          "score": 241300,
+          "capped": true
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic",
+          "locked": 300,
+          "score": 258400,
+          "capped": true
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic",
+          "locked": 88,
+          "score": 43900,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic",
+          "locked": 113,
+          "score": 76800,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic",
+          "locked": 111,
+          "score": 75700,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic",
+          "locked": 120,
+          "score": 79500,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "classic_fill",
+          "locked": 245,
+          "score": 587200,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic_fill",
+          "locked": 227,
+          "score": 398800,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic_fill",
+          "locked": 300,
+          "score": 646000,
+          "capped": true
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic_fill",
+          "locked": 254,
+          "score": 556200,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic_fill",
+          "locked": 135,
+          "score": 235700,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic_fill",
+          "locked": 148,
+          "score": 287000,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic_fill",
+          "locked": 300,
+          "score": 668100,
+          "capped": true
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic_fill",
+          "locked": 148,
+          "score": 225200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic_fill",
+          "locked": 91,
+          "score": 134100,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic_fill",
+          "locked": 268,
+          "score": 626100,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic_fill",
+          "locked": 233,
+          "score": 419500,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic_fill",
+          "locked": 300,
+          "score": 609200,
+          "capped": true
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic_fill",
+          "locked": 220,
+          "score": 540200,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic_fill",
+          "locked": 103,
+          "score": 202700,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic_fill",
+          "locked": 178,
+          "score": 496700,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic_fill",
+          "locked": 278,
+          "score": 779400,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic_fill",
+          "locked": 168,
+          "score": 409700,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic_fill",
+          "locked": 278,
+          "score": 543900,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic_fill",
+          "locked": 300,
+          "score": 726700,
+          "capped": true
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic_fill",
+          "locked": 300,
+          "score": 735200,
+          "capped": true
+        },
+        {
+          "seed": 12000000,
+          "mode": "classic_anchored",
+          "locked": 55,
+          "score": 32100,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic_anchored",
+          "locked": 84,
+          "score": 52800,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic_anchored",
+          "locked": 148,
+          "score": 128800,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic_anchored",
+          "locked": 88,
+          "score": 64800,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic_anchored",
+          "locked": 98,
+          "score": 75000,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic_anchored",
+          "locked": 120,
+          "score": 86600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic_anchored",
+          "locked": 57,
+          "score": 33900,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic_anchored",
+          "locked": 89,
+          "score": 74200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic_anchored",
+          "locked": 36,
+          "score": 11700,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic_anchored",
+          "locked": 97,
+          "score": 100400,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic_anchored",
+          "locked": 56,
+          "score": 38400,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic_anchored",
+          "locked": 140,
+          "score": 113800,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic_anchored",
+          "locked": 116,
+          "score": 86400,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic_anchored",
+          "locked": 174,
+          "score": 144900,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic_anchored",
+          "locked": 173,
+          "score": 184200,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic_anchored",
+          "locked": 80,
+          "score": 49800,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic_anchored",
+          "locked": 59,
+          "score": 34700,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic_anchored",
+          "locked": 38,
+          "score": 13100,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic_anchored",
+          "locked": 59,
+          "score": 27100,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic_anchored",
+          "locked": 115,
+          "score": 74000,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "classic_anchored_fill",
+          "locked": 190,
+          "score": 414800,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "classic_anchored_fill",
+          "locked": 101,
+          "score": 186800,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "classic_anchored_fill",
+          "locked": 145,
+          "score": 284200,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "classic_anchored_fill",
+          "locked": 193,
+          "score": 528700,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "classic_anchored_fill",
+          "locked": 68,
+          "score": 145600,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "classic_anchored_fill",
+          "locked": 134,
+          "score": 368900,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "classic_anchored_fill",
+          "locked": 233,
+          "score": 583200,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "classic_anchored_fill",
+          "locked": 37,
+          "score": 53400,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "classic_anchored_fill",
+          "locked": 86,
+          "score": 285000,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "classic_anchored_fill",
+          "locked": 292,
+          "score": 804300,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "classic_anchored_fill",
+          "locked": 174,
+          "score": 410300,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "classic_anchored_fill",
+          "locked": 95,
+          "score": 105300,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "classic_anchored_fill",
+          "locked": 63,
+          "score": 105100,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "classic_anchored_fill",
+          "locked": 142,
+          "score": 318800,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "classic_anchored_fill",
+          "locked": 148,
+          "score": 386100,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "classic_anchored_fill",
+          "locked": 169,
+          "score": 372400,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "classic_anchored_fill",
+          "locked": 100,
+          "score": 163000,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "classic_anchored_fill",
+          "locked": 165,
+          "score": 287800,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "classic_anchored_fill",
+          "locked": 176,
+          "score": 412400,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "classic_anchored_fill",
+          "locked": 267,
+          "score": 862100,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six",
+          "locked": 144,
+          "score": 101400,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six",
+          "locked": 59,
+          "score": 26200,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six",
+          "locked": 61,
+          "score": 23500,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six",
+          "locked": 41,
+          "score": 13200,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six",
+          "locked": 48,
+          "score": 25900,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six",
+          "locked": 164,
+          "score": 122000,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six",
+          "locked": 76,
+          "score": 49400,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six",
+          "locked": 60,
+          "score": 26500,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six",
+          "locked": 74,
+          "score": 32700,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six",
+          "locked": 109,
+          "score": 66400,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six",
+          "locked": 100,
+          "score": 57800,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six",
+          "locked": 67,
+          "score": 42000,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six",
+          "locked": 102,
+          "score": 58000,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six",
+          "locked": 59,
+          "score": 24000,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six",
+          "locked": 69,
+          "score": 39500,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six",
+          "locked": 123,
+          "score": 98500,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six",
+          "locked": 65,
+          "score": 29300,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six",
+          "locked": 97,
+          "score": 57200,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six",
+          "locked": 140,
+          "score": 100400,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six",
+          "locked": 93,
+          "score": 70500,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six_fill",
+          "locked": 150,
+          "score": 339300,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six_fill",
+          "locked": 135,
+          "score": 263200,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six_fill",
+          "locked": 160,
+          "score": 222800,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six_fill",
+          "locked": 154,
+          "score": 394700,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six_fill",
+          "locked": 87,
+          "score": 125200,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six_fill",
+          "locked": 88,
+          "score": 140400,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six_fill",
+          "locked": 61,
+          "score": 81400,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six_fill",
+          "locked": 99,
+          "score": 99700,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six_fill",
+          "locked": 106,
+          "score": 216800,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six_fill",
+          "locked": 138,
+          "score": 229200,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six_fill",
+          "locked": 136,
+          "score": 183000,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six_fill",
+          "locked": 70,
+          "score": 62300,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six_fill",
+          "locked": 93,
+          "score": 141900,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six_fill",
+          "locked": 163,
+          "score": 435700,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six_fill",
+          "locked": 87,
+          "score": 114900,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six_fill",
+          "locked": 143,
+          "score": 326400,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six_fill",
+          "locked": 143,
+          "score": 185100,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six_fill",
+          "locked": 151,
+          "score": 313900,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six_fill",
+          "locked": 177,
+          "score": 330000,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six_fill",
+          "locked": 106,
+          "score": 150700,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six_anchored",
+          "locked": 50,
+          "score": 22000,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six_anchored",
+          "locked": 57,
+          "score": 28500,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six_anchored",
+          "locked": 136,
+          "score": 122800,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six_anchored",
+          "locked": 38,
+          "score": 11800,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six_anchored",
+          "locked": 79,
+          "score": 45700,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six_anchored",
+          "locked": 110,
+          "score": 79600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six_anchored",
+          "locked": 45,
+          "score": 17700,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six_anchored",
+          "locked": 70,
+          "score": 35200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six_anchored",
+          "locked": 123,
+          "score": 89300,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six_anchored",
+          "locked": 78,
+          "score": 52900,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six_anchored",
+          "locked": 55,
+          "score": 23900,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six_anchored",
+          "locked": 54,
+          "score": 24700,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six_anchored",
+          "locked": 59,
+          "score": 31800,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six_anchored",
+          "locked": 69,
+          "score": 42900,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six_anchored",
+          "locked": 57,
+          "score": 27500,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six_anchored",
+          "locked": 79,
+          "score": 50300,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six_anchored",
+          "locked": 53,
+          "score": 26700,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six_anchored",
+          "locked": 47,
+          "score": 20000,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six_anchored",
+          "locked": 97,
+          "score": 58800,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six_anchored",
+          "locked": 58,
+          "score": 30600,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_six_anchored_fill",
+          "locked": 127,
+          "score": 219900,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_six_anchored_fill",
+          "locked": 99,
+          "score": 164800,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_six_anchored_fill",
+          "locked": 137,
+          "score": 240200,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_six_anchored_fill",
+          "locked": 135,
+          "score": 300200,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_six_anchored_fill",
+          "locked": 106,
+          "score": 202900,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_six_anchored_fill",
+          "locked": 90,
+          "score": 145800,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_six_anchored_fill",
+          "locked": 102,
+          "score": 157500,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_six_anchored_fill",
+          "locked": 85,
+          "score": 225500,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_six_anchored_fill",
+          "locked": 106,
+          "score": 211200,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_six_anchored_fill",
+          "locked": 190,
+          "score": 406400,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_six_anchored_fill",
+          "locked": 102,
+          "score": 197900,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_six_anchored_fill",
+          "locked": 74,
+          "score": 127400,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_six_anchored_fill",
+          "locked": 106,
+          "score": 252300,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_six_anchored_fill",
+          "locked": 106,
+          "score": 299200,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_six_anchored_fill",
+          "locked": 75,
+          "score": 104100,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_six_anchored_fill",
+          "locked": 56,
+          "score": 60800,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_six_anchored_fill",
+          "locked": 95,
+          "score": 178200,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_six_anchored_fill",
+          "locked": 68,
+          "score": 104300,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_six_anchored_fill",
+          "locked": 108,
+          "score": 198500,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_six_anchored_fill",
+          "locked": 80,
+          "score": 183100,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven",
+          "locked": 82,
+          "score": 41300,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven",
+          "locked": 51,
+          "score": 25400,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven",
+          "locked": 50,
+          "score": 23300,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven",
+          "locked": 29,
+          "score": 0,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven",
+          "locked": 52,
+          "score": 22100,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven",
+          "locked": 124,
+          "score": 89700,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven",
+          "locked": 61,
+          "score": 26100,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven",
+          "locked": 88,
+          "score": 47200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven",
+          "locked": 98,
+          "score": 61600,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven",
+          "locked": 39,
+          "score": 10200,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven",
+          "locked": 42,
+          "score": 10300,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven",
+          "locked": 48,
+          "score": 15500,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven",
+          "locked": 63,
+          "score": 36000,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven",
+          "locked": 60,
+          "score": 25800,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven",
+          "locked": 65,
+          "score": 26900,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven",
+          "locked": 40,
+          "score": 11900,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven",
+          "locked": 83,
+          "score": 39400,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven",
+          "locked": 57,
+          "score": 20400,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven",
+          "locked": 81,
+          "score": 49900,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven",
+          "locked": 79,
+          "score": 44700,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven_fill",
+          "locked": 59,
+          "score": 85300,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven_fill",
+          "locked": 110,
+          "score": 183600,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven_fill",
+          "locked": 42,
+          "score": 40400,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven_fill",
+          "locked": 58,
+          "score": 59400,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven_fill",
+          "locked": 106,
+          "score": 162100,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven_fill",
+          "locked": 78,
+          "score": 86300,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven_fill",
+          "locked": 77,
+          "score": 84400,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven_fill",
+          "locked": 91,
+          "score": 174200,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven_fill",
+          "locked": 72,
+          "score": 95900,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven_fill",
+          "locked": 45,
+          "score": 37100,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven_fill",
+          "locked": 97,
+          "score": 133600,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven_fill",
+          "locked": 90,
+          "score": 155600,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven_fill",
+          "locked": 103,
+          "score": 97700,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven_fill",
+          "locked": 75,
+          "score": 101300,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven_fill",
+          "locked": 101,
+          "score": 129400,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven_fill",
+          "locked": 69,
+          "score": 62400,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven_fill",
+          "locked": 89,
+          "score": 156700,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven_fill",
+          "locked": 94,
+          "score": 159600,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven_fill",
+          "locked": 69,
+          "score": 73200,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven_fill",
+          "locked": 87,
+          "score": 190200,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven_anchored",
+          "locked": 49,
+          "score": 21600,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven_anchored",
+          "locked": 47,
+          "score": 18800,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven_anchored",
+          "locked": 38,
+          "score": 15100,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven_anchored",
+          "locked": 43,
+          "score": 19300,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven_anchored",
+          "locked": 50,
+          "score": 21600,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven_anchored",
+          "locked": 84,
+          "score": 65600,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven_anchored",
+          "locked": 56,
+          "score": 27900,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven_anchored",
+          "locked": 60,
+          "score": 27600,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven_anchored",
+          "locked": 58,
+          "score": 27200,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven_anchored",
+          "locked": 31,
+          "score": 6600,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven_anchored",
+          "locked": 93,
+          "score": 66000,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven_anchored",
+          "locked": 64,
+          "score": 31600,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven_anchored",
+          "locked": 71,
+          "score": 54300,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven_anchored",
+          "locked": 57,
+          "score": 32500,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven_anchored",
+          "locked": 56,
+          "score": 31600,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven_anchored",
+          "locked": 69,
+          "score": 47000,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven_anchored",
+          "locked": 36,
+          "score": 10800,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven_anchored",
+          "locked": 45,
+          "score": 17200,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven_anchored",
+          "locked": 88,
+          "score": 55200,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven_anchored",
+          "locked": 61,
+          "score": 33300,
+          "capped": false
+        },
+        {
+          "seed": 12000000,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 47,
+          "score": 67900,
+          "capped": false
+        },
+        {
+          "seed": 12000001,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 61,
+          "score": 118700,
+          "capped": false
+        },
+        {
+          "seed": 12000002,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 64,
+          "score": 100200,
+          "capped": false
+        },
+        {
+          "seed": 12000003,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 45,
+          "score": 48300,
+          "capped": false
+        },
+        {
+          "seed": 12000004,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 72,
+          "score": 61700,
+          "capped": false
+        },
+        {
+          "seed": 12000005,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 61,
+          "score": 85100,
+          "capped": false
+        },
+        {
+          "seed": 12000006,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 82,
+          "score": 141300,
+          "capped": false
+        },
+        {
+          "seed": 12000007,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 45,
+          "score": 52700,
+          "capped": false
+        },
+        {
+          "seed": 12000008,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 78,
+          "score": 111100,
+          "capped": false
+        },
+        {
+          "seed": 12000009,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 76,
+          "score": 125300,
+          "capped": false
+        },
+        {
+          "seed": 12000010,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 53,
+          "score": 78700,
+          "capped": false
+        },
+        {
+          "seed": 12000011,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 50,
+          "score": 90600,
+          "capped": false
+        },
+        {
+          "seed": 12000012,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 63,
+          "score": 115000,
+          "capped": false
+        },
+        {
+          "seed": 12000013,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 52,
+          "score": 34900,
+          "capped": false
+        },
+        {
+          "seed": 12000014,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 78,
+          "score": 117700,
+          "capped": false
+        },
+        {
+          "seed": 12000015,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 75,
+          "score": 136300,
+          "capped": false
+        },
+        {
+          "seed": 12000016,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 86,
+          "score": 128200,
+          "capped": false
+        },
+        {
+          "seed": 12000017,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 85,
+          "score": 221300,
+          "capped": false
+        },
+        {
+          "seed": 12000018,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 48,
+          "score": 41200,
+          "capped": false
+        },
+        {
+          "seed": 12000019,
+          "mode": "rare_seven_anchored_fill",
+          "locked": 114,
+          "score": 210100,
+          "capped": false
+        }
+      ]
+    },
+    "paired_comparison": {
+      "macro_mean_locked_delta": 58.8,
+      "relative_change_percent": 125.33972821742606,
+      "paired_seed_cluster_bootstrap_95_ci": [
+        53.26635416666667,
+        64.61677083333332
+      ],
+      "bootstrap_replicates": 10000,
+      "bootstrap_seed": 42,
+      "bootstrap_unit": "shared_game_seed_averaged_over_all_12_modes",
+      "per_seed_macro_deltas": [
+        {
+          "seed": 12000000,
+          "delta": 60.75
+        },
+        {
+          "seed": 12000001,
+          "delta": 44
+        },
+        {
+          "seed": 12000002,
+          "delta": 61.166666666666664
+        },
+        {
+          "seed": 12000003,
+          "delta": 53.25
+        },
+        {
+          "seed": 12000004,
+          "delta": 42.583333333333336
+        },
+        {
+          "seed": 12000005,
+          "delta": 68.25
+        },
+        {
+          "seed": 12000006,
+          "delta": 57.833333333333336
+        },
+        {
+          "seed": 12000007,
+          "delta": 42.75
+        },
+        {
+          "seed": 12000008,
+          "delta": 37
+        },
+        {
+          "seed": 12000009,
+          "delta": 92.08333333333333
+        },
+        {
+          "seed": 12000010,
+          "delta": 60.666666666666664
+        },
+        {
+          "seed": 12000011,
+          "delta": 57.333333333333336
+        },
+        {
+          "seed": 12000012,
+          "delta": 55.75
+        },
+        {
+          "seed": 12000013,
+          "delta": 50.75
+        },
+        {
+          "seed": 12000014,
+          "delta": 67
+        },
+        {
+          "seed": 12000015,
+          "delta": 75.58333333333333
+        },
+        {
+          "seed": 12000016,
+          "delta": 48.583333333333336
+        },
+        {
+          "seed": 12000017,
+          "delta": 58.75
+        },
+        {
+          "seed": 12000018,
+          "delta": 70.5
+        },
+        {
+          "seed": 12000019,
+          "delta": 71.41666666666667
+        }
+      ]
+    },
+    "per_mode_deltas": {
+      "classic": {
+        "baseline_mean_locked": 39.3,
+        "selected_mean_locked": 149.15,
+        "delta": 109.85000000000001
+      },
+      "classic_fill": {
+        "baseline_mean_locked": 82.3,
+        "selected_mean_locked": 223.7,
+        "delta": 141.39999999999998
+      },
+      "classic_anchored": {
+        "baseline_mean_locked": 41.3,
+        "selected_mean_locked": 94.1,
+        "delta": 52.8
+      },
+      "classic_anchored_fill": {
+        "baseline_mean_locked": 58.5,
+        "selected_mean_locked": 148.9,
+        "delta": 90.4
+      },
+      "rare_six": {
+        "baseline_mean_locked": 43.1,
+        "selected_mean_locked": 87.55,
+        "delta": 44.449999999999996
+      },
+      "rare_six_fill": {
+        "baseline_mean_locked": 65.75,
+        "selected_mean_locked": 122.35,
+        "delta": 56.599999999999994
+      },
+      "rare_six_anchored": {
+        "baseline_mean_locked": 35.5,
+        "selected_mean_locked": 70.7,
+        "delta": 35.2
+      },
+      "rare_six_anchored_fill": {
+        "baseline_mean_locked": 44.25,
+        "selected_mean_locked": 102.35,
+        "delta": 58.099999999999994
+      },
+      "rare_seven": {
+        "baseline_mean_locked": 35.1,
+        "selected_mean_locked": 64.6,
+        "delta": 29.499999999999993
+      },
+      "rare_seven_fill": {
+        "baseline_mean_locked": 43.95,
+        "selected_mean_locked": 80.6,
+        "delta": 36.64999999999999
+      },
+      "rare_seven_anchored": {
+        "baseline_mean_locked": 31.05,
+        "selected_mean_locked": 57.8,
+        "delta": 26.749999999999996
+      },
+      "rare_seven_anchored_fill": {
+        "baseline_mean_locked": 42.85,
+        "selected_mean_locked": 66.75,
+        "delta": 23.9
+      }
+    },
+    "per_mode_regressions": {}
+  },
+  "methodology": [
+    "Each policy supports all twelve feature combinations; no mode-specific model selection.",
+    "Candidates are selected by equal-weight macro mean survival on eight shared development seeds per mode.",
+    "The original baseline is an eligible candidate; exact ties follow the fixed candidate order, baseline first.",
+    "Selected weights are frozen and development seeds added to validation lineage before held-out evaluation.",
+    "Test comparison uses the same twenty untouched seeds per mode and the identical engine binary.",
+    "The percentile bootstrap resamples the twenty shared seed clusters, retaining all twelve modes together.",
+    "Candidate budgets list the latest PPO phase plus inherited imitation budget; earlier baseline training is shared."
+  ],
+  "limitations": [
+    "One training seed per configuration; there are no independent replicate training runs.",
+    "The confidence interval covers evaluation-seed variation only, not training randomness or adaptive search.",
+    "Development results were used adaptively to choose experiments and are not independent generalization evidence.",
+    "Imitation and teacher-guided PPO use extra teacher labels; they are not equal-data-budget pure-PPO comparisons.",
+    "Environment balance, optimizer stability changes and schedule changes are bundled; this is not a causal ablation.",
+    "Survival is capped at 300 pieces, and twenty test seeds per mode provide limited evidence for long-tail performance.",
+    "Policy actions select legal final placements; the experiment does not measure real-time keyboard control."
+  ]
+}

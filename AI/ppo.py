@@ -86,6 +86,7 @@ def train(args):
   mode_cycle = []
   training_seeds, episodes, history = [], [], []
   initial_metadata = {'observation_version': version, 'objective': args.objective,
+    'color_conditioned': model.color_conditioned,
     'color_profile': 'mixed' if mixed_features else modes[0].color_profile,
     'game_modes': [mode.options() for mode in modes], 'max_pieces': args.max_pieces,
     'training_seed': args.seed, 'training_seeds': list(parent['training_seeds']) if parent else [],
@@ -153,7 +154,7 @@ def train(args):
 def load_model(path):
   checkpoint = torch.load(path, map_location='cpu', weights_only=True)
   metadata = checkpoint['metadata']
-  model = ActorCritic(metadata['observation_version'])
+  model = ActorCritic(metadata['observation_version'], color_conditioned=metadata.get('color_conditioned', False))
   model.load_state_dict(checkpoint['weights'])
   model.eval()
   return model, metadata

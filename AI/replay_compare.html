@@ -27,7 +27,7 @@
 </style>
 <main>
   <h1 id="title">AI replay comparison</h1>
-  <div class="controls"><label for="seed">Seed</label><select id="seed"></select><span id="meta"></span></div>
+  <div class="controls"><label id="seed-label" for="seed">Seed</label><select id="seed"></select><span id="meta"></span></div>
   <div class="boards">
     <section class="board"><select id="before-policy" aria-label="Left policy"></select><canvas id="before" width="300" height="540" aria-label="Left replay board"></canvas><div class="stats" id="before-stats"></div><p class="stats" id="before-result"></p></section>
     <section class="board"><select id="after-policy" aria-label="Right policy"></select><canvas id="after" width="300" height="540" aria-label="Right replay board"></canvas><div class="stats" id="after-stats"></div><p class="stats" id="after-result"></p></section>
@@ -38,7 +38,7 @@
     <select id="speed" aria-label="Playback speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
   </div>
   <p>Aligned by placed-piece number; playback is normalized within each turn.</p>
-  <details id="benchmark" hidden><summary id="benchmark-summary"></summary><table><thead><tr><th>Policy</th><th>Mean pieces</th><th>Mean score</th><th>Gold clear games</th></tr></thead><tbody id="benchmark-rows"></tbody></table></details>
+  <details id="benchmark" hidden><summary id="benchmark-summary"></summary><table><thead><tr><th>Policy</th><th>Mean pieces</th><th>Mean score</th><th id="benchmark-metric">Gold clear games</th></tr></thead><tbody id="benchmark-rows"></tbody></table></details>
 </main>
 <script id="replay-data" type="application/json">__REPLAY_DATA__</script>
 <script>__REPLAY_SCRIPT__</script>

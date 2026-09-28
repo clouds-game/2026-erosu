@@ -54,6 +54,7 @@ jobs:
       - run: python -m unittest discover -s tools -p 'test_afterstate.py'
       - run: python -m unittest discover -s tools -p 'test_dagger.py'
       - run: python -m unittest discover -s tools -p 'test_neural_compare.py'
+      - run: python -m unittest discover -s tools -p 'test_multi_mode_demo.py'
 
   desktop:
     name: Desktop (${{ matrix.target }})

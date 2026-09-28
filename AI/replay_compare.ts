@@ -1,18 +1,19 @@
 (() => {
   type Cell = { x: number; y: number };
-  type Piece = { color: number; cells: Cell[] };
+  type Piece = { color: number; cells: Cell[]; anchored?: boolean };
   type Frame = {
     pieces: Piece[]; active: Piece | null; wave: { pieces: Piece[] } | null;
     phase: string; score: number; locked: number; cleared: number; best_chain: number; repeat?: number;
   };
   type Result = { score: number; locked: number; best_chain: number; capped?: boolean; truncated?: boolean };
   type Policy = { name: string; result: Result; turns: Frame[][] };
-  type Scenario = { seed: number; policies: Policy[] };
-  type Benchmark = { name: string; mean_locked: number; mean_score: number; gold_clear_episodes: number };
+  type Scenario = { seed: number; policies: Policy[]; label?: string; game_mode?: string };
+  type Benchmark = { name: string; mean_locked: number; mean_score: number; gold_clear_episodes?: number; capped?: number };
   type ReplayData = {
     title?: string; seed: number; max_pieces: number; colors: { hex: string; mark: string }[];
     policies: Policy[]; scenarios?: Scenario[]; benchmark?: Benchmark[]; benchmark_episodes?: number;
     benchmark_summary?: string;
+    benchmark_metric?: 'gold_clear_episodes' | 'capped';
   };
   function element<T extends HTMLElement>(id: string): T {
     const result = document.getElementById(id);
@@ -32,15 +33,18 @@
   const title = data.title ?? 'Before / after training';
   document.title = title;
   element('title').textContent = title;
-  scenarios.forEach((s, index) => seedSelect.add(new Option(String(s.seed), String(index))));
+  scenarios.forEach((s, index) => seedSelect.add(new Option(s.label ?? String(s.seed), String(index))));
+  if (scenarios.some(s => s.game_mode)) element('seed-label').textContent = 'Mode / seed';
   seedSelect.disabled = scenarios.length === 1;
   if (data.benchmark) {
+    const metric = data.benchmark_metric ?? 'gold_clear_episodes';
+    element('benchmark-metric').textContent = metric === 'capped' ? 'Limit reached' : 'Gold clear games';
     element('benchmark').hidden = false;
     element('benchmark-summary').textContent = data.benchmark_summary ?? `${data.benchmark_episodes} independent evaluation seeds`;
     data.benchmark.forEach(row => {
       const tr = document.createElement('tr');
       [row.name, row.mean_locked.toFixed(1), Math.round(row.mean_score).toLocaleString(),
-        `${row.gold_clear_episodes}/${data.benchmark_episodes}`].forEach(value => {
+        `${row[metric] ?? 0}/${data.benchmark_episodes}`].forEach(value => {
         const td = document.createElement('td');
         td.textContent = value;
         tr.append(td);
@@ -62,6 +66,12 @@
           ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
         }
       }
+    }
+    if (p.anchored) {
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      for (const c of p.cells) ctx.strokeRect(c.x * 30 + 4, c.y * 30 + 4, 22, 22);
+      ctx.setLineDash([]);
     }
     const first = [...p.cells].sort((a,b) => a.y-b.y || a.x-b.x)[0];
     ctx.fillStyle = '#101319'; ctx.font = '17px system-ui'; ctx.textAlign = 'center';

@@ -9,6 +9,7 @@
     <EmbeddedResource Include="../Localization/strings.json" LogicalName="ChromaDrop.Localization.strings.json" />
     <Compile Include="../Localization/**/*.cs" Link="Localization/%(Filename)%(Extension)" />
 
+    <Compile Include="../Web/Game0BrowserSession.cs" Link="Web/Game0BrowserSession.cs" />
     <Compile Include="../Core/**/*.cs" Link="Core/%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

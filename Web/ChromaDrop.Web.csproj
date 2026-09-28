@@ -8,6 +8,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="../Assets/Fonts/*.otf;../Assets/Fonts/*.txt;../Assets/Fonts/*.md" Link="wwwroot/fonts/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Assets/Cats/cat-cell.png;../Assets/Cats/SOURCE.md" Link="wwwroot/assets/Cats/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../Assets/PixelUI/sheet.png;../Assets/PixelUI/*.txt" Link="wwwroot/assets/PixelUI/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../Assets/PixelUI/Ancient/tan.png" Link="wwwroot/assets/PixelUI/Ancient/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../Assets/PixelUI/Pattern/quiet.png" Link="wwwroot/assets/PixelUI/Pattern/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../Assets/Icons/rotate-clockwise.png;../Assets/Icons/rotate-counterclockwise.png;../Assets/Icons/SOURCE.md" Link="wwwroot/assets/Icons/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <EmbeddedResource Include="../Localization/strings.json" LogicalName="ChromaDrop.Localization.strings.json" />
     <Compile Include="../Localization/**/*.cs" Link="Localization/%(Filename)%(Extension)" />
     <Content Include="../Localization/strings.json" Link="wwwroot/locales.json" CopyToOutputDirectory="PreserveNewest" />

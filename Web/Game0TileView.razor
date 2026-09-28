@@ -1,0 +1,19 @@
+<svg x="@N(X)" y="@N(Y)" width="@N(Size)" height="@N(Size)" viewBox="54 18 16 16" preserveAspectRatio="none" opacity="@N(Alpha)" aria-hidden="true">
+  <image href="assets/PixelUI/sheet.png" width="538" height="592" filter="@TintFilter" />
+</svg>
+@if (Cat)
+{
+  <image href="assets/Cats/cat-cell.png" x="@N(X + Size * 0.025)" y="@N(Y + Size * 0.025)" width="@N(Size * 0.95)" height="@N(Size * 0.95)" opacity="@N(Alpha)" aria-hidden="true" />
+}
+
+@code {
+  [Parameter] public double X { get; set; }
+  [Parameter] public double Y { get; set; }
+  [Parameter] public double Size { get; set; }
+  [Parameter] public Shape Shape { get; set; }
+  [Parameter] public bool Cat { get; set; }
+  [Parameter] public bool Center { get; set; }
+  [Parameter] public double Alpha { get; set; } = 1;
+  private string TintFilter => Center ? "url(#game0-cream)" : $"url(#game0-color-{(Cat ? 2 : (int)Shape)})";
+  private static string N(double number) => Game0Svg.Number(number);
+}

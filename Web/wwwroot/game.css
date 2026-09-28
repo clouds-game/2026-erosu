@@ -1,77 +1,66 @@
-@font-face { font-family: ChromaSC; src: url('fonts/ChromaUI-SC.otf?v=challenge-3') format('opentype'); font-display: swap; }
-@font-face { font-family: ChromaJP; src: url('fonts/ChromaUI-JP.otf?v=challenge-3') format('opentype'); font-display: swap; }
-html:lang(zh-CN) { font-family: ChromaSC, sans-serif; }
-html:lang(ja) { font-family: ChromaJP, sans-serif; }
-:root { color-scheme: dark; font-family: system-ui, sans-serif; color: #e6edf3; background: #101319; }
+@font-face {
+  font-family: ChromaSC;
+  src: url('fonts/ChromaUI-SC.otf?v=game0-1') format('opentype');
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  font-family: ChromaSC, system-ui, sans-serif;
+  color: #f6f1e4;
+  background: #246ab3;
+}
+
 * { box-sizing: border-box; }
 body { margin: 0; }
-button, select { font: inherit; color: inherit; background: #222a35; border: 1px solid #344052; border-radius: 4px; padding: 9px 12px; cursor: pointer; touch-action: manipulation; }
-button:hover { background: #303e4d; }
-button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #8ee2c4; outline-offset: 3px; }
-button:disabled { opacity: .4; cursor: default; }
+#app, .game0 {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
 
-#app { height: 100vh; height: 100dvh; padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
-.game { container-type: size; --sidebar: 210px; --gap: 20px; display: grid; grid-template-columns: minmax(0, 400px) var(--sidebar); grid-template-rows: minmax(0, 1fr) 44px; gap: 8px var(--gap); width: min(100%, calc(400px + var(--sidebar) + var(--gap))); height: 100%; max-height: 780px; margin: auto; }
-.playfield { position: relative; border: 1px solid #394452; align-self: center; justify-self: center; height: min(100%, calc((100cqw - var(--sidebar) - var(--gap)) * 1.8)); max-width: 100%; aspect-ratio: 5 / 9; min-height: 0; }
-.playfield > svg { width: 100%; height: 100%; display: block; }
-.outline { fill: none; stroke: #101319; stroke-width: 3; }
-.mark { color: #101319; fill: none; stroke: currentColor; opacity: .4; stroke-width: 1.2; }
-aside { line-height: 1.35; grid-column: 2; grid-row: 1 / -1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
-.overview, .actions { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.muted, .keys, dl { color: #8391a5; font-size: 13px; }
-#score { font-size: 34px; line-height: 1.2; font-weight: 500; font-variant-numeric: tabular-nums; }
-.next-label { margin-top: 8px; }
-.previews { display: flex; gap: 4px; }
-.previews svg { height: 48px; width: 0; flex: 1; }
-dl { display: grid; grid-template-columns: 1fr auto; gap: 6px; margin: 6px 0 0; }
-dd { margin: 0; }
-.keys { line-height: 1.6; margin: 0 0 4px; }
-aside button { font-size: 13px; padding: 7px 4px; }
-.downloads { font-size: 12px; color: #8391a5; text-align: center; overflow-wrap: anywhere; }
-.language { display: flex; flex-direction: column; gap: 4px; color: #8391a5; font-size: 12px; }
-.language select { width: 100%; min-width: 0; color: #e6edf3; padding: 6px; }
-.touch { display: flex; gap: 4px; grid-column: 1; grid-row: 2; min-width: 0; }
-.touch button { flex: 1; min-width: 0; padding: 4px; font-size: 13px; }
-.touch button:last-child { flex: 2; }
-.overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px; background: #101319df; }
-.overlay strong { font-size: 28px; font-weight: 500; }
-.overlay small { color: #8391a5; }
-.notice { position: absolute; top: 16%; left: 3%; right: 3%; padding: 12px 5px; text-align: center; background: #101319ee; font-size: 13px; pointer-events: none; }
-.loading { text-align: center; margin-top: 40vh; color: #8391a5; }
-#blazor-error-ui { display: none; position: fixed; bottom: 0; padding: 16px; width: 100%; background: #68262c; }
+.game0-surface {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  image-rendering: pixelated;
+}
+
+.game0-surface:focus { outline: none; }
+.game0-score { font-size: 34px; }
+.game0-over { font-size: 45px; }
+.game0-surface text { pointer-events: none; }
+
+.game0-surface button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 1px solid #555;
+  border-radius: 3px;
+  font: inherit;
+  font-size: var(--game0-control-font, 24px);
+  color: #e0e0e0;
+  background: #333;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.game0-surface button:hover { background: #404040; }
+.game0-surface button:active { background: #242424; }
+.game0-surface button:focus-visible { outline: 3px solid #f6f1e4; outline-offset: -5px; }
+.game0-surface button:disabled { opacity: 0.4; cursor: default; }
+.loading { margin: 40vh auto 0; text-align: center; }
+#blazor-error-ui {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 16px;
+  background: #68262c;
+}
 #blazor-error-ui a { color: white; }
-@media (max-width: 580px) {
-  .game { --sidebar: 124px; --gap: 8px; }
-  aside { gap: 8px; }
-  .muted, dl, aside button, .downloads, .language { font-size: 11px; }
-  #score { font-size: 26px; }
-  .previews svg { height: 32px; }
-  .keys { display: none; }
-  .touch { grid-column: 1 / -1; }
-  aside { grid-row: 1; }
-  .notice { font-size: 11px; }
-  .overlay strong { font-size: 19px; }
-  .overlay { gap: 12px; text-align: center; }
-}
-@media (max-height: 680px) {
-  aside { gap: 6px; }
-  .overview, .actions { gap: 4px; }
-  .keys { display: none; }
-  .next-label { margin-top: 2px; }
-  #score { font-size: 26px; }
-  .previews svg { height: 28px; }
-  dl { gap: 3px; margin-top: 2px; }
-  aside button { padding: 4px; }
-}
-@media (max-height: 540px) and (min-width: 480px) {
-  .game { --sidebar: clamp(260px, 39vw, 330px); --gap: 16px; }
-  aside { display: grid; grid-template-columns: 1fr 1fr; align-content: center; align-items: start; gap: 12px; }
-  .muted, dl, aside button { font-size: 12px; }
-}
-
-.mode { width: 100%; min-width: 0; padding: 6px 3px; font-size: 12px; }
-.puzzle-goal { font-size: 13px; margin: 4px 0; }
-@media (max-height: 680px), (max-width: 580px) {
-  .mode, .puzzle-goal { font-size: 11px; }
-  .mode { padding: 4px 2px; }
-}

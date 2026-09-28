@@ -38,4 +38,20 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 - `Assets/PixelUI/`：项目现有 Kenney 像素界面资源；`Assets/Cats/`：经用户选择的黑猫头素材及 CC BY 4.0 来源记录。
 - `Tests/Game0Tests.cs`：Game0 规则测试。
 
-旧版 Web、AI 和回放实验仍保存在分支中，尚未迁移到新玩法。
+## 网页试玩
+
+[打开 Game0](https://clouds-game.github.io/2026-erosu/?branch=lingjiuu-game0)，也可直接访问 [独立页面](https://clouds-game.github.io/2026-erosu/lingjiuu-game0/)。推送到本分支后，GitHub Actions 自动运行规则与浏览器输入测试，再更新 Pages。
+
+网页使用同一份 `Game0Session` 规则和原型已有素材，保留拖拽、旋转、猫猫四边入口、75 秒 Lock、投放动画及暂停。失焦会暂停并取消拖拽；使用 F5 重新开始。猫猫及界面资源的来源和许可随构建发布于 `assets/`。
+
+本地运行：
+
+```sh
+npm ci --prefix Web --ignore-scripts
+npm run build --prefix Web
+dotnet run --project Web/ChromaDrop.Web.csproj
+```
+
+`Web/Game0BrowserSession.cs` 是纯 C# 的浏览器输入与动画适配层，由规则测试项目直接验证。网页指针桥接测试可运行 `python3 -m unittest discover -s tools -p 'test_web_interop.py'`。
+
+旧版 AI 和回放实验仍保存在分支中，尚未迁移到新玩法。

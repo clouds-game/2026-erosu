@@ -1,0 +1,28 @@
+@for (var row = 0; row < 3; row++)
+{
+  @for (var column = 0; column < 3; column++)
+  {
+    <svg x="@N(X + _targetX[column])" y="@N(Y + _targetY[row])" width="@N(_targetX[column + 1] - _targetX[column])" height="@N(_targetY[row + 1] - _targetY[row])" viewBox="@Crop(column, row)" preserveAspectRatio="none" aria-hidden="true">
+      <image href="assets/PixelUI/Ancient/tan.png" width="48" height="48" />
+    </svg>
+  }
+}
+<rect x="@N(X + 13)" y="@N(Y + 13)" width="@N(Width - 26)" height="@N(Height - 26)" fill="#0d2948" />
+
+@code {
+  [Parameter] public double X { get; set; }
+  [Parameter] public double Y { get; set; }
+  [Parameter] public double Width { get; set; }
+  [Parameter] public double Height { get; set; }
+  private static readonly double[] SourceEdges = [0, 8, 40, 48];
+  private double[] _targetX = [];
+  private double[] _targetY = [];
+  protected override void OnParametersSet()
+  {
+    _targetX = [0, 13, Width - 13, Width];
+    _targetY = [0, 13, Height - 13, Height];
+  }
+  private static string N(double number) => Game0Svg.Number(number);
+  private static string Crop(int column, int row) =>
+    $"{N(SourceEdges[column])} {N(SourceEdges[row])} {N(SourceEdges[column + 1] - SourceEdges[column])} {N(SourceEdges[row + 1] - SourceEdges[row])}";
+}

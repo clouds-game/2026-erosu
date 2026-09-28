@@ -1,287 +1,125 @@
-@using ChromaDrop.Localization
+@using ChromaDrop.Core.Game0
 @implements IAsyncDisposable
-@inject IJSRuntime JS
 
-@if (ready)
-{
-  <main class="game">
-    <section class="playfield" aria-label="@T("board")">
-      <svg viewBox="0 0 400 720" role="img" aria-label="@T("board_description")">
-        <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="#303946" /></pattern></defs>
-        <rect width="400" height="720" fill="#1b212c" />
-        <rect width="400" height="720" fill="url(#grid)" />
-        @foreach (var piece in game.Board.Pieces) { <PieceView @key="piece.Id" Piece="piece" /> }
-        @if (game.Phase == GamePhase.Falling)
-        {
-          @if (game.Ghost() is { } ghost) { <PieceView Piece="ghost" Ghost="true" /> }
-          @if (game.Active is { } active) { <PieceView Piece="active" /> }
-        }
-        @if (game.Wave is { } wave)
-        {
-          <g opacity="@(1 - game.ClearProgress * 0.8)">
-            @foreach (var piece in wave.Pieces) { <PieceView Piece="piece" /> }
-          </g>
-        }
-      </svg>
-      @if (game.Paused || game.IsFinished)
+<main class="game0">
+  <svg class="game0-surface" style="@($"--game0-control-font: {N(24 / _scale)}px")" viewBox="0 0 1448 1086" preserveAspectRatio="xMidYMid meet" role="application" aria-label="Game0" aria-busy="@(!_ready)" tabindex="0" @ref="_surface">
+    <defs>
+      @for (var i = 0; i < ShapeColors.Length; i++)
       {
-        <div class="overlay">
-          <strong>@T(game.Paused ? "paused" : game.Phase == GamePhase.Won ? PuzzleLevels.CompletionKey(game.Puzzle!) : game.Puzzle is not null ? "puzzle_failed" : "game_over")</strong>
-          <button @onclick="Confirm">@T(game.Paused ? "resume" : game.Phase == GamePhase.Won ? PuzzleLevels.ContinueKey(game.Puzzle!) : "play_again")</button>
-          <small>@(game.Paused ? T("resume_hint") : T("score_value", UiText.Number(game.Score)))</small>
-        </div>
+        <filter id="@($"game0-color-{i}")" color-interpolation-filters="sRGB">
+          <feColorMatrix type="matrix" values="@Game0Svg.TintMatrix(ShapeColors[i])" />
+        </filter>
       }
-      else if (notice_key.Length > 0) { <div class="notice" role="status">@T(notice_key, notice_arguments)</div> }
-    </section>
-    <aside>
-      <div class="overview">
-        <select class="mode" aria-label="@T("mode")" value="@selected_level" @onchange="SelectLevel" @onfocus="PauseForFocus">
-          <option value="0">@T("free_play")</option>
-          @foreach (var tutorial in new[] { false, true })
-          {
-            <optgroup label="@T(tutorial ? "learn" : "challenges")">
-              @foreach (var level in PuzzleLevels.All.Where(level => level.IsTutorial == tutorial))
-              {
-                <option value="@level.Number">@T("puzzle_label", PuzzleLevels.DisplayNumber(level), T(level.TitleKey))@(IsCompleted(level.Number) ? " *" : "")</option>
-              }
-            </optgroup>
-          }
-        </select>
-        <span class="muted">@T("score")</span><strong id="score">@UiText.Number(game.Score)</strong>
-        @if (game.Puzzle is { } puzzle)
-        {
-          <p class="puzzle-goal">@T(puzzle.GoalKey, puzzle.Target)</p>
-          <dl><dt>@T("remaining")</dt><dd>@game.Remaining</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd></dl>
-          @if (!puzzle.IsTutorial && game.Next.Count > 0)
-          {
-            <span class="muted">@T("sequence")</span>
-            <div class="previews">
-              @foreach (var piece in game.Next)
-              {
-                <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
-              }
-            </div>
-          }
-          @if (IsCompleted(puzzle.Number)) { <span class="muted">@T("completed")</span> }
-        }
-        else
-        {
-          <span class="muted">@T("best", UiText.Number(best))</span>
-          <span class="next-label muted">@T("next")</span>
-          <div class="previews">
-            @foreach (var piece in game.Next)
-            {
-              <svg viewBox="-20 -10 200 100" role="img" aria-label="@T("preview", piece.Shape, piece.Color + 1)"><PieceView Piece="piece" /></svg>
-            }
-          </div>
-          <dl><dt>@T("level")</dt><dd>@game.Level</dd><dt>@T("cleared")</dt><dd id="cleared">@game.Cleared</dd><dt>@T("chain")</dt><dd>×@game.BestChain</dd></dl>
-        }
-      </div>
-      <div class="actions">
-        <p class="keys">← → @T("move")<br />↑ @T("rotate") · ↓ @T("soft_drop")<br />Space @T("drop") · P @T("pause")</p>
-        <button @onclick="TogglePause" disabled="@game.IsFinished">@T(game.Paused ? "resume" : "pause") [P]</button>
-        <button @onclick="() => Start()">@T("restart") [R]</button>
-        <button @onclick="ShowHintOrDemo" disabled="@(game.Puzzle is not null && game.IsFinished)">@T(game.Puzzle is null ? "demo" : "hint") [F2]</button>
-        <button @onclick="ToggleSound">@T(sound_enabled ? "sound_on" : "sound_off") [M]</button>
-        <label class="language"><span>@T("language")</span>
-          <select value="@texts.Language" @onchange="ChangeLanguage" @onfocus="PauseForFocus">
-            @for (var i = 0; i < UiText.Languages.Length; i++)
-            {
-              <option value="@UiText.Languages[i]">@UiText.LanguageNames[i]</option>
-            }
-          </select>
-        </label>
-        <a class="downloads" href="https://github.com/clouds-game/2026-erosu/releases/tag/nightly">@T("downloads")</a>
-      </div>
-    </aside>
-    <nav class="touch" aria-label="@T("controls")">
-      <button aria-label="@T("left")" @onclick="() => game.Move(-1, 0)">←</button>
-      <button aria-label="@T("rotate")" @onclick="() => game.Rotate()">↻</button>
-      <button aria-label="@T("right")" @onclick="() => game.Move(1, 0)">→</button>
-      <button aria-label="@T("down")" @onclick="() => game.Move(0, 1)">↓</button>
-      <button @onclick="game.HardDrop">@T("drop")</button>
-    </nav>
-  </main>
-}
-
-@code {
-  private GameSession game = null!;
-  private IJSObjectReference? interop;
-  private DotNetObjectReference<App>? callback;
-  private readonly CancellationTokenSource cancellation = new();
-  private readonly HashSet<string> held = [];
-  private Task? loop;
-  private int selected_level = PuzzleLevels.DefaultLevel;
-  private int completed_levels;
-  private bool ready;
-  private int best;
-  private bool sound_enabled;
-  private readonly UiText texts = new();
-  private string notice_key = "";
-  private object[] notice_arguments = [];
-  private string T(string key, params object[] arguments) => texts.Get(key, arguments);
-  private double notice_time;
-  private int held_direction;
-  private double repeat_time;
-  private bool repeating;
-
-  protected override void OnInitialized() => Start();
-
-  protected override async Task OnAfterRenderAsync(bool firstRender)
-  {
-    if (!firstRender) return;
-    interop = await JS.InvokeAsync<IJSObjectReference>("import", "./interop.js?v=challenge-3");
-    texts.SetLanguage(await interop.InvokeAsync<string>("loadLanguage"));
-    await interop.InvokeVoidAsync("setLanguage", texts.Language);
-    best = await interop.InvokeAsync<int>("loadBest");
-    completed_levels = (await interop.InvokeAsync<int>("loadCompleted")) & PuzzleLevels.ProgressMask;
-    callback = DotNetObjectReference.Create(this);
-    await interop.InvokeVoidAsync("connect", callback);
-    ready = true;
-    StateHasChanged();
-    loop = RunLoop();
-  }
-
-  private async Task ChangeLanguage(ChangeEventArgs args)
-  {
-    texts.SetLanguage(args.Value?.ToString());
-    if (interop is not null) await interop.InvokeVoidAsync("setLanguage", texts.Language);
-  }
-
-  private async Task RunLoop()
-  {
-    using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(33));
-    var clock = System.Diagnostics.Stopwatch.StartNew();
-    var previous = clock.Elapsed.TotalSeconds;
-    try
+      <filter id="game0-cream" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="@Game0Svg.TintMatrix("f6f1e4")" /></filter>
+      <filter id="game0-pattern-tint" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="@Game0Svg.TintMatrix("1f406e")" /></filter>
+      <pattern id="game0-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
+        <image href="assets/PixelUI/Pattern/quiet.png" width="48" height="48" opacity="0.04" filter="url(#game0-pattern-tint)" />
+      </pattern>
+    </defs>
+    <rect width="1448" height="1086" fill="#246ab3" />
+    <rect width="1448" height="1086" fill="url(#game0-pattern)" />
+    <Game0FrameView X="158" Y="137" Width="1132" Height="180" />
+    @for (var i = 0; i < Game0Session.HandSize; i++)
     {
-      while (await timer.WaitForNextTickAsync(cancellation.Token))
+      @if (_browser.Session.Hand[i] is { } shape)
       {
-        var now = clock.Elapsed.TotalSeconds;
-        var delta = Math.Min(0.05, now - previous);
-        previous = now;
-        var direction = (held.Contains("ArrowRight") || held.Contains("KeyD") ? 1 : 0) -
-          (held.Contains("ArrowLeft") || held.Contains("KeyA") ? 1 : 0);
-        if (game.AcceptsInput && direction != 0)
+        var slot = Game0BrowserSession.HandSlot(i);
+        @if (_browser.Session.Locked && _browser.Session.CanSelect(PieceSource.Hand, i))
         {
-          if (direction != held_direction)
-          {
-            game.Move(direction, 0);
-            repeat_time = 0;
-            repeating = false;
-          }
-          else
-          {
-            repeat_time += delta;
-            if (repeat_time >= (repeating ? 0.075 : 0.18))
-            {
-              game.Move(direction, 0);
-              repeat_time = 0;
-              repeating = true;
-            }
-          }
+          <rect x="@N(slot.X - 2)" y="@N(slot.Y - 2)" width="@N(slot.Width + 4)" height="@N(slot.Height + 4)" fill="none" stroke="#f6f1e4" stroke-width="3" />
         }
-        held_direction = game.AcceptsInput ? direction : 0;
-        game.Advance(delta, held.Contains("ArrowDown") || held.Contains("KeyS"));
-        if (!game.Paused && (notice_time -= delta) <= 0) notice_key = "";
-        if (game.Phase == GamePhase.Won && !IsCompleted(selected_level))
+        @foreach (var tile in MiniTiles(shape, false, slot))
         {
-          completed_levels |= 1 << (selected_level - 1);
-          if (interop is not null) await interop.InvokeVoidAsync("saveCompleted", completed_levels);
+          <Game0TileView X="tile.X" Y="tile.Y" Size="tile.Size" Shape="shape" Alpha="@(InMotion(PieceSource.Hand, i) ? 0.4 : 1)" />
         }
-        if (game.Puzzle is null && game.Score > best)
-        {
-          best = game.Score;
-          if (interop is not null) await interop.InvokeVoidAsync("saveBest", best);
-        }
-        await InvokeAsync(StateHasChanged);
       }
     }
-    catch (OperationCanceledException) { }
-  }
-
-  private void Start(bool demo = false)
-  {
-    if (demo) selected_level = 0;
-    game = demo ? GameSession.CreateDemo() : selected_level == 0 ? new GameSession() : new GameSession(PuzzleLevels.All[selected_level - 1]);
-    held.Clear();
-    held_direction = 0;
-    notice_key = game.Puzzle is { IsTutorial: false } ? "challenge_intro" : game.Puzzle is not null ? "puzzle_intro" : demo ? "demo_hint" : "intro";
-    notice_arguments = [];
-    notice_time = 3;
-    game.Matched += wave =>
+    <rect x="383" y="360" width="636" height="636" fill="#112e50" />
+    @for (var y = 0; y < Game0Session.Size; y++)
     {
-      notice_key = "match";
-      notice_arguments = [wave.Pieces.Count, UiText.Number(wave.Points), wave.Chain];
-      notice_time = 1.8;
-      PlayTone(360 + wave.Chain * 140, 0.25);
-    };
-    game.PieceLocked += () => PlayTone(160, 0.08);
-  }
-
-  [JSInvokable]
-  public void KeyChanged(string key, bool pressed)
-  {
-    if (!pressed) { held.Remove(key); return; }
-    held.Add(key);
-    switch (key)
-    {
-      case "ArrowUp": case "KeyW": game.Rotate(); break;
-      case "Space": game.HardDrop(); break;
-      case "KeyP": case "Escape": TogglePause(); break;
-      case "KeyR": Start(); break;
-      case "F2": ShowHintOrDemo(); break;
-      case "KeyM": ToggleSound(); break;
-      case "Enter": Confirm(); break;
+      @for (var x = 0; x < Game0Session.Size; x++)
+      {
+        <rect x="@N(383 + x * Game0BrowserSession.CellSize)" y="@N(360 + y * Game0BrowserSession.CellSize)" width="@N(Game0BrowserSession.CellSize)" height="@N(Game0BrowserSession.CellSize)" fill="@((x + y) % 2 == 1 ? "#193b62" : "none")" stroke="#4a719a" stroke-opacity="0.45" stroke-width="1" />
+      }
     }
-  }
-
-  [JSInvokable]
-  public void PauseForFocus() { game.SetPaused(true); held.Clear(); }
-  private void TogglePause() { game.SetPaused(!game.Paused); held.Clear(); }
-  private void Confirm()
-  {
-    if (game.Phase == GamePhase.Won)
+    @foreach (var (cell, tile) in _browser.Session.Tiles)
     {
-      completed_levels |= 1 << (selected_level - 1);
-      if (interop is not null) _ = interop.InvokeVoidAsync("saveCompleted", completed_levels);
-      selected_level = PuzzleLevels.NextLevel(selected_level);
-      Start();
+      <Game0TileView X="@(383 + cell.X * Game0BrowserSession.CellSize)" Y="@(360 + cell.Y * Game0BrowserSession.CellSize)" Size="Game0BrowserSession.CellSize" Shape="tile.Shape" Cat="tile.Cat" />
     }
-    else if (game.Phase == GamePhase.Over) Start();
-    else if (game.Paused) TogglePause();
-  }
-  private bool IsCompleted(int number) => number > 0 && (completed_levels & (1 << (number - 1))) != 0;
-  private void SelectLevel(ChangeEventArgs args)
-  {
-    if (!int.TryParse(args.Value?.ToString(), out var number) || number < 0 || number > PuzzleLevels.All.Count) return;
-    selected_level = number;
-    Start();
-  }
-  private void ShowHintOrDemo()
-  {
-    if (game.Puzzle is null) { Start(true); return; }
-    game.SetPaused(false);
-    held.Clear();
-    notice_key = game.Puzzle.HintKey;
-    notice_arguments = [];
-    notice_time = 12;
-  }
-  private void ToggleSound() { sound_enabled = !sound_enabled; PlayTone(500, 0.1); }
-  private void PlayTone(int frequency, double duration)
-  {
-    if (sound_enabled && interop is not null) _ = interop.InvokeVoidAsync("tone", frequency, duration);
-  }
-  public async ValueTask DisposeAsync()
-  {
-    cancellation.Cancel();
-    if (loop is not null) await loop;
-    if (interop is not null)
+    <Game0TileView X="@(383 + Game0Session.Center * Game0BrowserSession.CellSize)" Y="@(360 + Game0Session.Center * Game0BrowserSession.CellSize)" Size="Game0BrowserSession.CellSize" Center="true" />
+    @if (_browser.Falling is { } fall)
     {
-      await interop.InvokeVoidAsync("disconnect");
-      await interop.DisposeAsync();
+      @if (fall.Blocked && fall.Side == EntrySide.Top)
+      {
+        <rect x="@N(383 + fall.Lane * Game0BrowserSession.CellSize)" y="355" width="@N((fall.Cells.Max(cell => cell.X) + 1) * Game0BrowserSession.CellSize)" height="5" fill="#f16670" />
+      }
+      @foreach (var cell in fall.Cells)
+      {
+        var x = 383 + (fall.Origin.X + cell.X) * Game0BrowserSession.CellSize;
+        var y = 360 + (fall.Origin.Y + cell.Y) * Game0BrowserSession.CellSize;
+        @if (x + Game0BrowserSession.CellSize > 383 && x < 1019 && y + Game0BrowserSession.CellSize > 360 && y < 996)
+        {
+          <Game0TileView X="x" Y="y" Size="Game0BrowserSession.CellSize" Shape="fall.Shape" Cat="@(fall.Source == PieceSource.Cat)" />
+        }
+      }
     }
-    callback?.Dispose();
-    cancellation.Dispose();
-  }
-}
+    @if (_browser.Dragging && _browser.SelectedShape is { } held)
+    {
+      var cells = Game0Session.ShapeCells(held, _browser.Orientation);
+      @if (_browser.Source == PieceSource.Hand && _browser.CanDrop)
+      {
+        var width = (cells.Max(cell => cell.X) + 1) * Game0BrowserSession.CellSize;
+        var left = 383 + _browser.Lane * Game0BrowserSession.CellSize;
+        <rect x="@N(left)" y="355" width="@N(width)" height="5" fill="#30d6ef" />
+        <svg x="@N(left + (width - 30) / 2)" y="323" width="30" height="30" viewBox="414 453 16 16" preserveAspectRatio="none" aria-hidden="true"><image href="assets/PixelUI/sheet.png" width="538" height="592" /></svg>
+      }
+      @foreach (var cell in cells)
+      {
+        <Game0TileView X="@(_browser.Pointer.X + (cell.X - 1) * Game0BrowserSession.CellSize * 0.7)" Y="@(_browser.Pointer.Y + (cell.Y - 1) * Game0BrowserSession.CellSize * 0.7)" Size="@(Game0BrowserSession.CellSize * 0.7)" Shape="held" Cat="@(_browser.Source == PieceSource.Cat)" Alpha="0.8" />
+      }
+    }
+    <Game0FrameView X="1050" Y="520" Width="272" Height="500" />
+    <line x1="1079" y1="645" x2="1292" y2="645" stroke="#52769a" stroke-width="3" />
+    <line x1="1079" y1="753" x2="1292" y2="753" stroke="#52769a" stroke-width="3" />
+    <image href="@(_browser.Session.ClockwiseNext ? "assets/Icons/rotate-clockwise.png" : "assets/Icons/rotate-counterclockwise.png")" x="1082" y="550" width="84" height="84" aria-hidden="true" />
+    <svg x="1144" y="656" width="84" height="84" viewBox="@(_browser.Session.ClockwiseNext ? "414 469 16 16" : "398 469 16 16")" preserveAspectRatio="none" aria-hidden="true"><image href="assets/PixelUI/sheet.png" width="538" height="592" /></svg>
+    @for (var i = 0; i < Game0Session.RotationPeriod; i++)
+    {
+      <circle cx="@(1192 + i * 28)" cy="590" r="10" fill="@(i < _browser.Session.UntilRotation ? "#f7ce46" : "#274c75")" />
+    }
+    @for (var i = 0; i < Game0Session.CatCapacity; i++)
+    {
+      var slot = Game0BrowserSession.CatSlot(i);
+      <rect x="@N(slot.X)" y="@N(slot.Y)" width="96" height="96" fill="#16395f" stroke="#7d9bbc" stroke-width="3" />
+      @if (_browser.Session.Cats[i] is { } shape)
+      {
+        @foreach (var tile in MiniTiles(shape, true, slot))
+        {
+          <Game0TileView X="tile.X" Y="tile.Y" Size="tile.Size" Shape="shape" Cat="true" Alpha="@(InMotion(PieceSource.Cat, i) ? 0.4 : 1)" />
+        }
+      }
+    }
+    <rect x="383" y="1005" width="636" height="30" fill="@(_browser.Session.Locked ? "#f32735" : "#133553")" />
+    @if (!_browser.Session.Locked)
+    {
+      <rect x="383" y="1005" width="@N(636 * _browser.Session.HandTimeLeft / Game0Session.HandSeconds)" height="30" fill="#23e344" />
+    }
+    <rect x="383" y="1005" width="636" height="30" fill="none" stroke="#07182a" stroke-width="5" />
+    @if (_browser.Paused)
+    {
+      <rect x="383" y="360" width="636" height="636" fill="black" opacity="0.5" />
+    }
+    @if (_browser.Session.IsOver)
+    {
+      <rect x="383" y="360" width="636" height="636" fill="black" opacity="0.65" />
+      <g><text class="game0-over" x="701" y="676" text-anchor="middle" fill="#f6f1e4">GAME OVER</text></g>
+      <foreignObject x="610" y="712" width="180" height="58" data-game0-control="true">
+        <button class="game0-restart" data-game0-control="true" @onclick="Restart">重新开始</button>
+      </foreignObject>
+    }
+    <text class="game0-score" x="239" y="83" fill="#f6f1e4" aria-label="Score">@_browser.Session.Score</text>
+    <foreignObject x="1327" y="38" width="88" height="85" data-game0-control="true">
+      <button class="game0-pause" data-game0-control="true" aria-label="@(_browser.Paused ? "继续" : "暂停")" disabled="@(_browser.Session.IsOver || !_ready)" @onclick="TogglePause">@(_browser.Paused ? "▶" : "Ⅱ")</button>
+    </foreignObject>
+  </svg>
+</main>

@@ -12,6 +12,7 @@ if (args.Contains("--analyze-challenge"))
 var tests = new (string Name, Action Run)[]
 {
   ("Game0 center-ring rules, lock, cats, and ring rewards", Game0Tests.RunAll),
+  ("Game0 browser drag, fall timing, pause, and cat entries", Game0BrowserTests.RunAll),
   ("Locale aliases and unsupported languages resolve consistently", () =>
   {
     foreach (var (input, expected) in new[] { ("en-US", "en"), ("zh_TW", "zh-CN"), ("cn", "zh-CN"), ("ja-JP", "ja"), ("fr", "en"), ("", "en") })

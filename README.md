@@ -85,8 +85,8 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 
 [下载最新 Nightly](https://github.com/clouds-game/2026-erosu/releases/tag/nightly)：每次成功的主分支构建及每天北京时间 02:23 更新同一个滚动预发布，包含 Windows / macOS 包、校验文件和构建提交信息。
 
-详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线入口：[选择分支试玩](https://clouds-game.github.io/2026-erosu/)，可切换 `main`、`develop20260926` 和 `experiment1`。每次分支推送后更新该分支的最新提交；入口显示实际构建提交。
+详见 [持续集成与发布](docs/持续集成与发布.md)。仓库已按用户要求公开并启用 Pages。在线入口：[选择分支试玩](https://clouds-game.github.io/2026-erosu/)，可切换 `main`、`develop20260926`、`experiment1` 和 `lingjiuu-game0`。每次分支推送后更新该分支的最新提交；入口显示实际构建提交。
 
-也可直接打开 [main](https://clouds-game.github.io/2026-erosu/main/)、[develop20260926](https://clouds-game.github.io/2026-erosu/develop20260926/) 或 [experiment1](https://clouds-game.github.io/2026-erosu/experiment1/)。分享入口的 `?branch=experiment1` 链接可直接选中对应分支。
+也可直接打开 [main](https://clouds-game.github.io/2026-erosu/main/)、[develop20260926](https://clouds-game.github.io/2026-erosu/develop20260926/) 、[experiment1](https://clouds-game.github.io/2026-erosu/experiment1/) 或 [Game0](https://clouds-game.github.io/2026-erosu/lingjiuu-game0/)。分享入口的 `?branch=experiment1` 链接可直接选中对应分支。
 
-界面支持 English / 简体中文 / 日本語，可在游戏侧栏切换并记住偏好。详见 [界面国际化](docs/界面国际化.md)。
+原版界面支持 English / 简体中文 / 日本語，可在游戏侧栏切换并记住偏好。Game0 使用与其 Godot 原型一致的独立界面。详见 [界面国际化](docs/界面国际化.md)。

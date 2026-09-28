@@ -22,6 +22,15 @@ REQUIRED_BUILD_FILES = (
 )
 
 
+GAME0_ASSET_FILES = (
+  "assets/Cats/cat-cell.png", "assets/Cats/SOURCE.md",
+  "assets/PixelUI/sheet.png", "assets/PixelUI/Ancient/tan.png",
+  "assets/PixelUI/Pattern/quiet.png", "assets/PixelUI/PixelUI-License.txt",
+  "assets/PixelUI/Pattern-License.txt", "assets/Icons/rotate-clockwise.png",
+  "assets/Icons/rotate-counterclockwise.png", "assets/Icons/SOURCE.md",
+)
+
+
 def validate_branch_name(name):
   if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_.-]*", name):
     raise ValueError(f"Unsafe branch name: {name!r}")
@@ -135,10 +144,13 @@ class BaseParser(HTMLParser):
   def __init__(self):
     super().__init__()
     self.bases = []
+    self.game = None
 
   def handle_starttag(self, tag, attributes):
     if tag == "base":
       self.bases.append([value for name, value in attributes if name == "href"])
+    elif tag == "meta" and dict(attributes).get("name") == "game":
+      self.game = dict(attributes).get("content")
 
 
 def validate_build(directory, base_path):
@@ -154,6 +166,16 @@ def validate_build(directory, base_path):
   parser.feed((directory / "index.html").read_text(encoding="utf-8"))
   if parser.bases != [[base_path]]:
     raise ValueError(f"Expected exactly one base href {base_path!r} in {directory / 'index.html'}")
+  if parser.game == "game0":
+    for name in GAME0_ASSET_FILES:
+      path = directory / name
+      if not path.is_file():
+        raise ValueError(f"Missing Game0 resource: {path}")
+      content = path.read_bytes()
+      if not content or name.endswith(".png") and not content.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ValueError(f"Invalid Game0 resource: {path}")
+    if "connectGame0" not in (directory / "interop.js").read_text(encoding="utf-8"):
+      raise ValueError("The Game0 pointer bridge is missing")
 
 
 def validate_output(output, inputs):

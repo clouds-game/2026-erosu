@@ -97,6 +97,34 @@ class PagesSiteTests(unittest.TestCase):
     self.assertTrue((self.output / ".nojekyll").is_file())
     self.assertEqual((self.output / "selector.js").read_text(), "selector.js")
 
+  def test_game0_is_retained_with_licensed_images_and_pointer_bridge(self):
+    self.snapshot["branches"].append({"name": "lingjiuu-game0", "commit": "d" * 40, "path": "lingjiuu-game0/"})
+    self.prepare_builds()
+    directory = self.artifacts / "pages-web-lingjiuu-game0"
+    index = directory / "index.html"
+    index.write_text(index.read_text().replace("</head>", '<meta name="game" content="game0" /></head>'))
+    (directory / "interop.js").write_text("export function connectGame0() {}")
+    for name in pages_site.GAME0_ASSET_FILES:
+      path = directory / name
+      path.parent.mkdir(parents=True, exist_ok=True)
+      path.write_bytes(b"\x89PNG\r\n\x1a\n" if name.endswith(".png") else b"Asset source and license")
+    self.assemble()
+    self.assertTrue((self.output / "lingjiuu-game0/assets/Cats/SOURCE.md").is_file())
+    self.assertTrue((self.output / "main/index.html").is_file())
+    previous = self.site_files()
+    for name in ["assets/Cats/cat-cell.png", "assets/Cats/SOURCE.md"]:
+      path = directory / name
+      content = path.read_bytes()
+      path.unlink()
+      with self.subTest(name=name), self.assertRaisesRegex(ValueError, "Missing Game0 resource"):
+        self.assemble()
+      self.assertEqual(self.site_files(), previous)
+      path.write_bytes(content)
+    (directory / "interop.js").write_text("Old game keyboard bridge")
+    with self.assertRaisesRegex(ValueError, "pointer bridge"):
+      self.assemble()
+    self.assertEqual(self.site_files(), previous)
+
   def test_user_pages_has_no_repository_prefix(self):
     self.snapshot["repository"] = "Example/example.github.io"
     self.prepare_builds()

@@ -4,6 +4,8 @@ import json
 import time
 import urllib.request
 
+from pages_site import BaseParser, GAME0_ASSET_FILES
+
 
 def fetch(base, path, limit=None):
   with urllib.request.urlopen(base.rstrip("/") + "/" + path, timeout=30) as response:
@@ -11,8 +13,19 @@ def fetch(base, path, limit=None):
 
 
 def verify_web(base):
-  assert b"blazor.webassembly.js" in fetch(base, "")
-  assert b"KeyChanged" in fetch(base, "interop.js")
+  html = fetch(base, "")
+  assert b"blazor.webassembly.js" in html
+  interop = fetch(base, "interop.js")
+  assert b"KeyChanged" in interop
+  parser = BaseParser()
+  parser.feed(html.decode("utf-8"))
+  if parser.game == "game0":
+    assert b"connectGame0" in interop, "Missing Game0 pointer bridge"
+    for name in GAME0_ASSET_FILES:
+      if name.endswith(".png"):
+        assert fetch(base, name, 8) == b"\x89PNG\r\n\x1a\n", f"Invalid Game0 image: {name}"
+      else:
+        assert fetch(base, name), f"Missing Game0 attribution: {name}"
   catalog = json.loads(fetch(base, "locales.json"))
   assert set(catalog) == {"en", "zh-CN", "ja"}
   for language in ("SC", "JP"):

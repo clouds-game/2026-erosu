@@ -3,6 +3,8 @@ import argparse
 from pathlib import Path
 import re
 
+from pages_site import validate_build
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("directory", type=Path)
 parser.add_argument("--base-path", required=True)
@@ -15,7 +17,5 @@ if html.count('<base href="/" />') != 1:
   raise ValueError("Expected exactly one base href in the published index.")
 index.write_text(html.replace('<base href="/" />', f'<base href="{args.base_path}" />'), encoding="utf-8")
 (args.directory / ".nojekyll").touch()
-for name in ["interop.js", "game.css", "locales.json", "fonts/ChromaUI-SC.otf", "fonts/ChromaUI-JP.otf", "_framework/blazor.webassembly.js"]:
-  if not (args.directory / name).is_file():
-    raise FileNotFoundError(name)
+validate_build(args.directory, args.base_path)
 print(f"Pages prepared at {args.base_path}")

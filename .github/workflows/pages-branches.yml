@@ -2,7 +2,7 @@ name: Request branch preview update
 
 on:
   push:
-    branches: [develop20260926, experiment1]
+    branches: [develop20260926, experiment1, lingjiuu-game0]
   workflow_dispatch:
 
 permissions:

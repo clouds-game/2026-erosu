@@ -110,7 +110,9 @@ var tests = new (string Name, Action Run)[]
     board.Add(Piece.Create(103, Shape.Single, 3, 9, 15) with { Anchored = true });
     board.Add(Piece.Create(104, Shape.Single, 4, 8, 16) with { Anchored = true });
     board.Add(Piece.Create(105, Shape.Single, 5, 9, 17) with { Anchored = true });
+    var remembered = game.KnownEnclosedCells.ToArray();
     Check(game.PreviewPlacement(5)!.EnclosedFillPending);
+    Check(remembered.SequenceEqual(game.KnownEnclosedCells));
     Turn();
     var fill = board.Pieces.Single(piece => piece.Cells.Contains(new Cell(9, 16)));
     Check(fill.Id < 0 && !fill.Anchored);

@@ -142,7 +142,7 @@ public sealed class JsonEngine
     Width = Board.Width, Height = Board.Height,
     ColorProfile = game.Colors?.Id, ColorWeights = game.Colors?.Weights, Colors = ColorRules.All,
     Mode = game.Puzzle is null ? "endless" : "puzzle", Puzzle = game.Puzzle,
-    game.AnchoredBlocks, game.AnchoredSpawnPending, game.EnclosedFill, game.EnclosedFillPending, game.IncomingAnchor, game.Forecast, game.Phase, game.Paused, game.AcceptsInput, game.IsFinished,
+    game.AnchoredBlocks, game.AnchoredSpawnPending, game.EnclosedFill, game.EnclosedFillPending, game.KnownEnclosedCells, game.IncomingAnchor, game.Forecast, game.Phase, game.Paused, game.AcceptsInput, game.IsFinished,
     game.Score, game.Cleared, game.BestChain, game.Locked, game.Level,
     game.Remaining, game.ClearProgress, game.Active, Ghost = game.Ghost(),
     game.Next, Pieces = game.Board.Pieces, game.Wave

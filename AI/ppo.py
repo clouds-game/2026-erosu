@@ -12,7 +12,8 @@ import torch
 from torch import nn
 
 from .engine import ENGINE
-from .neural import ActorCritic, OBS_VERSION
+from .neural import ActorCritic, OBS_VERSION, FEATURE_OBS_VERSION, upgrade
+from .modes import ALL_MODES, GameMode, find_mode
 from .rl_env import PlacementEnv
 from .train import source_hash, save
 
@@ -59,13 +60,21 @@ def train(args):
   random.seed(args.seed)
   np.random.seed(args.seed)
   torch.manual_seed(args.seed)
-  model = ActorCritic()
+  mixed_features = getattr(args, "mixed_features", False)
+  requested_mode = getattr(args, "game_mode", None)
+  modes = list(ALL_MODES) if mixed_features else [find_mode(requested_mode) if requested_mode else GameMode(args.color_profile)]
+  version = FEATURE_OBS_VERSION if mixed_features or requested_mode else OBS_VERSION
+  model = ActorCritic(version)
   parent = None
   if args.init_model is not None:
     model, parent = load_model(args.init_model)
-    for key in ('objective', 'max_pieces', 'color_profile'):
+    for key in ('objective', 'max_pieces'):
       if parent[key] != getattr(args, key):
         raise ValueError(f'Initialization task mismatch: {key}')
+    if version == FEATURE_OBS_VERSION:
+      model = upgrade(model)
+    elif parent['observation_version'] != version or parent['color_profile'] != args.color_profile:
+      raise ValueError('Initialization observation/profile mismatch')
     output_paths = (args.model, args.model.with_suffix('.initial.pt'), args.model.with_suffix('.json'), args.model.with_suffix('.tmp'))
     if args.init_model.resolve() in {path.resolve() for path in output_paths}:
       raise ValueError('Initialization and output checkpoints must differ')
@@ -73,9 +82,12 @@ def train(args):
   torch.manual_seed(args.seed)
   optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
   rng = random.Random(args.seed)
+  mode_rng = random.Random(args.seed + 1)
+  mode_cycle = []
   training_seeds, episodes, history = [], [], []
-  initial_metadata = {'observation_version': OBS_VERSION, 'objective': args.objective,
-    'color_profile': args.color_profile, 'max_pieces': args.max_pieces,
+  initial_metadata = {'observation_version': version, 'objective': args.objective,
+    'color_profile': 'mixed' if mixed_features else modes[0].color_profile,
+    'game_modes': [mode.options() for mode in modes], 'max_pieces': args.max_pieces,
     'training_seed': args.seed, 'training_seeds': list(parent['training_seeds']) if parent else [],
     'validation_seeds': list(parent.get('validation_seeds', [])) if parent else [],
     'initialization_sha256': hashlib.sha256(args.init_model.read_bytes()).hexdigest() if parent else None,
@@ -84,12 +96,15 @@ def train(args):
     'torch_version': str(torch.__version__), 'parameters': sum(p.numel() for p in model.parameters())}
   args.model.parent.mkdir(parents=True, exist_ok=True)
   torch.save({'metadata': initial_metadata, 'weights': model.state_dict()}, args.model.with_suffix('.initial.pt'))
-  env = PlacementEnv(args.objective, args.max_pieces, args.color_profile)
+  env = PlacementEnv(args.objective, args.max_pieces, modes[0].color_profile, observation_version=version)
 
   def reset():
     seed = rng.randrange(1_000_000)
     training_seeds.append(seed)
-    return env.reset(seed)
+    if not mode_cycle:
+      mode_cycle.extend(modes)
+      mode_rng.shuffle(mode_cycle)
+    return env.reset(seed, mode_cycle.pop())
 
   observation = reset()
   steps = 0
@@ -119,7 +134,8 @@ def train(args):
       recent = episodes[-20:]
       row = {'steps': steps, 'episodes': len(episodes), 'loss': loss,
         'recent_mean_locked': statistics.mean(x['locked'] for x in recent) if recent else None,
-        'recent_mean_score': statistics.mean(x['score'] for x in recent) if recent else None}
+        'recent_mean_score': statistics.mean(x['score'] for x in recent) if recent else None,
+        'mode_episodes': {mode.key: sum(x['mode'] == mode.key for x in episodes) for mode in modes}}
       history.append(row)
       print(json.dumps(row), flush=True)
       metadata = {**initial_metadata, 'steps': steps,
@@ -137,12 +153,29 @@ def train(args):
 def load_model(path):
   checkpoint = torch.load(path, map_location='cpu', weights_only=True)
   metadata = checkpoint['metadata']
-  if metadata['observation_version'] != OBS_VERSION:
-    raise ValueError('Incompatible observation version')
-  model = ActorCritic()
+  model = ActorCritic(metadata['observation_version'])
   model.load_state_dict(checkpoint['weights'])
   model.eval()
   return model, metadata
+
+
+def checkpoint_modes(metadata, requested=None):
+  modes = [GameMode(**mode) for mode in metadata.get('game_modes',
+    [GameMode(metadata['color_profile']).options()] if metadata['color_profile'] != 'mixed' else [])]
+  if not modes:
+    raise ValueError('Checkpoint has no supported game modes')
+  if requested is not None:
+    modes = [mode for mode in modes if mode.key == requested]
+    if not modes:
+      raise ValueError('Requested game mode was not part of training')
+  return modes
+
+
+def summarize(runs):
+  return {'mean_locked': statistics.mean(x['locked'] for x in runs),
+    'median_locked': statistics.median(x['locked'] for x in runs),
+    'mean_score': statistics.mean(x['score'] for x in runs),
+    'capped': sum(x['capped'] for x in runs)}
 
 
 def evaluate(args):
@@ -151,41 +184,42 @@ def evaluate(args):
   seeds = list(range(args.seed, args.seed + args.episodes))
   if set(seeds) & (set(metadata['training_seeds']) | set(metadata.get('validation_seeds', []))):
     raise ValueError('Evaluation seeds overlap training or model-selection seeds')
-  # Use the trained task horizon and objective: budget is a model input.
-  runs = []
-  env = PlacementEnv(metadata['objective'], metadata['max_pieces'], metadata['color_profile'])
-  try:
-    for seed in seeds:
-      observation = env.reset(seed)
-      while True:
-        with torch.no_grad():
-          distribution, _ = model(*tensors([observation]))
-          action = (distribution.sample() if args.sample_actions else distribution.logits.argmax(-1)).item()
-        observation, _, done, info = env.step(action)
-        if done:
-          runs.append(info)
-          break
-  finally:
-    env.close()
-  summary = {'mean_locked': statistics.mean(x['locked'] for x in runs),
-    'median_locked': statistics.median(x['locked'] for x in runs),
-    'mean_score': statistics.mean(x['score'] for x in runs),
-    'capped': sum(x['capped'] for x in runs)}
+  modes = checkpoint_modes(metadata, getattr(args, "game_mode", None))
+  runs, by_mode = [], {}
+  with PlacementEnv(metadata['objective'], metadata['max_pieces'], modes[0].color_profile,
+      observation_version=metadata['observation_version']) as env:
+    for mode in modes:
+      mode_runs = []
+      for seed in seeds:
+        observation = env.reset(seed, mode)
+        while True:
+          with torch.no_grad():
+            distribution, _ = model(*tensors([observation]))
+            action = (distribution.sample() if args.sample_actions else distribution.logits.argmax(-1)).item()
+          observation, _, done, info = env.step(action)
+          if done:
+            mode_runs.append(info)
+            break
+      by_mode[mode.key] = summarize(mode_runs)
+      runs.extend(mode_runs)
+      print(json.dumps({'mode': mode.key, **by_mode[mode.key]}), flush=True)
   report = {'model_sha256': hashlib.sha256(args.model.read_bytes()).hexdigest(),
     'action_selection': 'sample' if args.sample_actions else 'greedy',
     'metadata': metadata, 'evaluation_engine_sha256': hashlib.sha256(ENGINE.read_bytes()).hexdigest(),
-    'summary': summary, 'runs': runs}
+    'summary': summarize(runs), 'by_mode': by_mode, 'runs': runs}
   save(args.report, report)
-  print(json.dumps(summary), flush=True)
+  print(json.dumps(report['summary']), flush=True)
 
 
 def play(args):
   from .trajectory import replay
   model, metadata = load_model(args.model)
   args.trace.parent.mkdir(parents=True, exist_ok=True)
+  mode = checkpoint_modes(metadata, getattr(args, "game_mode", None))[0]
   with args.trace.open('x', encoding='utf-8') as trace, PlacementEnv(
-      metadata['objective'], metadata['max_pieces'], metadata['color_profile'], trace) as env:
-    observation = env.reset(args.seed)
+      metadata['objective'], metadata['max_pieces'], mode.color_profile, trace,
+      observation_version=metadata['observation_version']) as env:
+    observation = env.reset(args.seed, mode)
     while True:
       with torch.no_grad():
         distribution, _ = model(*tensors([observation]))
@@ -204,6 +238,8 @@ def main():
   parser.add_argument('--init-model', type=Path, help='Initialize weights from a compatible checkpoint; starts a fresh optimizer')
   parser.add_argument('--objective', choices=['survival', 'score'], default='survival')
   parser.add_argument('--color-profile', choices=['classic', 'rare_six', 'rare_seven'], default='rare_seven')
+  parser.add_argument('--mixed-features', action='store_true', help='Train one version-2 policy across all twelve free-play modes')
+  parser.add_argument('--game-mode', choices=[mode.key for mode in ALL_MODES], help='Train/play/evaluate a specific feature combination')
   parser.add_argument('--max-pieces', type=int, default=300)
   parser.add_argument('--steps', type=int, default=16384)
   parser.add_argument('--rollout', type=int, default=256)
@@ -218,6 +254,8 @@ def main():
     parser.error('Require positive budgets and rollout >= 2')
   if not 0 <= args.seed <= 2**31 - args.episodes:
     parser.error('Seeds must fit nonnegative Int32')
+  if args.mixed_features and args.game_mode:
+    parser.error('Choose mixed features or one game mode')
   torch.set_num_threads(args.threads)
   {'train': train, 'evaluate': evaluate, 'play': play}[args.mode](args)
 

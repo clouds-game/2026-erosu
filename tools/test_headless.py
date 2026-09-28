@@ -95,6 +95,7 @@ class HeadlessTests(unittest.TestCase):
   def test_enclosed_fill_start_flag_is_independent_and_invalid_requests_preserve_state(self):
     plain = self.start()['state']
     self.assertFalse(plain['enclosed_fill'])
+    self.assertEqual([], plain['known_enclosed_cells'])
     disabled = self.send({'command': 'start', 'mode': 'endless', 'seed': 42, 'enclosed_fill': False})['state']
     self.assertEqual(plain, disabled)
     for anchored in [False, True]:

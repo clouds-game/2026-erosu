@@ -25,6 +25,7 @@ class ImitationTests(unittest.TestCase):
     with PlacementEnv('survival') as env:
       env.reset(42)
       targets = teacher_targets(env.state, env.actions)
+      self.assertEqual('float32', str(targets.dtype))
       self.assertAlmostEqual(1, float(targets.sum()))
       for option in env.actions:
         if option['piece'] is None:

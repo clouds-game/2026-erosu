@@ -46,10 +46,15 @@ jobs:
       - run: pip install -r AI/requirements-rl.txt
       - run: dotnet build Headless/ChromaDrop.Headless.csproj -c Release --nologo
       - run: python -m unittest discover -s tools -p 'test_neural.py'
+      - run: python -m unittest discover -s tools -p 'test_multi_mode.py'
+      - run: python -m unittest discover -s tools -p 'test_ppo_*.py'
+      - run: python -m unittest discover -s tools -p 'test_mixed_imitation.py'
+      - run: python -m unittest discover -s tools -p 'test_color_conditioning.py'
       - run: python -m unittest discover -s tools -p 'test_imitation.py'
       - run: python -m unittest discover -s tools -p 'test_afterstate.py'
       - run: python -m unittest discover -s tools -p 'test_dagger.py'
       - run: python -m unittest discover -s tools -p 'test_neural_compare.py'
+      - run: python -m unittest discover -s tools -p 'test_multi_mode_demo.py'
 
   desktop:
     name: Desktop (${{ matrix.target }})

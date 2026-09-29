@@ -94,3 +94,5 @@ dotnet run --project Tests/ChromaDrop.Tests.csproj
 棋盘状态神经网络与独立生存/得分训练：[CNN 与 PPO](docs/CNN与PPO训练.md)。
 
 教师示范与 PPO 微调对照：[模仿学习实验](docs/模仿学习实验.md)。
+
+一个策略适配十二种规则组合：[多模式 RL](docs/多模式RL训练.md)；颜色条件输入、均衡 PPO 与独立测试：[RL 训练改进](docs/RL训练改进.md)。

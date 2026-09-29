@@ -28,7 +28,7 @@ def teacher_targets(state, actions):
     raise ValueError('Teacher requires a legal action')
   # Equivalent orientations and exact ties should not give contradictory labels.
   best = np.isclose(scores, scores.max(), rtol=0, atol=1e-6)
-  return best.astype(np.float32) / best.sum()
+  return best.astype(np.float32) / int(best.sum())
 
 
 def collect(path, seed, steps, max_pieces=300, profile='rare_seven'):

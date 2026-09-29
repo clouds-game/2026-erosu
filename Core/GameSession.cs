@@ -27,6 +27,7 @@ public sealed class GameSession
   public ColorProfile? Colors { get; }
   public bool AnchoredBlocks { get; }
   public bool EnclosedFill { get; }
+  public IReadOnlyList<Cell> KnownEnclosedCells => _knownEnclosedCells.OrderBy(cell => cell.Y).ThenBy(cell => cell.X).ToArray();
   public bool EnclosedFillPending { get; private set; }
   public bool AnchoredSpawnPending { get; private set; }
   public Piece? IncomingAnchor => _next.FirstOrDefault(piece => piece.Anchored);
